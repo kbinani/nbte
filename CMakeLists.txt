@@ -9,6 +9,7 @@ add_subdirectory(deps/glfw EXCLUDE_FROM_ALL)
 
 list(APPEND nbte_files
   src/main.cpp
+  src/render.hpp
   deps/imgui/imgui.cpp
   deps/imgui/imgui_demo.cpp
   deps/imgui/imgui_draw.cpp
