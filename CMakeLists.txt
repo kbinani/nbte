@@ -16,14 +16,19 @@ list(APPEND nbte_files
   deps/imgui/imgui_widgets.cpp
   deps/imgui/backends/imgui_impl_glfw.cpp
   deps/imgui/backends/imgui_impl_opengl3.cpp
-)
+  deps/nativefiledialog/src/nfd_common.c)
+if ("${CMAKE_SYSTEM_NAME}" STREQUAL "Windows")
+  list(APPEND nbte_files
+    deps/nativefiledialog/src/nfd_win.cpp)
+endif()
 
 add_executable(nbte ${nbte_files})
 
 target_include_directories(nbte
   PRIVATE
     deps/imgui
-    deps/imgui/backends)
+    deps/imgui/backends
+    deps/nativefiledialog/src/include)
 target_link_libraries(nbte
   PRIVATE
     opengl32.lib

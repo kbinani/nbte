@@ -4,3 +4,6 @@
 [submodule "deps/glfw"]
 	path = deps/glfw
 	url = https://github.com/glfw/glfw.git
+[submodule "deps/nativefiledialog"]
+	path = deps/nativefiledialog
+	url = https://github.com/mlabbe/nativefiledialog.git
