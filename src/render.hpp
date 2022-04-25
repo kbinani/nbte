@@ -70,7 +70,7 @@ static void Render(State &s) {
   using namespace std;
   using namespace ImGui;
 
-  ImGuiWindowFlags flags = ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoTitleBar; // | ImGuiWindowFlags_NoMove;
+  ImGuiWindowFlags flags = ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove;
   Begin("main", nullptr, flags);
   SetWindowPos(ImVec2(0, 0));
   SetWindowSize(s.fDisplaySize);
@@ -90,7 +90,7 @@ static void Render(State &s) {
   if (!s.fError.empty()) {
     OpenPopup("Error");
     if (BeginPopupModal("Error", nullptr, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_AlwaysAutoResize)) {
-      Text(s.fError.c_str());
+      TextUnformatted(s.fError.c_str());
       if (Button("OK")) {
         s.fError.clear();
         CloseCurrentPopup();
