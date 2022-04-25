@@ -6,6 +6,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
 add_subdirectory(deps/glfw EXCLUDE_FROM_ALL)
+add_subdirectory(deps/libminecraft-file EXCLUDE_FROM_ALL)
 
 list(APPEND nbte_files
   src/main.cpp
@@ -33,7 +34,9 @@ target_include_directories(nbte
     deps/glfw/include
     deps/nativefiledialog/src/include)
 
-list(APPEND nbte_link_libraries glfw)
+list(APPEND nbte_link_libraries
+  glfw
+  mcfile)
 if ("${CMAKE_SYSTEM_NAME}" STREQUAL "Darwin")
   list(APPEND nbte_link_libraries "-framework OpenGL")
 elseif("${CMAKE_SYSTEM_NAME}" STREQUAL "Windows")
