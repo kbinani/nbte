@@ -17,21 +17,28 @@ list(APPEND nbte_files
   deps/imgui/backends/imgui_impl_glfw.cpp
   deps/imgui/backends/imgui_impl_opengl3.cpp
   deps/nativefiledialog/src/nfd_common.c)
-if ("${CMAKE_SYSTEM_NAME}" STREQUAL "Windows")
+if ("${CMAKE_SYSTEM_NAME}" STREQUAL "Darwin")
+  list(APPEND nbte_files
+    deps/nativefiledialog/src/nfd_cocoa.m)
+elseif ("${CMAKE_SYSTEM_NAME}" STREQUAL "Windows")
   list(APPEND nbte_files
     deps/nativefiledialog/src/nfd_win.cpp)
 endif()
-
 add_executable(nbte ${nbte_files})
 
 target_include_directories(nbte
   PRIVATE
     deps/imgui
     deps/imgui/backends
+    deps/glfw/include
     deps/nativefiledialog/src/include)
-target_link_libraries(nbte
-  PRIVATE
-    opengl32.lib
-    glfw)
+
+list(APPEND nbte_link_libraries glfw)
+if ("${CMAKE_SYSTEM_NAME}" STREQUAL "Darwin")
+  list(APPEND nbte_link_libraries "-framework OpenGL")
+elseif("${CMAKE_SYSTEM_NAME}" STREQUAL "Windows")
+  list(APPEND nbte_link_libraries opengl32.lib)
+endif()
+target_link_libraries(nbte PRIVATE ${nbte_link_libraries})
 
 source_group(TREE ${CMAKE_CURRENT_LIST_DIR} FILES ${nbte_files})
