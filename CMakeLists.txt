@@ -18,6 +18,7 @@ list(APPEND nbte_files
   deps/imgui/imgui_widgets.cpp
   deps/imgui/backends/imgui_impl_glfw.cpp
   deps/imgui/backends/imgui_impl_opengl3.cpp
+  deps/imgui/misc/cpp/imgui_stdlib.cpp
   deps/nativefiledialog/src/nfd_common.c)
 if ("${CMAKE_SYSTEM_NAME}" STREQUAL "Darwin")
   list(APPEND nbte_files
@@ -32,6 +33,7 @@ target_include_directories(nbte
   PRIVATE
     deps/imgui
     deps/imgui/backends
+    deps/imgui/misc/cpp
     deps/glfw/include
     deps/nativefiledialog/src/include)
 

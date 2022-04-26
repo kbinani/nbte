@@ -58,7 +58,7 @@ static void RenderErrorPopup(State &s) {
   }
 }
 
-static void VisitCompoundTag(State const &s, mcfile::nbt::CompoundTag const &tag, unsigned int depth, unsigned int &line) {
+static void VisitCompoundTag(State &s, mcfile::nbt::CompoundTag const &tag, unsigned int depth, unsigned int &line) {
   using namespace std;
   using namespace ImGui;
   using namespace mcfile::nbt;
@@ -71,24 +71,10 @@ static void VisitCompoundTag(State const &s, mcfile::nbt::CompoundTag const &tag
 
   for (auto &it : tag) {
     string const &name = it.first;
-    switch (it.second->type()) {
-    case Tag::Type::Int: {
-      if (auto v = dynamic_pointer_cast<IntTag>(it.second); v) {
-        auto textSize = CalcTextSize(name.c_str());
-        Indent(kArrowWidth);
-        Text(name.c_str());
-        SameLine();
-        PushItemWidth(s.fDisplaySize.x - textSize.x - kArrowWidth - 30 * depth - 32);
-        PushID(line);
-        line++;
-        InputInt("", &v->fValue);
-        PopID();
-        Unindent(kArrowWidth);
-        PopItemWidth();
-      }
-      break;
+    if (!it.second) {
+      continue;
     }
-    case Tag::Type::Compound: {
+    if (it.second->type() == Tag::Type::Compound) {
       if (auto v = dynamic_pointer_cast<CompoundTag>(it.second); v) {
         SetNextItemOpen(true, ImGuiCond_Once);
         PushID(line);
@@ -101,9 +87,62 @@ static void VisitCompoundTag(State const &s, mcfile::nbt::CompoundTag const &tag
         }
         PopID();
       }
+      continue;
+    }
+
+    auto textSize = CalcTextSize(name.c_str());
+    Indent(kArrowWidth);
+    Text(name.c_str());
+    SameLine();
+    PushItemWidth(s.fDisplaySize.x - textSize.x - kArrowWidth - 30 * depth - 32);
+    PushID(line);
+
+    switch (it.second->type()) {
+    case Tag::Type::Int:
+      if (auto v = dynamic_pointer_cast<IntTag>(it.second); v) {
+        int *ptr = s.fStorage.useInt(v);
+        if (InputInt("", ptr)) {
+          v->fValue = *ptr;
+        }
+      }
+      break;
+    case Tag::Type::Byte:
+      if (auto v = dynamic_pointer_cast<ByteTag>(it.second); v) {
+        int *ptr = s.fStorage.useInt(v);
+        if (InputInt("", ptr)) {
+          *ptr = std::min<int>(std::max<int>(*ptr, numeric_limits<uint8_t>::lowest()), numeric_limits<uint8_t>::max());
+          v->fValue = *ptr;
+        }
+      }
+      break;
+    case Tag::Type::Short:
+      if (auto v = dynamic_pointer_cast<ShortTag>(it.second); v) {
+        int *ptr = s.fStorage.useInt(v);
+        if (InputInt("", ptr)) {
+          *ptr = std::min<int>(std::max<int>(*ptr, numeric_limits<int16_t>::lowest()), numeric_limits<int16_t>::max());
+          v->fValue = *ptr;
+        }
+      }
+      break;
+    case Tag::Type::Long:
+      if (auto v = dynamic_pointer_cast<LongTag>(it.second); v) {
+        string *ptr = s.fStorage.useString(v);
+        if (InputText("", ptr, ImGuiInputTextFlags_CharsDecimal)) {
+          v->fValue = atoll(ptr->c_str());
+        }
+      }
+      break;
+    case Tag::Type::String:
+      if (auto v = dynamic_pointer_cast<StringTag>(it.second); v) {
+        InputText("", &v->fValue);
+      }
       break;
     }
-    }
+
+    line++;
+    PopID();
+    Unindent(kArrowWidth);
+    PopItemWidth();
   }
 }
 
