@@ -58,7 +58,7 @@ static void RenderErrorPopup(State &s) {
   }
 }
 
-static void VisitCompoundTag(State const &s, mcfile::nbt::CompoundTag const &tag, unsigned int depth) {
+static void VisitCompoundTag(State const &s, mcfile::nbt::CompoundTag const &tag, unsigned int depth, unsigned int &line) {
   using namespace std;
   using namespace ImGui;
   using namespace mcfile::nbt;
@@ -79,7 +79,10 @@ static void VisitCompoundTag(State const &s, mcfile::nbt::CompoundTag const &tag
         Text(name.c_str());
         SameLine();
         PushItemWidth(s.fDisplaySize.x - textSize.x - kArrowWidth - 30 * depth - 32);
+        PushID(line);
+        line++;
         InputInt("", &v->fValue);
+        PopID();
         Unindent(kArrowWidth);
         PopItemWidth();
       }
@@ -88,12 +91,15 @@ static void VisitCompoundTag(State const &s, mcfile::nbt::CompoundTag const &tag
     case Tag::Type::Compound: {
       if (auto v = dynamic_pointer_cast<CompoundTag>(it.second); v) {
         SetNextItemOpen(true, ImGuiCond_Once);
+        PushID(line);
+        line++;
         if (TreeNode(name.c_str())) {
           Indent(kIndent);
-          VisitCompoundTag(s, *v, depth + 1);
+          VisitCompoundTag(s, *v, depth + 1, line);
           TreePop();
           Unindent(kIndent);
         }
+        PopID();
       }
       break;
     }
@@ -119,7 +125,8 @@ static void RenderCompoundTag(State &s) {
   float height = GetFrameHeight();
   SetWindowPos(ImVec2(0, height));
   SetWindowSize(ImVec2(s.fDisplaySize.x, s.fDisplaySize.y - height));
-  VisitCompoundTag(s, *tag, 0);
+  unsigned int line = 0;
+  VisitCompoundTag(s, *tag, 0, line);
   End();
 }
 
