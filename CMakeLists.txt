@@ -11,6 +11,7 @@ add_subdirectory(deps/libminecraft-file EXCLUDE_FROM_ALL)
 list(APPEND nbte_files
   src/main.cpp
   src/render.hpp
+  src/state.hpp
   deps/imgui/imgui.cpp
   deps/imgui/imgui_draw.cpp
   deps/imgui/imgui_tables.cpp
