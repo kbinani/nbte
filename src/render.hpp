@@ -44,7 +44,7 @@ static void RenderErrorPopup(State &s) {
   using namespace std;
   using namespace ImGui;
 
-  if (s.ferror.empty()) {
+  if (s.fError.empty()) {
     return;
   }
   OpenPopup("Error");
