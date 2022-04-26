@@ -40,24 +40,27 @@ static void RenderMainMenu(State &s) {
   End();
 }
 
-static void Render(State &s) {
+static void RenderErrorPopup(State &s) {
   using namespace std;
   using namespace ImGui;
 
-  RenderMainMenu(s);
-
-  if (!s.fError.empty()) {
-    OpenPopup("Error");
-    if (BeginPopupModal("Error", nullptr, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_AlwaysAutoResize)) {
-      TextUnformatted(s.fError.c_str());
-      if (Button("OK")) {
-        s.fError.clear();
-        CloseCurrentPopup();
-      }
-      EndPopup();
-    }
+  if (s.ferror.empty()) {
+    return;
   }
+  OpenPopup("Error");
+  if (BeginPopupModal("Error", nullptr, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_AlwaysAutoResize)) {
+    TextUnformatted(s.fError.c_str());
+    if (Button("OK")) {
+      s.fError.clear();
+      CloseCurrentPopup();
+    }
+    EndPopup();
+  }
+}
 
+static void Render(State &s) {
+  RenderMainMenu(s);
+  RenderErrorPopup(s);
   ImGui::Render();
 }
 
