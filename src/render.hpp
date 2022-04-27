@@ -2,7 +2,7 @@
 
 namespace nbte {
 
-constexpr float kIndent = 8.0f;
+constexpr float kIndent = 6.0f;
 constexpr float kArrowWidth = 21.0f;
 
 static void VisitCompoundTag(State &s, mcfile::nbt::CompoundTag const &tag, unsigned int &line);
