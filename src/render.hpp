@@ -250,15 +250,26 @@ static void RenderCompoundTag(State &s) {
 static void Render(State &s) {
   using namespace ImGui;
 
+  float const frameHeight = GetFrameHeightWithSpacing();
+
   ImGuiWindowFlags flags = ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove;
   Begin("main", nullptr, flags);
   SetWindowPos(ImVec2(0, 0));
-  SetWindowSize(s.fDisplaySize);
+  SetWindowSize(ImVec2(s.fDisplaySize.x, s.fDisplaySize.y - frameHeight));
 
   RenderMainMenu(s);
   RenderErrorPopup(s);
   RenderCompoundTag(s);
 
+  End();
+
+  Begin("footer", nullptr, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoDecoration);
+  SetWindowPos(ImVec2(0, s.fDisplaySize.y - frameHeight));
+  SetWindowSize(ImVec2(s.fDisplaySize.x, frameHeight));
+
+  PushItemWidth(-FLT_EPSILON);
+  Text("Path: %s, Format: %s", s.fOpenedPath.u8string().c_str(), s.fOpenedTypeDescription.c_str());
+  PopItemWidth();
   End();
 
   ImGui::Render();

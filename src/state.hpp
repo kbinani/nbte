@@ -8,12 +8,27 @@ enum class Type {
   // Anvil,
 };
 
+static std::string EndianDescription(mcfile::Endian endian) {
+  switch (endian) {
+  case mcfile::Endian::Little:
+    return "little endian";
+  case mcfile::Endian::Big:
+    return "big endian";
+  default:
+    return "unknown";
+  }
+}
+
 struct State {
   ImVec2 fDisplaySize;
   bool fMainMenuBarFileSelected = false;
   bool fMainMenuBarFileOpenSelected = false;
+
   Type fOpenedType;
   std::variant<std::shared_ptr<mcfile::nbt::CompoundTag>, std::nullopt_t> fOpened = std::nullopt;
+  std::filesystem::path fOpenedPath;
+  std::string fOpenedTypeDescription;
+
   std::string fError;
 
   void open(std::filesystem::path const &selected) {
@@ -28,6 +43,8 @@ struct State {
         if (auto tag = mcfile::nbt::CompoundTag::Read(selected, endian); tag) {
           fOpened = tag;
           fOpenedType = Type::CompoundTag;
+          fOpenedPath = fs::absolute(selected);
+          fOpenedTypeDescription = "Raw NBT (" + EndianDescription(endian) + ")";
           return;
         }
       }
@@ -35,6 +52,8 @@ struct State {
         if (auto tag = mcfile::nbt::CompoundTag::ReadCompressed(selected, endian); tag) {
           fOpened = tag;
           fOpenedType = Type::CompoundTag;
+          fOpenedPath = fs::absolute(selected);
+          fOpenedTypeDescription = "Deflated NBT (" + EndianDescription(endian) + ")";
           return;
         }
       }
@@ -43,6 +62,8 @@ struct State {
         if (auto tag = mcfile::nbt::CompoundTag::Read(stream, endian); tag) {
           fOpened = tag;
           fOpenedType = Type::CompoundTag;
+          fOpenedPath = fs::absolute(selected);
+          fOpenedTypeDescription = "Gzipped NBT (" + EndianDescription(endian) + ")";
           return;
         }
       }
