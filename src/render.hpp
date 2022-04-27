@@ -2,7 +2,11 @@
 
 namespace nbte {
 
+constexpr float kIndent = 8.0f;
+constexpr float kArrowWidth = 21.0f;
+
 static void VisitCompoundTag(State &s, mcfile::nbt::CompoundTag const &tag, unsigned int depth, unsigned int &line);
+static void Visit(State &s, std::string const &name, std::shared_ptr<mcfile::nbt::Tag> const &tag, unsigned int depth, unsigned int &line);
 
 static std::optional<std::filesystem::path> OpenFileDialog() {
   using namespace std;
@@ -58,42 +62,65 @@ static T Clamp(U u) {
   return (T)std::min<U>(std::max<U>(u, (U)std::numeric_limits<T>::lowest()), (U)std::numeric_limits<T>::max());
 }
 
-static void VisitScalar(State &s, std::shared_ptr<mcfile::nbt::Tag> const &tag) {
+template <class T>
+static void InputScalar(T &v) {
+  int t = v;
+  if (ImGui::InputInt("", &t)) {
+    v = Clamp<T, int>(t);
+  }
+}
+
+template <>
+static void InputScalar(int64_t &v) {
+  std::string t = std::to_string(v);
+  if (ImGui::InputText("", &t, ImGuiInputTextFlags_CharsDecimal)) {
+    v = atoll(t.c_str());
+  }
+}
+
+static void PushScalarInput(std::string const &name, unsigned int &line) {
+  using namespace ImGui;
+  PushItemWidth(-FLT_EPSILON);
+  Indent(kArrowWidth);
+  PushID(line);
+  line++;
+  TextUnformatted(name.c_str());
+  SameLine();
+}
+
+static void PopScalarInput() {
+  using namespace ImGui;
+  PopID();
+  Unindent(kArrowWidth);
+  PopItemWidth();
+}
+
+static void VisitScalar(State &s, std::string const &name, std::shared_ptr<mcfile::nbt::Tag> const &tag, unsigned int &line) {
   using namespace std;
   using namespace ImGui;
   using namespace mcfile::nbt;
 
+  PushScalarInput(name, line);
+
   switch (tag->type()) {
   case Tag::Type::Int:
     if (auto v = dynamic_pointer_cast<IntTag>(tag); v) {
-      int t = v->fValue;
-      if (InputInt("", &t)) {
-        v->fValue = t;
-      }
+      InputScalar<int>(v->fValue);
     }
     break;
   case Tag::Type::Byte:
     if (auto v = dynamic_pointer_cast<ByteTag>(tag); v) {
-      int t = v->fValue;
-      if (InputInt("", &t)) {
-        v->fValue = Clamp<uint8_t, int>(t);
-      }
+      InputScalar<uint8_t>(v->fValue);
     }
     break;
   case Tag::Type::Short:
     if (auto v = dynamic_pointer_cast<ShortTag>(tag); v) {
-      int t = v->fValue;
-      if (InputInt("", &t)) {
-        v->fValue = Clamp<int16_t, int>(t);
-      }
+      InputScalar<int16_t>(v->fValue);
     }
     break;
   case Tag::Type::Long:
     if (auto v = dynamic_pointer_cast<LongTag>(tag); v) {
-      string t = to_string(v->fValue);
-      if (InputText("", &t, ImGuiInputTextFlags_CharsDecimal)) {
-        v->fValue = atoll(t.c_str());
-      }
+      InputScalar(v->fValue);
     }
     break;
   case Tag::Type::String:
@@ -114,22 +141,82 @@ static void VisitScalar(State &s, std::shared_ptr<mcfile::nbt::Tag> const &tag) 
   default:
     break;
   }
+
+  PopScalarInput();
 }
 
-static void VisitNonScalar(State &s, std::shared_ptr<mcfile::nbt::Tag> const &tag, unsigned int depth, unsigned int &line) {
+static void VisitNonScalar(State &s, std::string const &name, std::shared_ptr<mcfile::nbt::Tag> const &tag, unsigned int depth, unsigned int &line) {
   using namespace std;
   using namespace ImGui;
   using namespace mcfile::nbt;
 
+  PushID(line);
+  line++;
+  if (TreeNodeEx(name.c_str(), ImGuiTreeNodeFlags_DefaultOpen)) {
+    Indent(kIndent);
+
+    switch (tag->type()) {
+    case Tag::Type::Compound:
+      if (auto v = dynamic_pointer_cast<CompoundTag>(tag); v) {
+        VisitCompoundTag(s, *v, depth + 1, line);
+      }
+      break;
+    case Tag::Type::List:
+      if (auto v = dynamic_pointer_cast<ListTag>(tag); v) {
+        for (size_t i = 0; i < v->fValue.size(); i++) {
+          auto const &it = v->fValue[i];
+          Visit(s, "#" + to_string(i), it, depth + 1, line);
+        }
+      }
+      break;
+    case Tag::Type::ByteArray:
+      if (auto v = dynamic_pointer_cast<ByteArrayTag>(tag); v) {
+        for (size_t i = 0; i < v->fValue.size(); i++) {
+          PushScalarInput("#" + to_string(i), line);
+          InputScalar<uint8_t>(v->fValue[i]);
+          PopScalarInput();
+        }
+      }
+      break;
+    case Tag::Type::IntArray:
+      if (auto v = dynamic_pointer_cast<IntArrayTag>(tag); v) {
+        for (size_t i = 0; i < v->fValue.size(); i++) {
+          PushScalarInput("#" + to_string(i), line);
+          InputScalar<int>(v->fValue[i]);
+          PopScalarInput();
+        }
+      }
+      break;
+    case Tag::Type::LongArray:
+      if (auto v = dynamic_pointer_cast<LongArrayTag>(tag); v) {
+        for (size_t i = 0; i < v->fValue.size(); i++) {
+          PushScalarInput("#" + to_string(i), line);
+          InputScalar<int64_t>(v->fValue[i]);
+          PopScalarInput();
+        }
+      }
+      break;
+    }
+
+    TreePop();
+    Unindent(kIndent);
+  }
+  PopID();
+}
+
+static void Visit(State &s, std::string const &name, std::shared_ptr<mcfile::nbt::Tag> const &tag, unsigned int depth, unsigned int &line) {
+  using namespace mcfile::nbt;
+
   switch (tag->type()) {
   case Tag::Type::Compound:
-    if (auto v = dynamic_pointer_cast<CompoundTag>(tag); v) {
-      VisitCompoundTag(s, *v, depth + 1, line);
-    }
-    break;
   case Tag::Type::List:
-    if (auto v = dynamic_pointer_cast<ListTag>(tag); v) {
-    }
+  case Tag::Type::ByteArray:
+  case Tag::Type::IntArray:
+  case Tag::Type::LongArray:
+    VisitNonScalar(s, name, tag, depth, line);
+    break;
+  default:
+    VisitScalar(s, name, tag, line);
     break;
   }
 }
@@ -139,9 +226,6 @@ static void VisitCompoundTag(State &s, mcfile::nbt::CompoundTag const &tag, unsi
   using namespace ImGui;
   using namespace mcfile::nbt;
 
-  constexpr float kIndent = 8.0f;
-  constexpr float kArrowWidth = 21.0f;
-
   auto const &style = GetStyle();
   float currentIndent = depth * kIndent;
 
@@ -150,42 +234,7 @@ static void VisitCompoundTag(State &s, mcfile::nbt::CompoundTag const &tag, unsi
     if (!it.second) {
       continue;
     }
-    switch (it.second->type()) {
-    case Tag::Type::Compound:
-    case Tag::Type::List:
-    case Tag::Type::ByteArray:
-    case Tag::Type::IntArray:
-    case Tag::Type::LongArray:
-      SetNextItemOpen(true, ImGuiCond_Once);
-      PushID(line);
-      line++;
-      if (TreeNode(name.c_str())) {
-        Indent(kIndent);
-
-        VisitNonScalar(s, it.second, depth, line);
-
-        TreePop();
-        Unindent(kIndent);
-      }
-      PopID();
-      break;
-    default: {
-      PushItemWidth(-FLT_EPSILON);
-      Indent(kArrowWidth);
-      TextUnformatted(name.c_str());
-      SameLine();
-      PushID(line);
-
-      VisitScalar(s, it.second);
-
-      line++;
-      PopID();
-      Unindent(kArrowWidth);
-      PopItemWidth();
-
-      break;
-    }
-    }
+    Visit(s, name, it.second, depth, line);
   }
 }
 
