@@ -58,6 +58,11 @@ static void RenderErrorPopup(State &s) {
   }
 }
 
+template <class T, class U>
+static T Clamp(U u) {
+  return (T)std::min<U>(std::max<U>(u, (U)std::numeric_limits<T>::lowest()), (U)std::numeric_limits<T>::max());
+}
+
 static void VisitCompoundTag(State &s, mcfile::nbt::CompoundTag const &tag, unsigned int depth, unsigned int &line) {
   using namespace std;
   using namespace ImGui;
@@ -92,43 +97,41 @@ static void VisitCompoundTag(State &s, mcfile::nbt::CompoundTag const &tag, unsi
 
     auto textSize = CalcTextSize(name.c_str());
     Indent(kArrowWidth);
-    Text(name.c_str());
+    TextUnformatted(name.c_str());
     SameLine();
-    PushItemWidth(s.fDisplaySize.x - textSize.x - kArrowWidth - 30 * depth - 32);
+    PushItemWidth(s.fDisplaySize.x * 0.5 - textSize.x - kArrowWidth - 30 * depth - 32);
     PushID(line);
 
     switch (it.second->type()) {
     case Tag::Type::Int:
       if (auto v = dynamic_pointer_cast<IntTag>(it.second); v) {
-        int *ptr = s.fStorage.useInt(v);
-        if (InputInt("", ptr)) {
-          v->fValue = *ptr;
+        int t = v->fValue;
+        if (InputInt("", &t)) {
+          v->fValue = t;
         }
       }
       break;
     case Tag::Type::Byte:
       if (auto v = dynamic_pointer_cast<ByteTag>(it.second); v) {
-        int *ptr = s.fStorage.useInt(v);
-        if (InputInt("", ptr)) {
-          *ptr = std::min<int>(std::max<int>(*ptr, numeric_limits<uint8_t>::lowest()), numeric_limits<uint8_t>::max());
-          v->fValue = *ptr;
+        int t = v->fValue;
+        if (InputInt("", &t)) {
+          v->fValue = Clamp<uint8_t, int>(t);
         }
       }
       break;
     case Tag::Type::Short:
       if (auto v = dynamic_pointer_cast<ShortTag>(it.second); v) {
-        int *ptr = s.fStorage.useInt(v);
-        if (InputInt("", ptr)) {
-          *ptr = std::min<int>(std::max<int>(*ptr, numeric_limits<int16_t>::lowest()), numeric_limits<int16_t>::max());
-          v->fValue = *ptr;
+        int t = v->fValue;
+        if (InputInt("", &t)) {
+          v->fValue = Clamp<int16_t, int>(t);
         }
       }
       break;
     case Tag::Type::Long:
       if (auto v = dynamic_pointer_cast<LongTag>(it.second); v) {
-        string *ptr = s.fStorage.useString(v);
-        if (InputText("", ptr, ImGuiInputTextFlags_CharsDecimal)) {
-          v->fValue = atoll(ptr->c_str());
+        string t = to_string(v->fValue);
+        if (InputText("", &t, ImGuiInputTextFlags_CharsDecimal)) {
+          v->fValue = atoll(t.c_str());
         }
       }
       break;
@@ -136,6 +139,26 @@ static void VisitCompoundTag(State &s, mcfile::nbt::CompoundTag const &tag, unsi
       if (auto v = dynamic_pointer_cast<StringTag>(it.second); v) {
         InputText("", &v->fValue);
       }
+      break;
+    case mcfile::nbt::Tag::Type::Float:
+      //TODO:
+      break;
+    case mcfile::nbt::Tag::Type::Double:
+      //TODO:
+      break;
+    case mcfile::nbt::Tag::Type::ByteArray:
+      //TODO:
+      break;
+    case mcfile::nbt::Tag::Type::List:
+      //TODO:
+      break;
+    case mcfile::nbt::Tag::Type::IntArray:
+      //TODO:
+      break;
+    case mcfile::nbt::Tag::Type::LongArray:
+      //TODO:
+      break;
+    default:
       break;
     }
 
