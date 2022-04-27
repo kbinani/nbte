@@ -149,10 +149,45 @@ static void VisitNonScalar(State &s, std::string const &name, std::shared_ptr<mc
   using namespace ImGui;
   using namespace mcfile::nbt;
 
+  int size = 0;
+  switch (tag->type()) {
+  case Tag::Type::Compound:
+    if (auto v = dynamic_pointer_cast<CompoundTag>(tag); v) {
+      size = v->size();
+    }
+    break;
+  case Tag::Type::List:
+    if (auto v = dynamic_pointer_cast<ListTag>(tag); v) {
+      size = v->size();
+    }
+    break;
+  case Tag::Type::ByteArray:
+    if (auto v = dynamic_pointer_cast<ByteArrayTag>(tag); v) {
+      size = v->fValue.size();
+    }
+    break;
+  case Tag::Type::IntArray:
+    if (auto v = dynamic_pointer_cast<IntArrayTag>(tag); v) {
+      size = v->fValue.size();
+    }
+    break;
+  case Tag::Type::LongArray:
+    if (auto v = dynamic_pointer_cast<LongArrayTag>(tag); v) {
+      size = v->fValue.size();
+    }
+    break;
+  }
+  string label = name + ": ";
+  if (size < 2) {
+    label += to_string(size) + " entry";
+  } else {
+    label += to_string(size) + " entries";
+  }
+
   auto nextPath = path + "/" + name;
   PushID(nextPath.c_str());
 
-  if (TreeNodeEx(name.c_str(), ImGuiTreeNodeFlags_DefaultOpen)) {
+  if (TreeNodeEx(label.c_str(), ImGuiTreeNodeFlags_DefaultOpen)) {
     Indent(kIndent);
 
     switch (tag->type()) {
