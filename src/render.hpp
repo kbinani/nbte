@@ -3,7 +3,6 @@
 namespace nbte {
 
 constexpr float kIndent = 6.0f;
-constexpr float kArrowWidth = 21.0f;
 
 static void VisitCompoundTag(State &s, mcfile::nbt::CompoundTag const &tag, std::string const &path);
 static void Visit(State &s, std::string const &name, std::shared_ptr<mcfile::nbt::Tag> const &tag, std::string const &path);
@@ -81,7 +80,7 @@ static void InputScalar(int64_t &v) {
 static void PushScalarInput(std::string const &name, std::string const &path) {
   using namespace ImGui;
   PushItemWidth(-FLT_EPSILON);
-  Indent(kArrowWidth);
+  Indent(GetTreeNodeToLabelSpacing());
   PushID((path + "/" + name).c_str());
   TextUnformatted(name.c_str());
   SameLine();
@@ -90,7 +89,7 @@ static void PushScalarInput(std::string const &name, std::string const &path) {
 static void PopScalarInput() {
   using namespace ImGui;
   PopID();
-  Unindent(kArrowWidth);
+  Unindent(GetTreeNodeToLabelSpacing());
   PopItemWidth();
 }
 
