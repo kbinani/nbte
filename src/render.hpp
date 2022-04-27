@@ -2,6 +2,8 @@
 
 namespace nbte {
 
+static void VisitCompoundTag(State &s, mcfile::nbt::CompoundTag const &tag, unsigned int depth, unsigned int &line);
+
 static std::optional<std::filesystem::path> OpenFileDialog() {
   using namespace std;
   namespace fs = std::filesystem;
@@ -63,6 +65,82 @@ static T Clamp(U u) {
   return (T)std::min<U>(std::max<U>(u, (U)std::numeric_limits<T>::lowest()), (U)std::numeric_limits<T>::max());
 }
 
+static void VisitScalar(State &s, std::shared_ptr<mcfile::nbt::Tag> const &tag) {
+  using namespace std;
+  using namespace ImGui;
+  using namespace mcfile::nbt;
+
+  switch (tag->type()) {
+  case Tag::Type::Int:
+    if (auto v = dynamic_pointer_cast<IntTag>(tag); v) {
+      int t = v->fValue;
+      if (InputInt("", &t)) {
+        v->fValue = t;
+      }
+    }
+    break;
+  case Tag::Type::Byte:
+    if (auto v = dynamic_pointer_cast<ByteTag>(tag); v) {
+      int t = v->fValue;
+      if (InputInt("", &t)) {
+        v->fValue = Clamp<uint8_t, int>(t);
+      }
+    }
+    break;
+  case Tag::Type::Short:
+    if (auto v = dynamic_pointer_cast<ShortTag>(tag); v) {
+      int t = v->fValue;
+      if (InputInt("", &t)) {
+        v->fValue = Clamp<int16_t, int>(t);
+      }
+    }
+    break;
+  case Tag::Type::Long:
+    if (auto v = dynamic_pointer_cast<LongTag>(tag); v) {
+      string t = to_string(v->fValue);
+      if (InputText("", &t, ImGuiInputTextFlags_CharsDecimal)) {
+        v->fValue = atoll(t.c_str());
+      }
+    }
+    break;
+  case Tag::Type::String:
+    if (auto v = dynamic_pointer_cast<StringTag>(tag); v) {
+      InputText("", &v->fValue);
+    }
+    break;
+  case mcfile::nbt::Tag::Type::Float:
+    if (auto v = dynamic_pointer_cast<FloatTag>(tag); v) {
+      InputFloat("", &v->fValue);
+    }
+    break;
+  case mcfile::nbt::Tag::Type::Double:
+    if (auto v = dynamic_pointer_cast<DoubleTag>(tag); v) {
+      InputDouble("", &v->fValue);
+    }
+    break;
+  default:
+    break;
+  }
+}
+
+static void VisitNonScalar(State &s, std::shared_ptr<mcfile::nbt::Tag> const &tag, unsigned int depth, unsigned int &line) {
+  using namespace std;
+  using namespace ImGui;
+  using namespace mcfile::nbt;
+
+  switch (tag->type()) {
+  case Tag::Type::Compound:
+    if (auto v = dynamic_pointer_cast<CompoundTag>(tag); v) {
+      VisitCompoundTag(s, *v, depth + 1, line);
+    }
+    break;
+  case Tag::Type::List:
+    if (auto v = dynamic_pointer_cast<ListTag>(tag); v) {
+    }
+    break;
+  }
+}
+
 static void VisitCompoundTag(State &s, mcfile::nbt::CompoundTag const &tag, unsigned int depth, unsigned int &line) {
   using namespace std;
   using namespace ImGui;
@@ -79,93 +157,43 @@ static void VisitCompoundTag(State &s, mcfile::nbt::CompoundTag const &tag, unsi
     if (!it.second) {
       continue;
     }
-    if (it.second->type() == Tag::Type::Compound) {
-      if (auto v = dynamic_pointer_cast<CompoundTag>(it.second); v) {
-        SetNextItemOpen(true, ImGuiCond_Once);
-        PushID(line);
-        line++;
-        if (TreeNode(name.c_str())) {
-          Indent(kIndent);
-          VisitCompoundTag(s, *v, depth + 1, line);
-          TreePop();
-          Unindent(kIndent);
-        }
-        PopID();
-      }
-      continue;
-    }
-
-    auto textSize = CalcTextSize(name.c_str());
-    Indent(kArrowWidth);
-    TextUnformatted(name.c_str());
-    SameLine();
-    PushItemWidth(s.fDisplaySize.x * 0.5 - textSize.x - kArrowWidth - 30 * depth - 32);
-    PushID(line);
-
     switch (it.second->type()) {
-    case Tag::Type::Int:
-      if (auto v = dynamic_pointer_cast<IntTag>(it.second); v) {
-        int t = v->fValue;
-        if (InputInt("", &t)) {
-          v->fValue = t;
-        }
+    case Tag::Type::Compound:
+    case Tag::Type::List:
+    case Tag::Type::ByteArray:
+    case Tag::Type::IntArray:
+    case Tag::Type::LongArray:
+      SetNextItemOpen(true, ImGuiCond_Once);
+      PushID(line);
+      line++;
+      if (TreeNode(name.c_str())) {
+        Indent(kIndent);
+
+        VisitNonScalar(s, it.second, depth, line);
+
+        TreePop();
+        Unindent(kIndent);
       }
+      PopID();
       break;
-    case Tag::Type::Byte:
-      if (auto v = dynamic_pointer_cast<ByteTag>(it.second); v) {
-        int t = v->fValue;
-        if (InputInt("", &t)) {
-          v->fValue = Clamp<uint8_t, int>(t);
-        }
-      }
-      break;
-    case Tag::Type::Short:
-      if (auto v = dynamic_pointer_cast<ShortTag>(it.second); v) {
-        int t = v->fValue;
-        if (InputInt("", &t)) {
-          v->fValue = Clamp<int16_t, int>(t);
-        }
-      }
-      break;
-    case Tag::Type::Long:
-      if (auto v = dynamic_pointer_cast<LongTag>(it.second); v) {
-        string t = to_string(v->fValue);
-        if (InputText("", &t, ImGuiInputTextFlags_CharsDecimal)) {
-          v->fValue = atoll(t.c_str());
-        }
-      }
-      break;
-    case Tag::Type::String:
-      if (auto v = dynamic_pointer_cast<StringTag>(it.second); v) {
-        InputText("", &v->fValue);
-      }
-      break;
-    case mcfile::nbt::Tag::Type::Float:
-      //TODO:
-      break;
-    case mcfile::nbt::Tag::Type::Double:
-      //TODO:
-      break;
-    case mcfile::nbt::Tag::Type::ByteArray:
-      //TODO:
-      break;
-    case mcfile::nbt::Tag::Type::List:
-      //TODO:
-      break;
-    case mcfile::nbt::Tag::Type::IntArray:
-      //TODO:
-      break;
-    case mcfile::nbt::Tag::Type::LongArray:
-      //TODO:
-      break;
-    default:
+    default: {
+      auto textSize = CalcTextSize(name.c_str());
+      Indent(kArrowWidth);
+      TextUnformatted(name.c_str());
+      SameLine();
+      PushItemWidth(s.fDisplaySize.x * 0.5 - textSize.x - kArrowWidth - 30 * depth - 32);
+      PushID(line);
+
+      VisitScalar(s, it.second);
+
+      line++;
+      PopID();
+      Unindent(kArrowWidth);
+      PopItemWidth();
+
       break;
     }
-
-    line++;
-    PopID();
-    Unindent(kArrowWidth);
-    PopItemWidth();
+    }
   }
 }
 
