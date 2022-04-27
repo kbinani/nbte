@@ -70,7 +70,13 @@ static T Clamp(U u) {
   return (T)std::min<U>(std::max<U>(u, (U)std::numeric_limits<T>::lowest()), (U)std::numeric_limits<T>::max());
 }
 
-static bool ContainsTerm(std::shared_ptr<mcfile::nbt::Tag> const &tag, std::string const &term, FilterMode mode) {
+static std::string ToLower(std::string const &s) {
+  std::string ret = s;
+  std::transform(ret.begin(), ret.end(), ret.begin(), ::tolower);
+  return ret;
+}
+
+static bool ContainsTerm(std::shared_ptr<mcfile::nbt::Tag> const &tag, std::string const &term, FilterMode mode, bool caseSensitive) {
   using namespace std;
   using namespace mcfile::nbt;
 
@@ -93,11 +99,17 @@ static bool ContainsTerm(std::shared_ptr<mcfile::nbt::Tag> const &tag, std::stri
     if (auto v = dynamic_pointer_cast<CompoundTag>(tag); v) {
       for (auto const &it : *v) {
         if (mode == FilterMode::Key) {
-          if (it.first.find(term) != string::npos) {
-            return true;
+          if (caseSensitive) {
+            if (it.first.find(term) != string::npos) {
+              return true;
+            }
+          } else {
+            if (ToLower(it.first).find(term) != string::npos) {
+              return true;
+            }
           }
         }
-        if (ContainsTerm(it.second, term, mode)) {
+        if (ContainsTerm(it.second, term, mode, caseSensitive)) {
           return true;
         }
       }
@@ -106,7 +118,7 @@ static bool ContainsTerm(std::shared_ptr<mcfile::nbt::Tag> const &tag, std::stri
   case Tag::Type::List:
     if (auto v = dynamic_pointer_cast<ListTag>(tag); v) {
       for (auto const &it : *v) {
-        if (ContainsTerm(it, term, mode)) {
+        if (ContainsTerm(it, term, mode, caseSensitive)) {
           return true;
         }
       }
@@ -219,7 +231,7 @@ static void VisitNonScalar(State &s, std::string const &name, std::shared_ptr<mc
   switch (tag->type()) {
   case Tag::Type::Compound:
     if (s.fFilterBarOpened) {
-      if (!ContainsTerm(tag, s.fFilter, s.fFilterMode)) {
+      if (!ContainsTerm(tag, s.fFilterCaseSensitive ? s.fFilter : ToLower(s.fFilter), s.fFilterMode, s.fFilterCaseSensitive)) {
         return;
       }
     }
@@ -229,7 +241,7 @@ static void VisitNonScalar(State &s, std::string const &name, std::shared_ptr<mc
     break;
   case Tag::Type::List:
     if (s.fFilterBarOpened) {
-      if (!ContainsTerm(tag, s.fFilter, s.fFilterMode)) {
+      if (!ContainsTerm(tag, s.fFilterCaseSensitive ? s.fFilter : ToLower(s.fFilter), s.fFilterMode, s.fFilterCaseSensitive)) {
         return;
       }
     }
@@ -346,11 +358,11 @@ static void VisitCompoundTag(State &s, mcfile::nbt::CompoundTag const &tag, std:
     }
     if (s.fFilterBarOpened) {
       if (s.fFilterMode == FilterMode::Key) {
-        if (!s.fFilter.empty() && name.find(s.fFilter) == string::npos && !ContainsTerm(it.second, s.fFilter, s.fFilterMode)) {
+        if (!s.fFilter.empty() && (s.fFilterCaseSensitive ? name : ToLower(name)).find(s.fFilter) == string::npos && !ContainsTerm(it.second, s.fFilter, s.fFilterMode, s.fFilterCaseSensitive)) {
           continue;
         }
       } else {
-        if (!ContainsTerm(it.second, s.fFilter, s.fFilterMode)) {
+        if (!ContainsTerm(it.second, s.fFilterCaseSensitive ? s.fFilter : ToLower(s.fFilter), s.fFilterMode, s.fFilterCaseSensitive)) {
           continue;
         }
       }
@@ -403,13 +415,21 @@ static void Render(State &s) {
 
   if (s.fFilterBarOpened) {
     BeginChild("filter_panel", ImVec2(s.fDisplaySize.x, frameHeight));
+
     TextUnformatted("Filter: ");
+
+    SameLine();
+    PushID("filter_panel#checkbox_case_sensitive");
+    Checkbox("Case Sensitive", &s.fFilterCaseSensitive);
+    PopID();
+
     SameLine();
     PushID("filter_panel#text");
     PushItemWidth(-FLT_EPSILON);
     InputText("", &s.fFilter);
     PopItemWidth();
     PopID();
+
     EndChild();
     Separator();
   }

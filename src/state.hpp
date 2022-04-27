@@ -52,6 +52,7 @@ struct State {
   bool fFilterBarOpened = false;
   std::string fFilter;
   FilterMode fFilterMode = FilterMode::Key;
+  bool fFilterCaseSensitive = false;
 
   void open(std::filesystem::path const &selected) {
     using namespace std;
