@@ -20,13 +20,7 @@ static std::optional<std::filesystem::path> OpenFileDialog() {
 }
 
 static void RenderMainMenu(State &s) {
-  using namespace std;
   using namespace ImGui;
-
-  ImGuiWindowFlags flags = ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoBackground;
-  Begin("main_menu", nullptr, flags);
-  SetWindowPos(ImVec2(0, 0));
-  SetWindowSize(s.fDisplaySize);
 
   if (BeginMenuBar()) {
     if (BeginMenu("File", &s.fMainMenuBarFileSelected)) {
@@ -39,7 +33,6 @@ static void RenderMainMenu(State &s) {
     }
     EndMenuBar();
   }
-  End();
 }
 
 static void RenderErrorPopup(State &s) {
@@ -177,11 +170,10 @@ static void VisitCompoundTag(State &s, mcfile::nbt::CompoundTag const &tag, unsi
       PopID();
       break;
     default: {
-      auto textSize = CalcTextSize(name.c_str());
+      PushItemWidth(-FLT_EPSILON);
       Indent(kArrowWidth);
       TextUnformatted(name.c_str());
       SameLine();
-      PushItemWidth(s.fDisplaySize.x * 0.5 - textSize.x - kArrowWidth - 30 * depth - 32);
       PushID(line);
 
       VisitScalar(s, it.second);
@@ -210,20 +202,25 @@ static void RenderCompoundTag(State &s) {
     return;
   }
 
-  ImGuiWindowFlags flags = ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove;
-  Begin("compound_tag", nullptr, flags);
   float height = GetFrameHeight();
-  SetWindowPos(ImVec2(0, height));
-  SetWindowSize(ImVec2(s.fDisplaySize.x, s.fDisplaySize.y - height));
   unsigned int line = 0;
   VisitCompoundTag(s, *tag, 0, line);
-  End();
 }
 
 static void Render(State &s) {
+  using namespace ImGui;
+
+  ImGuiWindowFlags flags = ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove;
+  Begin("main", nullptr, flags);
+  SetWindowPos(ImVec2(0, 0));
+  SetWindowSize(s.fDisplaySize);
+
   RenderMainMenu(s);
   RenderErrorPopup(s);
   RenderCompoundTag(s);
+
+  End();
+
   ImGui::Render();
 }
 
