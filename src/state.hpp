@@ -11,9 +11,9 @@ enum class Type {
 static std::string EndianDescription(mcfile::Endian endian) {
   switch (endian) {
   case mcfile::Endian::Little:
-    return "little endian";
+    return "LittleEndian";
   case mcfile::Endian::Big:
-    return "big endian";
+    return "BigEndian";
   default:
     return "unknown";
   }
