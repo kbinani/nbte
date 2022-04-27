@@ -36,12 +36,16 @@ struct State {
   ImVec2 fDisplaySize;
   bool fMainMenuBarFileSelected = false;
   bool fMainMenuBarFileOpenSelected = false;
+  bool fMainMenuBarFindSelected = false;
 
   Format fOpenedFormat;
   std::variant<std::nullopt_t, std::shared_ptr<mcfile::nbt::CompoundTag>> fOpened = std::nullopt;
   std::filesystem::path fOpenedPath;
 
   std::string fError;
+
+  bool fFilterBarOpened = false;
+  std::string fFilter;
 
   void open(std::filesystem::path const &selected) {
     using namespace std;

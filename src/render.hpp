@@ -37,6 +37,12 @@ static void RenderMainMenu(State &s) {
       }
       ImGui::EndMenu();
     }
+    if (BeginMenu("Find", &s.fMainMenuBarFindSelected)) {
+      if (MenuItem("Filter", nullptr, nullptr)) {
+        s.fFilterBarOpened = true;
+      }
+      ImGui::EndMenu();
+    }
     EndMenuBar();
   }
 }
@@ -284,21 +290,10 @@ static void RenderCompoundTag(State &s) {
   VisitCompoundTag(s, *tag, "");
 }
 
-static void Render(State &s) {
+static void RenderFooter(State &s) {
   using namespace ImGui;
 
   float const frameHeight = GetFrameHeightWithSpacing();
-
-  ImGuiWindowFlags flags = ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove;
-  Begin("main", nullptr, flags);
-  SetWindowPos(ImVec2(0, 0));
-  SetWindowSize(ImVec2(s.fDisplaySize.x, s.fDisplaySize.y - frameHeight));
-
-  RenderMainMenu(s);
-  RenderErrorPopup(s);
-  RenderCompoundTag(s);
-
-  End();
 
   Begin("footer", nullptr, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoDecoration);
   SetWindowPos(ImVec2(0, s.fDisplaySize.y - frameHeight));
@@ -309,6 +304,40 @@ static void Render(State &s) {
   Text("Path: %s, Format: %s", s.fOpenedPath.u8string().c_str(), formatDescription.c_str());
   PopItemWidth();
   End();
+}
+
+static void Render(State &s) {
+  using namespace ImGui;
+
+  float const frameHeight = GetFrameHeightWithSpacing();
+  auto const &style = GetStyle();
+
+  ImGuiWindowFlags flags = ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove;
+  Begin("main", nullptr, flags);
+  SetWindowPos(ImVec2(0, 0));
+  SetWindowSize(ImVec2(s.fDisplaySize.x, s.fDisplaySize.y - frameHeight));
+
+  RenderMainMenu(s);
+  RenderErrorPopup(s);
+
+  if (s.fFilterBarOpened) {
+    BeginChild("filter_panel", ImVec2(s.fDisplaySize.x, frameHeight));
+    TextUnformatted("Filter: ");
+    SameLine();
+    PushID("filter_panel#text");
+    PushItemWidth(-FLT_EPSILON);
+    InputText("", &s.fFilter);
+    PopItemWidth();
+    PopID();
+    EndChild();
+    Separator();
+  }
+
+  RenderCompoundTag(s);
+
+  End();
+
+  RenderFooter(s);
 
   ImGui::Render();
 }
