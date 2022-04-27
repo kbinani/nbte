@@ -32,6 +32,11 @@ static std::string TypeDescription(Format type) {
   }
 }
 
+enum class FilterMode {
+  Key,
+  Value,
+};
+
 struct State {
   ImVec2 fDisplaySize;
   bool fMainMenuBarFileSelected = false;
@@ -46,6 +51,7 @@ struct State {
 
   bool fFilterBarOpened = false;
   std::string fFilter;
+  FilterMode fFilterMode = FilterMode::Key;
 
   void open(std::filesystem::path const &selected) {
     using namespace std;

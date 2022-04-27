@@ -70,6 +70,64 @@ static T Clamp(U u) {
   return (T)std::min<U>(std::max<U>(u, (U)std::numeric_limits<T>::lowest()), (U)std::numeric_limits<T>::max());
 }
 
+static bool ContainsTerm(std::shared_ptr<mcfile::nbt::Tag> const &tag, std::string const &term, FilterMode mode) {
+  using namespace std;
+  using namespace mcfile::nbt;
+
+  if (term.empty()) {
+    return true;
+  }
+
+  switch (tag->type()) {
+  case Tag::Type::Byte:
+  case Tag::Type::Short:
+  case Tag::Type::Int:
+  case Tag::Type::Long:
+  case Tag::Type::Float:
+  case Tag::Type::Double:
+  case Tag::Type::ByteArray:
+  case Tag::Type::IntArray:
+  case Tag::Type::LongArray:
+    return false;
+  case Tag::Type::Compound:
+    if (auto v = dynamic_pointer_cast<CompoundTag>(tag); v) {
+      for (auto const &it : *v) {
+        if (mode == FilterMode::Key) {
+          if (it.first.find(term) != string::npos) {
+            return true;
+          }
+        }
+        if (ContainsTerm(it.second, term, mode)) {
+          return true;
+        }
+      }
+    }
+    return false;
+  case Tag::Type::List:
+    if (auto v = dynamic_pointer_cast<ListTag>(tag); v) {
+      for (auto const &it : *v) {
+        if (ContainsTerm(it, term, mode)) {
+          return true;
+        }
+      }
+    }
+    return false;
+  case Tag::Type::String:
+    if (mode == FilterMode::Key) {
+      return false;
+    } else {
+      if (auto v = dynamic_pointer_cast<StringTag>(tag); v) {
+        return v->fValue.find(term) != string::npos;
+      }
+    }
+    return false;
+  default:
+    assert(false);
+    return false;
+  }
+  return false;
+}
+
 template <class T>
 static void InputScalar(T &v) {
   int t = v;
@@ -160,11 +218,21 @@ static void VisitNonScalar(State &s, std::string const &name, std::shared_ptr<mc
   int size = 0;
   switch (tag->type()) {
   case Tag::Type::Compound:
+    if (s.fFilterBarOpened) {
+      if (!ContainsTerm(tag, s.fFilter, s.fFilterMode)) {
+        return;
+      }
+    }
     if (auto v = dynamic_pointer_cast<CompoundTag>(tag); v) {
       size = v->size();
     }
     break;
   case Tag::Type::List:
+    if (s.fFilterBarOpened) {
+      if (!ContainsTerm(tag, s.fFilter, s.fFilterMode)) {
+        return;
+      }
+    }
     if (auto v = dynamic_pointer_cast<ListTag>(tag); v) {
       size = v->size();
     }
@@ -269,10 +337,23 @@ static void Visit(State &s, std::string const &name, std::shared_ptr<mcfile::nbt
 }
 
 static void VisitCompoundTag(State &s, mcfile::nbt::CompoundTag const &tag, std::string const &path) {
+  using namespace std;
+
   for (auto &it : tag) {
     auto const &name = it.first;
     if (!it.second) {
       continue;
+    }
+    if (s.fFilterBarOpened) {
+      if (s.fFilterMode == FilterMode::Key) {
+        if (!s.fFilter.empty() && name.find(s.fFilter) == string::npos && !ContainsTerm(it.second, s.fFilter, s.fFilterMode)) {
+          continue;
+        }
+      } else {
+        if (!ContainsTerm(it.second, s.fFilter, s.fFilterMode)) {
+          continue;
+        }
+      }
     }
     Visit(s, name, it.second, path);
   }
