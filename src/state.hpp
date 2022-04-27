@@ -3,19 +3,32 @@
 namespace nbte {
 
 enum class Type {
-  CompoundTag,
+  CompoundTagRawLittleEndian,
+  CompoundTagRawBigEndian,
+  CompoundTagDeflatedLittleEndian,
+  CompoundTagDeflatedBigEndian,
+  CompoundTagGzippedLittleEndian,
+  CompoundTagGzippedBigEndian,
   // Directory,
   // Anvil,
 };
 
-static std::string EndianDescription(mcfile::Endian endian) {
-  switch (endian) {
-  case mcfile::Endian::Little:
-    return "LittleEndian";
-  case mcfile::Endian::Big:
-    return "BigEndian";
+static std::string TypeDescription(Type type) {
+  switch (type) {
+  case Type::CompoundTagRawLittleEndian:
+    return "Raw NBT (LittleEndian)";
+  case Type::CompoundTagRawBigEndian:
+    return "Raw NBT (BigEndian)";
+  case Type::CompoundTagDeflatedLittleEndian:
+    return "Deflated NBT (LittleEndian)";
+  case Type::CompoundTagDeflatedBigEndian:
+    return "Deflated NBT (BigEndian)";
+  case Type::CompoundTagGzippedBigEndian:
+    return "Gzipped NBT (BigEndian)";
+  case Type::CompoundTagGzippedLittleEndian:
+    return "Gzipped NBT (LittleEndian)";
   default:
-    return "unknown";
+    return "Unknown";
   }
 }
 
@@ -25,9 +38,8 @@ struct State {
   bool fMainMenuBarFileOpenSelected = false;
 
   Type fOpenedType;
-  std::variant<std::shared_ptr<mcfile::nbt::CompoundTag>, std::nullopt_t> fOpened = std::nullopt;
+  std::variant<std::nullopt_t, std::shared_ptr<mcfile::nbt::CompoundTag>> fOpened = std::nullopt;
   std::filesystem::path fOpenedPath;
-  std::string fOpenedTypeDescription;
 
   std::string fError;
 
@@ -39,31 +51,45 @@ struct State {
     static std::set<mcfile::Endian> const sEndians = {mcfile::Endian::Big, mcfile::Endian::Little};
 
     if (fs::is_regular_file(selected)) {
-      for (auto endian : sEndians) {
-        if (auto tag = mcfile::nbt::CompoundTag::Read(selected, endian); tag) {
-          fOpened = tag;
-          fOpenedType = Type::CompoundTag;
-          fOpenedPath = fs::absolute(selected);
-          fOpenedTypeDescription = "Raw NBT (" + EndianDescription(endian) + ")";
-          return;
-        }
+      if (auto tag = mcfile::nbt::CompoundTag::Read(selected, mcfile::Endian::Little); tag) {
+        fOpened = tag;
+        fOpenedType = Type::CompoundTagRawLittleEndian;
+        fOpenedPath = fs::absolute(selected);
+        return;
       }
-      for (auto endian : sEndians) {
-        if (auto tag = mcfile::nbt::CompoundTag::ReadCompressed(selected, endian); tag) {
-          fOpened = tag;
-          fOpenedType = Type::CompoundTag;
-          fOpenedPath = fs::absolute(selected);
-          fOpenedTypeDescription = "Deflated NBT (" + EndianDescription(endian) + ")";
-          return;
-        }
+      if (auto tag = mcfile::nbt::CompoundTag::Read(selected, mcfile::Endian::Big); tag) {
+        fOpened = tag;
+        fOpenedType = Type::CompoundTagRawBigEndian;
+        fOpenedPath = fs::absolute(selected);
+        return;
       }
-      for (auto endian : sEndians) {
+      if (auto tag = mcfile::nbt::CompoundTag::ReadCompressed(selected, mcfile::Endian::Little); tag) {
+        fOpened = tag;
+        fOpenedType = Type::CompoundTagDeflatedLittleEndian;
+        fOpenedPath = fs::absolute(selected);
+        return;
+      }
+      if (auto tag = mcfile::nbt::CompoundTag::ReadCompressed(selected, mcfile::Endian::Big); tag) {
+        fOpened = tag;
+        fOpenedType = Type::CompoundTagDeflatedBigEndian;
+        fOpenedPath = fs::absolute(selected);
+        return;
+      }
+      {
         auto stream = std::make_shared<mcfile::stream::GzFileInputStream>(selected);
-        if (auto tag = mcfile::nbt::CompoundTag::Read(stream, endian); tag) {
+        if (auto tag = mcfile::nbt::CompoundTag::Read(stream, mcfile::Endian::Big); tag) {
           fOpened = tag;
-          fOpenedType = Type::CompoundTag;
+          fOpenedType = Type::CompoundTagGzippedBigEndian;
           fOpenedPath = fs::absolute(selected);
-          fOpenedTypeDescription = "Gzipped NBT (" + EndianDescription(endian) + ")";
+          return;
+        }
+      }
+      {
+        auto stream = std::make_shared<mcfile::stream::GzFileInputStream>(selected);
+        if (auto tag = mcfile::nbt::CompoundTag::Read(stream, mcfile::Endian::Little); tag) {
+          fOpened = tag;
+          fOpenedType = Type::CompoundTagGzippedLittleEndian;
+          fOpenedPath = fs::absolute(selected);
           return;
         }
       }

@@ -32,6 +32,9 @@ static void RenderMainMenu(State &s) {
           s.open(*selected);
         }
       }
+      if (MenuItem("Save", "CTRL+S", nullptr, s.fOpened.index() != 0)) {
+        //TODO:
+      }
       ImGui::EndMenu();
     }
     EndMenuBar();
@@ -270,10 +273,10 @@ static void VisitCompoundTag(State &s, mcfile::nbt::CompoundTag const &tag, std:
 }
 
 static void RenderCompoundTag(State &s) {
-  if (s.fOpened.index() != 0) {
+  if (s.fOpened.index() != 1) {
     return;
   }
-  std::shared_ptr<mcfile::nbt::CompoundTag> const &tag = get<0>(s.fOpened);
+  std::shared_ptr<mcfile::nbt::CompoundTag> const &tag = get<1>(s.fOpened);
   if (!tag) {
     return;
   }
@@ -302,7 +305,8 @@ static void Render(State &s) {
   SetWindowSize(ImVec2(s.fDisplaySize.x, frameHeight));
 
   PushItemWidth(-FLT_EPSILON);
-  Text("Path: %s, Format: %s", s.fOpenedPath.u8string().c_str(), s.fOpenedTypeDescription.c_str());
+  auto formatDescription = TypeDescription(s.fOpenedType);
+  Text("Path: %s, Format: %s", s.fOpenedPath.u8string().c_str(), formatDescription.c_str());
   PopItemWidth();
   End();
 
