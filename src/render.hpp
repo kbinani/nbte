@@ -222,15 +222,8 @@ static void Visit(State &s, std::string const &name, std::shared_ptr<mcfile::nbt
 }
 
 static void VisitCompoundTag(State &s, mcfile::nbt::CompoundTag const &tag, unsigned int depth, unsigned int &line) {
-  using namespace std;
-  using namespace ImGui;
-  using namespace mcfile::nbt;
-
-  auto const &style = GetStyle();
-  float currentIndent = depth * kIndent;
-
   for (auto &it : tag) {
-    string const &name = it.first;
+    auto const &name = it.first;
     if (!it.second) {
       continue;
     }
