@@ -32,8 +32,8 @@ static void RenderMainMenu(State &s) {
           s.open(*selected);
         }
       }
-      if (MenuItem("Save", "CTRL+S", nullptr, s.fOpened.index() != 0)) {
-        //TODO:
+      if (MenuItem("Save", nullptr, nullptr, s.fOpened.index() != 0)) {
+        s.save();
       }
       ImGui::EndMenu();
     }
@@ -305,7 +305,7 @@ static void Render(State &s) {
   SetWindowSize(ImVec2(s.fDisplaySize.x, frameHeight));
 
   PushItemWidth(-FLT_EPSILON);
-  auto formatDescription = TypeDescription(s.fOpenedType);
+  auto formatDescription = TypeDescription(s.fOpenedFormat);
   Text("Path: %s, Format: %s", s.fOpenedPath.u8string().c_str(), formatDescription.c_str());
   PopItemWidth();
   End();
