@@ -5,8 +5,8 @@ namespace nbte {
 constexpr float kIndent = 8.0f;
 constexpr float kArrowWidth = 21.0f;
 
-static void VisitCompoundTag(State &s, mcfile::nbt::CompoundTag const &tag, unsigned int depth, unsigned int &line);
-static void Visit(State &s, std::string const &name, std::shared_ptr<mcfile::nbt::Tag> const &tag, unsigned int depth, unsigned int &line);
+static void VisitCompoundTag(State &s, mcfile::nbt::CompoundTag const &tag, unsigned int &line);
+static void Visit(State &s, std::string const &name, std::shared_ptr<mcfile::nbt::Tag> const &tag, unsigned int &line);
 
 static std::optional<std::filesystem::path> OpenFileDialog() {
   using namespace std;
@@ -145,7 +145,7 @@ static void VisitScalar(State &s, std::string const &name, std::shared_ptr<mcfil
   PopScalarInput();
 }
 
-static void VisitNonScalar(State &s, std::string const &name, std::shared_ptr<mcfile::nbt::Tag> const &tag, unsigned int depth, unsigned int &line) {
+static void VisitNonScalar(State &s, std::string const &name, std::shared_ptr<mcfile::nbt::Tag> const &tag, unsigned int &line) {
   using namespace std;
   using namespace ImGui;
   using namespace mcfile::nbt;
@@ -158,14 +158,14 @@ static void VisitNonScalar(State &s, std::string const &name, std::shared_ptr<mc
     switch (tag->type()) {
     case Tag::Type::Compound:
       if (auto v = dynamic_pointer_cast<CompoundTag>(tag); v) {
-        VisitCompoundTag(s, *v, depth + 1, line);
+        VisitCompoundTag(s, *v, line);
       }
       break;
     case Tag::Type::List:
       if (auto v = dynamic_pointer_cast<ListTag>(tag); v) {
         for (size_t i = 0; i < v->fValue.size(); i++) {
           auto const &it = v->fValue[i];
-          Visit(s, "#" + to_string(i), it, depth + 1, line);
+          Visit(s, "#" + to_string(i), it, line);
         }
       }
       break;
@@ -204,7 +204,7 @@ static void VisitNonScalar(State &s, std::string const &name, std::shared_ptr<mc
   PopID();
 }
 
-static void Visit(State &s, std::string const &name, std::shared_ptr<mcfile::nbt::Tag> const &tag, unsigned int depth, unsigned int &line) {
+static void Visit(State &s, std::string const &name, std::shared_ptr<mcfile::nbt::Tag> const &tag, unsigned int &line) {
   using namespace mcfile::nbt;
 
   switch (tag->type()) {
@@ -213,7 +213,7 @@ static void Visit(State &s, std::string const &name, std::shared_ptr<mcfile::nbt
   case Tag::Type::ByteArray:
   case Tag::Type::IntArray:
   case Tag::Type::LongArray:
-    VisitNonScalar(s, name, tag, depth, line);
+    VisitNonScalar(s, name, tag, line);
     break;
   default:
     VisitScalar(s, name, tag, line);
@@ -221,13 +221,13 @@ static void Visit(State &s, std::string const &name, std::shared_ptr<mcfile::nbt
   }
 }
 
-static void VisitCompoundTag(State &s, mcfile::nbt::CompoundTag const &tag, unsigned int depth, unsigned int &line) {
+static void VisitCompoundTag(State &s, mcfile::nbt::CompoundTag const &tag, unsigned int &line) {
   for (auto &it : tag) {
     auto const &name = it.first;
     if (!it.second) {
       continue;
     }
-    Visit(s, name, it.second, depth, line);
+    Visit(s, name, it.second, line);
   }
 }
 
@@ -246,7 +246,7 @@ static void RenderCompoundTag(State &s) {
 
   float height = GetFrameHeight();
   unsigned int line = 0;
-  VisitCompoundTag(s, *tag, 0, line);
+  VisitCompoundTag(s, *tag, line);
 }
 
 static void Render(State &s) {
