@@ -17,6 +17,7 @@
 #include <nfd.h>
 #include <variant>
 
+#include "udev_gothic35_regular.h"
 #include "state.hpp"
 #include "render.hpp"
 
@@ -101,6 +102,7 @@ int main(int, char **) {
   //io.Fonts->AddFontFromFileTTF("../../misc/fonts/ProggyTiny.ttf", 10.0f);
   //ImFont* font = io.Fonts->AddFontFromFileTTF("c:\\Windows\\Fonts\\ArialUni.ttf", 18.0f, NULL, io.Fonts->GetGlyphRangesJapanese());
   //IM_ASSERT(font != NULL);
+  io.Fonts->AddFontFromMemoryCompressedTTF(udev_gothic35_regular_compressed_data, udev_gothic35_regular_compressed_size, 15.0f);
 
   nbte::State state;
 

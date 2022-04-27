@@ -12,6 +12,7 @@ list(APPEND nbte_files
   src/main.cpp
   src/render.hpp
   src/state.hpp
+  src/udev_gothic35_regular.h
   deps/imgui/imgui.cpp
   deps/imgui/imgui_draw.cpp
   deps/imgui/imgui_tables.cpp
@@ -48,3 +49,5 @@ endif()
 target_link_libraries(nbte PRIVATE ${nbte_link_libraries})
 
 source_group(TREE ${CMAKE_CURRENT_LIST_DIR} FILES ${nbte_files})
+
+add_executable(binary_to_compressed_c deps/imgui/misc/fonts/binary_to_compressed_c.cpp)
