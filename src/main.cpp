@@ -65,7 +65,7 @@ int main(int, char **) {
 #endif
 
   // Create window with graphics context
-  GLFWwindow *window = glfwCreateWindow(1280, 720, "Dear ImGui GLFW+OpenGL3 example", NULL, NULL);
+  GLFWwindow *window = glfwCreateWindow(1280, 720, "nbte", NULL, NULL);
   if (window == NULL)
     return 1;
   glfwMakeContextCurrent(window);
