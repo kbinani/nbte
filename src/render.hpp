@@ -432,7 +432,9 @@ static void Render(State &s) {
     filterBarGotFocus = false;
   }
 
+  BeginChild("editor");
   RenderCompoundTag(s);
+  EndChild();
 
   End();
 
