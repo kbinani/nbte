@@ -455,10 +455,10 @@ static void RenderFilterBar(State &s) {
 static void CaptureShortcutKey(State &s) {
   using namespace ImGui;
 
-  if (IsKeyPressed(GetKeyIndex(ImGuiKey_ModCtrl))) {
-    if (IsKeyPressed(GetKeyIndex(ImGuiKey_F))) {
+  if (IsKeyDown(GetKeyIndex(ImGuiKey_ModCtrl))) {
+    if (IsKeyDown(GetKeyIndex(ImGuiKey_F))) {
       s.fFilterBarOpened = true;
-    } else if (IsKeyPressed(GetKeyIndex(ImGuiKey_S)) && s.fOpened.index() != 0) {
+    } else if (IsKeyDown(GetKeyIndex(ImGuiKey_S)) && s.fOpened.index() != 0) {
       s.save();
     }
   }
