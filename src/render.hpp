@@ -392,22 +392,13 @@ static void RenderFooter(State &s) {
   End();
 }
 
-static void Render(State &s) {
+static void RenderFilterBar(State &s) {
   using namespace ImGui;
 
-  float const frameHeight = GetFrameHeightWithSpacing();
   auto const &style = GetStyle();
 
-  ImGuiWindowFlags flags = ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove;
-  Begin("main", nullptr, flags);
-  SetWindowPos(ImVec2(0, 0));
-  SetWindowSize(ImVec2(s.fDisplaySize.x, s.fDisplaySize.y - frameHeight));
-
-  RenderMainMenu(s);
-  RenderErrorPopup(s);
-
   if (s.fFilterBarOpened) {
-    BeginChild("filter_panel", ImVec2(s.fDisplaySize.x, frameHeight));
+    BeginChild("filter_panel", ImVec2(s.fDisplaySize.x, GetFrameHeightWithSpacing()));
 
     TextUnformatted("Filter: ");
 
@@ -430,11 +421,31 @@ static void Render(State &s) {
     InputText("", &s.fFilter);
     PopID();
 
+    SameLine();
+    PushID("filter_panel#close");
+    if (Button("x", ImVec2(GetFrameHeight(), GetFrameHeight()))) {
+      s.fFilterBarOpened = false;
+    }
+    PopID();
+
     EndChild();
     Separator();
   } else {
     s.fFilterBarGotFocus = false;
   }
+}
+
+static void Render(State &s) {
+  using namespace ImGui;
+
+  ImGuiWindowFlags flags = ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove;
+  Begin("main", nullptr, flags);
+  SetWindowPos(ImVec2(0, 0));
+  SetWindowSize(ImVec2(s.fDisplaySize.x, s.fDisplaySize.y - GetFrameHeightWithSpacing()));
+
+  RenderMainMenu(s);
+  RenderErrorPopup(s);
+  RenderFilterBar(s);
 
   BeginChild("editor");
   RenderCompoundTag(s);
