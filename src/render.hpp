@@ -428,7 +428,7 @@ static void RenderFilterBar(State &s) {
 
     SameLine();
     PushID("filter_panel#text");
-    if (!s.fFilterBarGotFocus) {
+    if (!s.fFilterBarGotFocus || (IsKeyDown(GetKeyIndex(ImGuiKey_ModCtrl)) && IsKeyDown(GetKeyIndex(ImGuiKey_F)))) {
       SetKeyboardFocusHere();
       s.fFilterBarGotFocus = true;
     }
