@@ -406,22 +406,26 @@ static void Render(State &s) {
   RenderMainMenu(s);
   RenderErrorPopup(s);
 
-  static bool filterBarGotFocus = false;
   if (s.fFilterBarOpened) {
     BeginChild("filter_panel", ImVec2(s.fDisplaySize.x, frameHeight));
 
     TextUnformatted("Filter: ");
 
     SameLine();
-    PushID("filter_panel#checkbox_case_sensitive");
-    Checkbox("Case Sensitive", &s.fFilterCaseSensitive);
+    PushID("filter_panel#button_case_sensitive");
+    PushStyleColor(ImGuiCol_Text, s.fFilterCaseSensitive ? style.Colors[ImGuiCol_ButtonActive] : style.Colors[ImGuiCol_TextDisabled]);
+    PushStyleColor(ImGuiCol_Button, s.fFilterCaseSensitive ? style.Colors[ImGuiCol_Button] : style.Colors[ImGuiCol_ChildBg]);
+    if (Button("Aa")) {
+      s.fFilterCaseSensitive = !s.fFilterCaseSensitive;
+    }
+    PopStyleColor(2);
     PopID();
 
     SameLine();
     PushID("filter_panel#text");
-    if (!filterBarGotFocus) {
+    if (!s.fFilterBarGotFocus) {
       SetKeyboardFocusHere();
-      filterBarGotFocus = true;
+      s.fFilterBarGotFocus = true;
     }
     InputText("", &s.fFilter);
     PopID();
@@ -429,7 +433,7 @@ static void Render(State &s) {
     EndChild();
     Separator();
   } else {
-    filterBarGotFocus = false;
+    s.fFilterBarGotFocus = false;
   }
 
   BeginChild("editor");

@@ -53,6 +53,7 @@ struct State {
   std::string fFilter;
   FilterMode fFilterMode = FilterMode::Key;
   bool fFilterCaseSensitive = false;
+  bool fFilterBarGotFocus = false;
 
   void open(std::filesystem::path const &selected) {
     using namespace std;
