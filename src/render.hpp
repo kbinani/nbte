@@ -419,6 +419,9 @@ static void RenderFilterBar(State &s) {
       s.fFilterBarGotFocus = true;
     }
     InputText("", &s.fFilter);
+    if (IsItemDeactivated() && IsKeyPressed(GetKeyIndex(ImGuiKey_Escape))) {
+      s.fFilterBarOpened = false;
+    }
     PopID();
 
     SameLine();
