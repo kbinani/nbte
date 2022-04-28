@@ -55,6 +55,8 @@ struct State {
   bool fFilterCaseSensitive = false;
   bool fFilterBarGotFocus = false;
 
+  bool fEdited = false;
+
   void open(std::filesystem::path const &selected) {
     using namespace std;
     namespace fs = std::filesystem;
@@ -160,6 +162,10 @@ struct State {
       }
       }
     }
+
+    if (fError.empty()) {
+      fEdited = false;
+    }
   }
 
   std::string filterTerm() const {
@@ -171,6 +177,21 @@ struct State {
     } else {
       return ToLower(fFilter);
     }
+  }
+
+  std::string winowTitle() const {
+    std::string title = "nbte";
+    if (fOpened.index() == 0) {
+      return title;
+    }
+    if (!fOpenedPath.has_filename()) {
+      return title;
+    }
+    title += " - " + fOpenedPath.string();
+    if (fEdited) {
+      title += " *";
+    }
+    return title;
   }
 };
 

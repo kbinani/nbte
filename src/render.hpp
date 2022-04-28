@@ -129,18 +129,26 @@ static bool ContainsTerm(std::shared_ptr<mcfile::nbt::Tag> const &tag, std::stri
 }
 
 template <class T>
-static void InputScalar(T &v) {
+static void InputScalar(T &v, State &s) {
   int t = v;
   if (ImGui::InputInt("", &t)) {
-    v = Clamp<T, int>(t);
+    T n = Clamp<T, int>(t);
+    if (n != v) {
+      v = n;
+      s.fEdited = true;
+    }
   }
 }
 
 template <>
-static void InputScalar(int64_t &v) {
+static void InputScalar(int64_t &v, State &s) {
   std::string t = std::to_string(v);
   if (ImGui::InputText("", &t, ImGuiInputTextFlags_CharsDecimal)) {
-    v = atoll(t.c_str());
+    int64_t n = atoll(t.c_str());
+    if (v != n) {
+      v = n;
+      s.fEdited = true;
+    }
   }
 }
 
@@ -170,37 +178,43 @@ static void VisitScalar(State &s, std::string const &name, std::shared_ptr<mcfil
   switch (tag->type()) {
   case Tag::Type::Int:
     if (auto v = dynamic_pointer_cast<IntTag>(tag); v) {
-      InputScalar<int>(v->fValue);
+      InputScalar<int>(v->fValue, s);
     }
     break;
   case Tag::Type::Byte:
     if (auto v = dynamic_pointer_cast<ByteTag>(tag); v) {
-      InputScalar<uint8_t>(v->fValue);
+      InputScalar<uint8_t>(v->fValue, s);
     }
     break;
   case Tag::Type::Short:
     if (auto v = dynamic_pointer_cast<ShortTag>(tag); v) {
-      InputScalar<int16_t>(v->fValue);
+      InputScalar<int16_t>(v->fValue, s);
     }
     break;
   case Tag::Type::Long:
     if (auto v = dynamic_pointer_cast<LongTag>(tag); v) {
-      InputScalar(v->fValue);
+      InputScalar(v->fValue, s);
     }
     break;
   case Tag::Type::String:
     if (auto v = dynamic_pointer_cast<StringTag>(tag); v) {
-      InputText("", &v->fValue);
+      if (InputText("", &v->fValue)) {
+        s.fEdited = true;
+      }
     }
     break;
   case mcfile::nbt::Tag::Type::Float:
     if (auto v = dynamic_pointer_cast<FloatTag>(tag); v) {
-      InputFloat("", &v->fValue);
+      if (InputFloat("", &v->fValue)) {
+        s.fEdited = true;
+      }
     }
     break;
   case mcfile::nbt::Tag::Type::Double:
     if (auto v = dynamic_pointer_cast<DoubleTag>(tag); v) {
-      InputDouble("", &v->fValue);
+      if (InputDouble("", &v->fValue)) {
+        s.fEdited = true;
+      }
     }
     break;
   default:
@@ -289,7 +303,7 @@ static void VisitNonScalar(State &s, std::string const &name, std::shared_ptr<mc
         for (size_t i = 0; i < v->fValue.size(); i++) {
           auto label = "#" + to_string(i);
           PushScalarInput(label, nextPath);
-          InputScalar<uint8_t>(v->fValue[i]);
+          InputScalar<uint8_t>(v->fValue[i], s);
           PopScalarInput();
         }
       }
@@ -299,7 +313,7 @@ static void VisitNonScalar(State &s, std::string const &name, std::shared_ptr<mc
         for (size_t i = 0; i < v->fValue.size(); i++) {
           auto label = "#" + to_string(i);
           PushScalarInput(label, nextPath);
-          InputScalar<int>(v->fValue[i]);
+          InputScalar<int>(v->fValue[i], s);
           PopScalarInput();
         }
       }
@@ -309,7 +323,7 @@ static void VisitNonScalar(State &s, std::string const &name, std::shared_ptr<mc
         for (size_t i = 0; i < v->fValue.size(); i++) {
           auto label = "#" + to_string(i);
           PushScalarInput(label, nextPath);
-          InputScalar<int64_t>(v->fValue[i]);
+          InputScalar<int64_t>(v->fValue[i], s);
           PopScalarInput();
         }
       }
