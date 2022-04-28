@@ -187,7 +187,7 @@ struct State {
     if (!fOpenedPath.has_filename()) {
       return title;
     }
-    title += " - " + fOpenedPath.string();
+    title += " - " + fOpenedPath.filename().string();
     if (fEdited) {
       title += " *";
     }
