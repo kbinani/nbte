@@ -32,13 +32,13 @@ static void RenderMainMenu(State &s) {
           s.open(*selected);
         }
       }
-      if (MenuItem("Save", nullptr, nullptr, s.fOpened.index() != 0)) {
+      if (MenuItem("Save", "Ctrl+S", nullptr, s.fOpened.index() != 0)) {
         s.save();
       }
       ImGui::EndMenu();
     }
     if (BeginMenu("Find", &s.fMainMenuBarFindSelected)) {
-      if (MenuItem("Filter", nullptr, nullptr)) {
+      if (MenuItem("Filter", "Ctrl+F", nullptr)) {
         s.fFilterBarOpened = true;
       }
       ImGui::EndMenu();
@@ -438,6 +438,18 @@ static void RenderFilterBar(State &s) {
   }
 }
 
+static void CaptureShortcutKey(State &s) {
+  using namespace ImGui;
+
+  if (IsKeyPressed(GetKeyIndex(ImGuiKey_ModCtrl))) {
+    if (IsKeyPressed(GetKeyIndex(ImGuiKey_F))) {
+      s.fFilterBarOpened = true;
+    } else if (IsKeyPressed(GetKeyIndex(ImGuiKey_S)) && s.fOpened.index() != 0) {
+      s.save();
+    }
+  }
+}
+
 static void Render(State &s) {
   using namespace ImGui;
 
@@ -457,6 +469,8 @@ static void Render(State &s) {
   End();
 
   RenderFooter(s);
+
+  CaptureShortcutKey(s);
 
   ImGui::Render();
 }
