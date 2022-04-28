@@ -5,7 +5,7 @@ namespace nbte {
 constexpr float kIndent = 6.0f;
 
 static void VisitCompoundTag(State &s, mcfile::nbt::CompoundTag const &tag, std::string const &path);
-static void Visit(State &s, std::string const &name, std::shared_ptr<mcfile::nbt::Tag> const &tag, std::string const &path);
+static void Visit(State &s, std::string const &name, std::shared_ptr<mcfile::nbt::Tag> const &tag, std::string const &path, std::string const &filter, bool filterCaseSensitive);
 
 static std::optional<std::filesystem::path> OpenFileDialog() {
   using namespace std;
@@ -70,11 +70,11 @@ static T Clamp(U u) {
   return (T)std::min<U>(std::max<U>(u, (U)std::numeric_limits<T>::lowest()), (U)std::numeric_limits<T>::max());
 }
 
-static bool ContainsTerm(std::shared_ptr<mcfile::nbt::Tag> const &tag, std::string const &term, FilterMode mode, bool caseSensitive) {
+static bool ContainsTerm(std::shared_ptr<mcfile::nbt::Tag> const &tag, std::string const &filter, FilterMode mode, bool caseSensitive) {
   using namespace std;
   using namespace mcfile::nbt;
 
-  if (term.empty()) {
+  if (filter.empty()) {
     return true;
   }
 
@@ -93,11 +93,11 @@ static bool ContainsTerm(std::shared_ptr<mcfile::nbt::Tag> const &tag, std::stri
     if (auto v = dynamic_pointer_cast<CompoundTag>(tag); v) {
       for (auto const &it : *v) {
         if (mode == FilterMode::Key) {
-          if ((caseSensitive ? it.first : ToLower(it.first)).find(term) != string::npos) {
+          if ((caseSensitive ? it.first : ToLower(it.first)).find(filter) != string::npos) {
             return true;
           }
         }
-        if (ContainsTerm(it.second, term, mode, caseSensitive)) {
+        if (ContainsTerm(it.second, filter, mode, caseSensitive)) {
           return true;
         }
       }
@@ -106,7 +106,7 @@ static bool ContainsTerm(std::shared_ptr<mcfile::nbt::Tag> const &tag, std::stri
   case Tag::Type::List:
     if (auto v = dynamic_pointer_cast<ListTag>(tag); v) {
       for (auto const &it : *v) {
-        if (ContainsTerm(it, term, mode, caseSensitive)) {
+        if (ContainsTerm(it, filter, mode, caseSensitive)) {
           return true;
         }
       }
@@ -117,7 +117,7 @@ static bool ContainsTerm(std::shared_ptr<mcfile::nbt::Tag> const &tag, std::stri
       return false;
     } else {
       if (auto v = dynamic_pointer_cast<StringTag>(tag); v) {
-        return v->fValue.find(term) != string::npos;
+        return v->fValue.find(filter) != string::npos;
       }
     }
     return false;
@@ -152,11 +152,29 @@ static void InputScalar(int64_t &v, State &s) {
   }
 }
 
-static void PushScalarInput(std::string const &name, std::string const &path) {
+static void PushScalarInput(std::string const &name, std::string const &path, std::string const &filter, bool filterCaseSensitive) {
+  using namespace std;
   using namespace ImGui;
   PushItemWidth(-FLT_EPSILON);
   Indent(GetTreeNodeToLabelSpacing());
   PushID((path + "/" + name).c_str());
+  if (!filter.empty()) {
+    ImDrawList *list = GetWindowDrawList();
+    auto cursor = GetCursorScreenPos();
+    auto color = GetColorU32(ImGuiCol_Button);
+    size_t pos = 0;
+    while (true) {
+      size_t found = (filterCaseSensitive ? name : ToLower(name)).find(filter, pos);
+      if (found == string::npos) {
+        break;
+      } else {
+        auto leading = CalcTextSize(name.substr(0, found).c_str());
+        auto trailing = CalcTextSize(name.substr(0, found + filter.size()).c_str());
+        list->AddRectFilled(ImVec2(cursor.x + leading.x, cursor.y), ImVec2(cursor.x + trailing.x, cursor.y + trailing.y), color, 2.0f);
+        pos = found + filter.size();
+      }
+    }
+  }
   TextUnformatted(name.c_str());
   SameLine();
 }
@@ -173,7 +191,7 @@ static void VisitScalar(State &s, std::string const &name, std::shared_ptr<mcfil
   using namespace ImGui;
   using namespace mcfile::nbt;
 
-  PushScalarInput(name, path);
+  PushScalarInput(name, path, s.filterTerm(), s.fFilterCaseSensitive);
 
   switch (tag->type()) {
   case Tag::Type::Int:
@@ -229,11 +247,13 @@ static void VisitNonScalar(State &s, std::string const &name, std::shared_ptr<mc
   using namespace ImGui;
   using namespace mcfile::nbt;
 
+  auto filter = s.filterTerm();
+
   int size = 0;
   switch (tag->type()) {
   case Tag::Type::Compound:
     if (s.fFilterBarOpened) {
-      if (!ContainsTerm(tag, s.filterTerm(), s.fFilterMode, s.fFilterCaseSensitive)) {
+      if (!ContainsTerm(tag, filter, s.fFilterMode, s.fFilterCaseSensitive)) {
         return;
       }
     }
@@ -243,7 +263,7 @@ static void VisitNonScalar(State &s, std::string const &name, std::shared_ptr<mc
     break;
   case Tag::Type::List:
     if (s.fFilterBarOpened) {
-      if (!ContainsTerm(tag, s.filterTerm(), s.fFilterMode, s.fFilterCaseSensitive)) {
+      if (!ContainsTerm(tag, filter, s.fFilterMode, s.fFilterCaseSensitive)) {
         return;
       }
     }
@@ -294,7 +314,7 @@ static void VisitNonScalar(State &s, std::string const &name, std::shared_ptr<mc
         for (size_t i = 0; i < v->fValue.size(); i++) {
           auto const &it = v->fValue[i];
           auto label = "#" + to_string(i);
-          Visit(s, label, it, nextPath);
+          Visit(s, label, it, nextPath, filter, s.fFilterCaseSensitive);
         }
       }
       break;
@@ -302,7 +322,7 @@ static void VisitNonScalar(State &s, std::string const &name, std::shared_ptr<mc
       if (auto v = dynamic_pointer_cast<ByteArrayTag>(tag); v) {
         for (size_t i = 0; i < v->fValue.size(); i++) {
           auto label = "#" + to_string(i);
-          PushScalarInput(label, nextPath);
+          PushScalarInput(label, nextPath, filter, s.fFilterCaseSensitive);
           InputScalar<uint8_t>(v->fValue[i], s);
           PopScalarInput();
         }
@@ -312,7 +332,7 @@ static void VisitNonScalar(State &s, std::string const &name, std::shared_ptr<mc
       if (auto v = dynamic_pointer_cast<IntArrayTag>(tag); v) {
         for (size_t i = 0; i < v->fValue.size(); i++) {
           auto label = "#" + to_string(i);
-          PushScalarInput(label, nextPath);
+          PushScalarInput(label, nextPath, filter, s.fFilterCaseSensitive);
           InputScalar<int>(v->fValue[i], s);
           PopScalarInput();
         }
@@ -322,7 +342,7 @@ static void VisitNonScalar(State &s, std::string const &name, std::shared_ptr<mc
       if (auto v = dynamic_pointer_cast<LongArrayTag>(tag); v) {
         for (size_t i = 0; i < v->fValue.size(); i++) {
           auto label = "#" + to_string(i);
-          PushScalarInput(label, nextPath);
+          PushScalarInput(label, nextPath, filter, s.fFilterCaseSensitive);
           InputScalar<int64_t>(v->fValue[i], s);
           PopScalarInput();
         }
@@ -336,7 +356,7 @@ static void VisitNonScalar(State &s, std::string const &name, std::shared_ptr<mc
   PopID();
 }
 
-static void Visit(State &s, std::string const &name, std::shared_ptr<mcfile::nbt::Tag> const &tag, std::string const &path) {
+static void Visit(State &s, std::string const &name, std::shared_ptr<mcfile::nbt::Tag> const &tag, std::string const &path, std::string const &filter, bool filterCaseSensitive) {
   using namespace mcfile::nbt;
 
   switch (tag->type()) {
@@ -363,18 +383,18 @@ static void VisitCompoundTag(State &s, mcfile::nbt::CompoundTag const &tag, std:
     if (!it.second) {
       continue;
     }
-    if (s.fFilterBarOpened) {
+    if (s.fFilterBarOpened && !filterTerm.empty()) {
       if (s.fFilterMode == FilterMode::Key) {
-        if (!filterTerm.empty() && (s.fFilterCaseSensitive ? name : ToLower(name)).find(filterTerm) == string::npos && !ContainsTerm(it.second, filterTerm, s.fFilterMode, s.fFilterCaseSensitive)) {
-          continue;
-        }
-      } else {
-        if (!ContainsTerm(it.second, filterTerm, s.fFilterMode, s.fFilterCaseSensitive)) {
+        if ((s.fFilterCaseSensitive ? name : ToLower(name)).find(filterTerm) != string::npos) {
+          Visit(s, name, it.second, path, "", s.fFilterCaseSensitive);
           continue;
         }
       }
+      if (!ContainsTerm(it.second, filterTerm, s.fFilterMode, s.fFilterCaseSensitive)) {
+        continue;
+      }
     }
-    Visit(s, name, it.second, path);
+    Visit(s, name, it.second, path, filterTerm, s.fFilterCaseSensitive);
   }
 }
 
