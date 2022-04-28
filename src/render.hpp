@@ -4,8 +4,15 @@ namespace nbte {
 
 constexpr float kIndent = 6.0f;
 
-static void VisitCompoundTag(State &s, mcfile::nbt::CompoundTag const &tag, std::string const &path);
-static void Visit(State &s, std::string const &name, std::shared_ptr<mcfile::nbt::Tag> const &tag, std::string const &path, std::string const &filter, bool filterCaseSensitive);
+static void VisitCompoundTag(State &s,
+                             mcfile::nbt::CompoundTag const &tag,
+                             std::string const &path,
+                             std::string const &filter);
+static void Visit(State &s,
+                  std::string const &name,
+                  std::shared_ptr<mcfile::nbt::Tag> const &tag,
+                  std::string const &path,
+                  std::string const &filter);
 
 static std::optional<std::filesystem::path> OpenFileDialog() {
   using namespace std;
@@ -70,7 +77,10 @@ static T Clamp(U u) {
   return (T)std::min<U>(std::max<U>(u, (U)std::numeric_limits<T>::lowest()), (U)std::numeric_limits<T>::max());
 }
 
-static bool ContainsTerm(std::shared_ptr<mcfile::nbt::Tag> const &tag, std::string const &filter, FilterMode mode, bool caseSensitive) {
+static bool ContainsTerm(std::shared_ptr<mcfile::nbt::Tag> const &tag,
+                         std::string const &filter,
+                         FilterMode mode,
+                         bool caseSensitive) {
   using namespace std;
   using namespace mcfile::nbt;
 
@@ -152,7 +162,10 @@ static void InputScalar(int64_t &v, State &s) {
   }
 }
 
-static void PushScalarInput(std::string const &name, std::string const &path, std::string const &filter, bool filterCaseSensitive) {
+static void PushScalarInput(std::string const &name,
+                            std::string const &path,
+                            std::string const &filter,
+                            bool filterCaseSensitive) {
   using namespace std;
   using namespace ImGui;
   PushItemWidth(-FLT_EPSILON);
@@ -186,12 +199,16 @@ static void PopScalarInput() {
   PopItemWidth();
 }
 
-static void VisitScalar(State &s, std::string const &name, std::shared_ptr<mcfile::nbt::Tag> const &tag, std::string const &path) {
+static void VisitScalar(State &s,
+                        std::string const &name,
+                        std::shared_ptr<mcfile::nbt::Tag> const &tag,
+                        std::string const &path,
+                        std::string const &filter) {
   using namespace std;
   using namespace ImGui;
   using namespace mcfile::nbt;
 
-  PushScalarInput(name, path, s.filterTerm(), s.fFilterCaseSensitive);
+  PushScalarInput(name, path, filter, s.fFilterCaseSensitive);
 
   switch (tag->type()) {
   case Tag::Type::Int:
@@ -242,12 +259,23 @@ static void VisitScalar(State &s, std::string const &name, std::shared_ptr<mcfil
   PopScalarInput();
 }
 
-static void VisitNonScalar(State &s, std::string const &name, std::shared_ptr<mcfile::nbt::Tag> const &tag, std::string const &path) {
+static void VisitNonScalar(State &s,
+                           std::string const &name,
+                           std::shared_ptr<mcfile::nbt::Tag> const &tag,
+                           std::string const &path,
+                           std::string const &filterTerm) {
   using namespace std;
   using namespace ImGui;
   using namespace mcfile::nbt;
 
-  auto filter = s.filterTerm();
+  string filter = filterTerm;
+  bool matchedNode = !filter.empty() && (s.fFilterCaseSensitive ? name : ToLower(name)).find(filter) != string::npos;
+  if (name == "Player") {
+    int a = 0;
+  }
+  if (matchedNode) {
+    filter = "";
+  }
 
   int size = 0;
   switch (tag->type()) {
@@ -297,16 +325,20 @@ static void VisitNonScalar(State &s, std::string const &name, std::shared_ptr<mc
   auto nextPath = path + "/" + name;
   PushID(nextPath.c_str());
 
-  if (s.fFilterBarOpened && !s.fFilter.empty()) {
+  if (s.fFilterBarOpened && !filter.empty()) {
     SetNextItemOpen(true);
   }
-  if (TreeNodeEx(label.c_str(), ImGuiTreeNodeFlags_DefaultOpen)) {
+  ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_DefaultOpen;
+  if (matchedNode) {
+    flags = flags | ImGuiTreeNodeFlags_Selected;
+  }
+  if (TreeNodeEx(label.c_str(), flags)) {
     Indent(kIndent);
 
     switch (tag->type()) {
     case Tag::Type::Compound:
       if (auto v = dynamic_pointer_cast<CompoundTag>(tag); v) {
-        VisitCompoundTag(s, *v, nextPath);
+        VisitCompoundTag(s, *v, nextPath, filter);
       }
       break;
     case Tag::Type::List:
@@ -314,7 +346,7 @@ static void VisitNonScalar(State &s, std::string const &name, std::shared_ptr<mc
         for (size_t i = 0; i < v->fValue.size(); i++) {
           auto const &it = v->fValue[i];
           auto label = "#" + to_string(i);
-          Visit(s, label, it, nextPath, filter, s.fFilterCaseSensitive);
+          Visit(s, label, it, nextPath, filter);
         }
       }
       break;
@@ -356,7 +388,11 @@ static void VisitNonScalar(State &s, std::string const &name, std::shared_ptr<mc
   PopID();
 }
 
-static void Visit(State &s, std::string const &name, std::shared_ptr<mcfile::nbt::Tag> const &tag, std::string const &path, std::string const &filter, bool filterCaseSensitive) {
+static void Visit(State &s,
+                  std::string const &name,
+                  std::shared_ptr<mcfile::nbt::Tag> const &tag,
+                  std::string const &path,
+                  std::string const &filter) {
   using namespace mcfile::nbt;
 
   switch (tag->type()) {
@@ -365,36 +401,37 @@ static void Visit(State &s, std::string const &name, std::shared_ptr<mcfile::nbt
   case Tag::Type::ByteArray:
   case Tag::Type::IntArray:
   case Tag::Type::LongArray:
-    VisitNonScalar(s, name, tag, path);
+    VisitNonScalar(s, name, tag, path, filter);
     break;
   default:
-    VisitScalar(s, name, tag, path);
+    VisitScalar(s, name, tag, path, filter);
     break;
   }
 }
 
-static void VisitCompoundTag(State &s, mcfile::nbt::CompoundTag const &tag, std::string const &path) {
+static void VisitCompoundTag(State &s,
+                             mcfile::nbt::CompoundTag const &tag,
+                             std::string const &path,
+                             std::string const &filter) {
   using namespace std;
-
-  auto filterTerm = s.filterTerm();
 
   for (auto &it : tag) {
     auto const &name = it.first;
     if (!it.second) {
       continue;
     }
-    if (s.fFilterBarOpened && !filterTerm.empty()) {
+    if (s.fFilterBarOpened && !filter.empty()) {
       if (s.fFilterMode == FilterMode::Key) {
-        if ((s.fFilterCaseSensitive ? name : ToLower(name)).find(filterTerm) != string::npos) {
-          Visit(s, name, it.second, path, "", s.fFilterCaseSensitive);
+        if ((s.fFilterCaseSensitive ? name : ToLower(name)).find(filter) == string::npos && !ContainsTerm(it.second, filter, s.fFilterMode, s.fFilterCaseSensitive)) {
+          continue;
+        }
+      } else {
+        if (!ContainsTerm(it.second, filter, s.fFilterMode, s.fFilterCaseSensitive)) {
           continue;
         }
       }
-      if (!ContainsTerm(it.second, filterTerm, s.fFilterMode, s.fFilterCaseSensitive)) {
-        continue;
-      }
     }
-    Visit(s, name, it.second, path, filterTerm, s.fFilterCaseSensitive);
+    Visit(s, name, it.second, path, filter);
   }
 }
 
@@ -407,7 +444,7 @@ static void RenderCompoundTag(State &s) {
     return;
   }
 
-  VisitCompoundTag(s, *tag, "");
+  VisitCompoundTag(s, *tag, "", s.filterTerm());
 }
 
 static void RenderFooter(State &s) {
