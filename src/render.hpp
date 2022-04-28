@@ -70,12 +70,6 @@ static T Clamp(U u) {
   return (T)std::min<U>(std::max<U>(u, (U)std::numeric_limits<T>::lowest()), (U)std::numeric_limits<T>::max());
 }
 
-static std::string ToLower(std::string const &s) {
-  std::string ret = s;
-  std::transform(ret.begin(), ret.end(), ret.begin(), ::tolower);
-  return ret;
-}
-
 static bool ContainsTerm(std::shared_ptr<mcfile::nbt::Tag> const &tag, std::string const &term, FilterMode mode, bool caseSensitive) {
   using namespace std;
   using namespace mcfile::nbt;
@@ -99,14 +93,8 @@ static bool ContainsTerm(std::shared_ptr<mcfile::nbt::Tag> const &tag, std::stri
     if (auto v = dynamic_pointer_cast<CompoundTag>(tag); v) {
       for (auto const &it : *v) {
         if (mode == FilterMode::Key) {
-          if (caseSensitive) {
-            if (it.first.find(term) != string::npos) {
-              return true;
-            }
-          } else {
-            if (ToLower(it.first).find(term) != string::npos) {
-              return true;
-            }
+          if ((caseSensitive ? it.first : ToLower(it.first)).find(term) != string::npos) {
+            return true;
           }
         }
         if (ContainsTerm(it.second, term, mode, caseSensitive)) {
@@ -231,7 +219,7 @@ static void VisitNonScalar(State &s, std::string const &name, std::shared_ptr<mc
   switch (tag->type()) {
   case Tag::Type::Compound:
     if (s.fFilterBarOpened) {
-      if (!ContainsTerm(tag, s.fFilterCaseSensitive ? s.fFilter : ToLower(s.fFilter), s.fFilterMode, s.fFilterCaseSensitive)) {
+      if (!ContainsTerm(tag, s.filterTerm(), s.fFilterMode, s.fFilterCaseSensitive)) {
         return;
       }
     }
@@ -241,7 +229,7 @@ static void VisitNonScalar(State &s, std::string const &name, std::shared_ptr<mc
     break;
   case Tag::Type::List:
     if (s.fFilterBarOpened) {
-      if (!ContainsTerm(tag, s.fFilterCaseSensitive ? s.fFilter : ToLower(s.fFilter), s.fFilterMode, s.fFilterCaseSensitive)) {
+      if (!ContainsTerm(tag, s.filterTerm(), s.fFilterMode, s.fFilterCaseSensitive)) {
         return;
       }
     }
@@ -275,6 +263,9 @@ static void VisitNonScalar(State &s, std::string const &name, std::shared_ptr<mc
   auto nextPath = path + "/" + name;
   PushID(nextPath.c_str());
 
+  if (s.fFilterBarOpened && !s.fFilter.empty()) {
+    SetNextItemOpen(true);
+  }
   if (TreeNodeEx(label.c_str(), ImGuiTreeNodeFlags_DefaultOpen)) {
     Indent(kIndent);
 
@@ -351,6 +342,8 @@ static void Visit(State &s, std::string const &name, std::shared_ptr<mcfile::nbt
 static void VisitCompoundTag(State &s, mcfile::nbt::CompoundTag const &tag, std::string const &path) {
   using namespace std;
 
+  auto filterTerm = s.filterTerm();
+
   for (auto &it : tag) {
     auto const &name = it.first;
     if (!it.second) {
@@ -358,11 +351,11 @@ static void VisitCompoundTag(State &s, mcfile::nbt::CompoundTag const &tag, std:
     }
     if (s.fFilterBarOpened) {
       if (s.fFilterMode == FilterMode::Key) {
-        if (!s.fFilter.empty() && (s.fFilterCaseSensitive ? name : ToLower(name)).find(s.fFilter) == string::npos && !ContainsTerm(it.second, s.fFilter, s.fFilterMode, s.fFilterCaseSensitive)) {
+        if (!filterTerm.empty() && (s.fFilterCaseSensitive ? name : ToLower(name)).find(filterTerm) == string::npos && !ContainsTerm(it.second, filterTerm, s.fFilterMode, s.fFilterCaseSensitive)) {
           continue;
         }
       } else {
-        if (!ContainsTerm(it.second, s.fFilterCaseSensitive ? s.fFilter : ToLower(s.fFilter), s.fFilterMode, s.fFilterCaseSensitive)) {
+        if (!ContainsTerm(it.second, filterTerm, s.fFilterMode, s.fFilterCaseSensitive)) {
           continue;
         }
       }
@@ -413,6 +406,7 @@ static void Render(State &s) {
   RenderMainMenu(s);
   RenderErrorPopup(s);
 
+  static bool filterBarGotFocus = false;
   if (s.fFilterBarOpened) {
     BeginChild("filter_panel", ImVec2(s.fDisplaySize.x, frameHeight));
 
@@ -425,13 +419,17 @@ static void Render(State &s) {
 
     SameLine();
     PushID("filter_panel#text");
-    PushItemWidth(-FLT_EPSILON);
+    if (!filterBarGotFocus) {
+      SetKeyboardFocusHere();
+      filterBarGotFocus = true;
+    }
     InputText("", &s.fFilter);
-    PopItemWidth();
     PopID();
 
     EndChild();
     Separator();
+  } else {
+    filterBarGotFocus = false;
   }
 
   RenderCompoundTag(s);

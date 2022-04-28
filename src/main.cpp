@@ -18,6 +18,7 @@
 #include <variant>
 
 #include "udev_gothic35_regular.h"
+#include "string.hpp"
 #include "state.hpp"
 #include "render.hpp"
 

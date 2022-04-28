@@ -12,6 +12,7 @@ list(APPEND nbte_files
   src/main.cpp
   src/render.hpp
   src/state.hpp
+  src/string.hpp
   src/udev_gothic35_regular.h
   deps/imgui/imgui.cpp
   deps/imgui/imgui_draw.cpp

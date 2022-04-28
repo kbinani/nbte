@@ -160,6 +160,17 @@ struct State {
       }
     }
   }
+
+  std::string filterTerm() const {
+    if (!fFilterBarOpened) {
+      return {};
+    }
+    if (fFilterCaseSensitive) {
+      return fFilter;
+    } else {
+      return ToLower(fFilter);
+    }
+  }
 };
 
 } // namespace nbte
