@@ -7,12 +7,12 @@
   IgnorableNamespaces="uap rescap">
 
   <Identity
-    Name="6930d26e-4385-4f64-93a4-03d8ccbb574e"
-    Publisher="CN=kbinani"
-    Version="1.0.0.0" />
+    Name="52186kbinani.nbte"
+    Publisher="CN=B8976C2F-50D5-4CD4-A6C5-15D29097087E"
+    Version="0.1.0.0" />
 
   <Properties>
-    <DisplayName>package</DisplayName>
+    <DisplayName>nbte</DisplayName>
     <PublisherDisplayName>kbinani</PublisherDisplayName>
     <Logo>Images\StoreLogo.png</Logo>
   </Properties>
@@ -31,7 +31,7 @@
       Executable="$targetnametoken$.exe"
       EntryPoint="$targetentrypoint$">
       <uap:VisualElements
-        DisplayName="package"
+        DisplayName="nbte"
         Description="package"
         BackgroundColor="transparent"
         Square150x150Logo="Images\Square150x150Logo.png"

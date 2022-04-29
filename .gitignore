@@ -3,3 +3,4 @@
 /src/render-legal.hpp
 /resource/appicon.rc
 /package/obj
+*.user
