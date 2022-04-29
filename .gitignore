@@ -2,6 +2,7 @@
 /src/version.hpp
 /src/render-legal.hpp
 /resource/appicon.rc
+/resource/Info.plist
 /package/obj
 /package/Package.appxmanifest
 /package/AppPackages

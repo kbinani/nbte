@@ -51,6 +51,10 @@ configure_file(src/render-legal.hpp.in ${CMAKE_CURRENT_SOURCE_DIR}/src/render-le
 
 configure_file(package/Package.appxmanifest.in ${CMAKE_CURRENT_SOURCE_DIR}/package/Package.appxmanifest)
 
+if ("${CMAKE_SYSTEM_NAME}" STREQUAL "Darwin")
+  configure_file(resource/Info.plist.in ${CMAKE_CURRENT_SOURCE_DIR}/resource/Info.plist)
+endif()
+
 list(APPEND nbte_files
   src/render.hpp
   src/state.hpp
