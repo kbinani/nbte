@@ -87,7 +87,7 @@ static void RenderAboutDialog(State &s) {
     return;
   }
   OpenPopup("About");
-  SetNextWindowSize(ImVec2(512, 320));
+  SetNextWindowSize(ImVec2(512, 320), ImGuiCond_Once);
   if (BeginPopupModal("About", &s.fMainMenuBarHelpAboutOpened, ImGuiWindowFlags_NoSavedSettings)) {
     TextUnformatted("nbte");
     Text("Version %s", kAppVersion);
