@@ -490,10 +490,13 @@ static void RenderFooter(State &s) {
   SetWindowPos(ImVec2(0, s.fDisplaySize.y - frameHeight));
   SetWindowSize(ImVec2(s.fDisplaySize.x, frameHeight));
 
-  PushItemWidth(-FLT_EPSILON);
-  auto formatDescription = TypeDescription(s.fOpenedFormat);
-  Text("Path: %s, Format: %s", s.fOpenedPath.u8string().c_str(), formatDescription.c_str());
-  PopItemWidth();
+  if (!s.fOpenedPath.empty()) {
+    PushItemWidth(-FLT_EPSILON);
+    auto formatDescription = TypeDescription(s.fOpenedFormat);
+    Text("Path: %s, Format: %s", s.fOpenedPath.u8string().c_str(), formatDescription.c_str());
+    PopItemWidth();
+  }
+
   End();
 }
 
