@@ -52,7 +52,6 @@ list(APPEND nbte_files
   src/nbte32.h
   src/render-legal.hpp
   deps/imgui/imgui.cpp
-  deps/imgui/imgui_demo.cpp
   deps/imgui/imgui_draw.cpp
   deps/imgui/imgui_tables.cpp
   deps/imgui/imgui_widgets.cpp
