@@ -3,4 +3,5 @@
 /src/render-legal.hpp
 /resource/appicon.rc
 /package/obj
+/package/Package.appxmanifest
 *.user

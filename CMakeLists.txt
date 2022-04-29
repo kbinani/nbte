@@ -39,6 +39,8 @@ file(READ deps/imgui/LICENSE.txt NBTE_LEGAL_DEARIMGUI)
 string(STRIP "${NBTE_LEGAL_DEARIMGUI}" NBTE_LEGAL_DEARIMGUI)
 configure_file(src/render-legal.hpp.in ${CMAKE_CURRENT_SOURCE_DIR}/src/render-legal.hpp)
 
+configure_file(package/Package.appxmanifest.in ${CMAKE_CURRENT_SOURCE_DIR}/package/Package.appxmanifest)
+
 list(APPEND nbte_files
   src/main.cpp
   src/render.hpp
