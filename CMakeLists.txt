@@ -5,6 +5,20 @@ set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
+if ("${CMAKE_SYSTEM_NAME}" STREQUAL "Windows")
+  add_definitions(
+    /DUNICODE
+    /D_UNICODE
+    /we4828
+    /wd4100 # Suppress "unreferenced formal parameter" warnings
+  )
+  add_compile_options(
+    $<$<CONFIG:Debug>:/MTd>
+    $<$<CONFIG:Release>:/MT>
+    $<$<CONFIG:RelWithDebInfo>:/MT>
+    $<$<CONFIG:MinSizeRel>:/MT>)
+endif()
+
 add_subdirectory(deps/glfw EXCLUDE_FROM_ALL)
 add_subdirectory(deps/libminecraft-file EXCLUDE_FROM_ALL)
 
