@@ -98,7 +98,7 @@ static void RenderAboutDialog(State &s) {
 
 This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.)");
     TextUnformatted("");
-    if (Button("OK")) {
+    if (Button("OK") || IsKeyDown(GetKeyIndex(ImGuiKey_Escape))) {
       s.fMainMenuBarHelpAboutOpened = false;
       CloseCurrentPopup();
     }
@@ -133,7 +133,7 @@ static void RenderOpenSourceLicenses(State &s) {
     TextUnformatted("libminecraft-file");
     TextUnformatted("https://github.com/kbinani/libminecraft-file");
     TextUnformatted("");
-    if (Button("OK")) {
+    if (Button("OK") || IsKeyDown(GetKeyIndex(ImGuiKey_Escape))) {
       s.fMainMenuBarHelpOpenSourceLicensesOpened = false;
       CloseCurrentPopup();
     }
