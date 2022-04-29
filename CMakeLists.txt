@@ -8,12 +8,15 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 add_subdirectory(deps/glfw EXCLUDE_FROM_ALL)
 add_subdirectory(deps/libminecraft-file EXCLUDE_FROM_ALL)
 
+configure_file(src/version.hpp.in ${CMAKE_CURRENT_SOURCE_DIR}/src/version.hpp)
+
 list(APPEND nbte_files
   src/main.cpp
   src/render.hpp
   src/state.hpp
   src/string.hpp
   src/udev_gothic35_regular.h
+  src/version.hpp
   deps/imgui/imgui.cpp
   deps/imgui/imgui_draw.cpp
   deps/imgui/imgui_tables.cpp

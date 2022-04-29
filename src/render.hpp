@@ -84,13 +84,10 @@ static void RenderAboutDialog(State &s) {
     return;
   }
   OpenPopup("About");
-  SetNextWindowSize(ImVec2(512, 300));
+  SetNextWindowSize(ImVec2(512, 320));
   if (BeginPopupModal("About", nullptr, ImGuiWindowFlags_NoSavedSettings)) {
-    auto textWidth = CalcTextSize("nbte").x;
-    auto windowSize = GetWindowSize();
-
-    SetCursorPosX(windowSize.x * 0.5f - textWidth * 0.5f);
     TextUnformatted("nbte");
+    Text("Version %s", kAppVersion);
     TextUnformatted("");
     TextUnformatted("Copyright © 2022 kbinani");
     TextUnformatted("");

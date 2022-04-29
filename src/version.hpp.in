@@ -1,0 +1,7 @@
+#pragma once
+
+namespace nbte {
+
+static char const* kAppVersion = "${CMAKE_PROJECT_VERSION}";
+
+}
