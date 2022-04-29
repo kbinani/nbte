@@ -1,0 +1,29 @@
+#pragma code_page(65001)
+
+#undef  WIN32_LEAN_AND_MEAN
+#define WIN32_LEAN_AND_MEAN
+#include <windows.h>
+
+VS_VERSION_INFO VERSIONINFO
+FILEVERSION  ${NBTE_FILE_VERSION}
+BEGIN
+  BLOCK "StringFileInfo"
+  BEGIN
+    BLOCK "040904E4"
+    BEGIN
+      VALUE "CompanyName",  "kbinani\0"
+      VALUE "FileDescription",  "nbte\0"
+      VALUE "FileVersion",  "${CMAKE_PROJECT_VERSION}\0"
+      VALUE "ProductName",  "nbte\0"
+      VALUE "ProductVersion",  "${CMAKE_PROJECT_VERSION}\0"
+    END
+  END
+
+  BLOCK "VarFileInfo"
+  BEGIN
+    VALUE "Translation", 0x409, 1252
+  END
+END
+
+IDI_ICON1 ICON DISCARDABLE "appicon.ico"
+IDI_ICON2 ICON DISCARDABLE "appicon.ico"

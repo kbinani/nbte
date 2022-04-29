@@ -23,6 +23,8 @@ add_subdirectory(deps/glfw EXCLUDE_FROM_ALL)
 add_subdirectory(deps/libminecraft-file EXCLUDE_FROM_ALL)
 
 configure_file(src/version.hpp.in ${CMAKE_CURRENT_SOURCE_DIR}/src/version.hpp)
+string(REPLACE "." "," NBTE_FILE_VERSION ${CMAKE_PROJECT_VERSION})
+configure_file(resource/appicon.rc.in ${CMAKE_CURRENT_SOURCE_DIR}/resource/appicon.rc)
 
 list(APPEND nbte_files
   src/main.cpp
@@ -31,6 +33,7 @@ list(APPEND nbte_files
   src/string.hpp
   src/udev_gothic35_regular.h
   src/version.hpp
+  src/nbte32.h
   deps/imgui/imgui.cpp
   deps/imgui/imgui_draw.cpp
   deps/imgui/imgui_tables.cpp
@@ -38,14 +41,17 @@ list(APPEND nbte_files
   deps/imgui/backends/imgui_impl_glfw.cpp
   deps/imgui/backends/imgui_impl_opengl3.cpp
   deps/imgui/misc/cpp/imgui_stdlib.cpp
-  deps/nativefiledialog/src/nfd_common.c)
+  deps/nativefiledialog/src/nfd_common.c
+  deps/stb/stb_image.h)
 if ("${CMAKE_SYSTEM_NAME}" STREQUAL "Darwin")
   list(APPEND nbte_files
     deps/nativefiledialog/src/nfd_cocoa.m)
 elseif ("${CMAKE_SYSTEM_NAME}" STREQUAL "Windows")
   list(APPEND nbte_files
+    resource/appicon.rc
     deps/nativefiledialog/src/nfd_win.cpp)
 endif()
+
 add_executable(nbte ${nbte_files})
 
 target_include_directories(nbte
@@ -54,7 +60,8 @@ target_include_directories(nbte
     deps/imgui/backends
     deps/imgui/misc/cpp
     deps/glfw/include
-    deps/nativefiledialog/src/include)
+    deps/nativefiledialog/src/include
+    deps/stb)
 
 list(APPEND nbte_link_libraries
   glfw

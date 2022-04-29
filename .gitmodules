@@ -10,3 +10,6 @@
 [submodule "deps/libminecraft-file"]
 	path = deps/libminecraft-file
 	url = https://github.com/kbinani/libminecraft-file.git
+[submodule "deps/stb"]
+	path = deps/stb
+	url = https://github.com/nothings/stb.git

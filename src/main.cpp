@@ -13,11 +13,15 @@
 #endif
 #include <GLFW/glfw3.h> // Will drag system OpenGL headers
 
+#define STB_IMAGE_IMPLEMENTATION
+#include "stb_image.h"
+
 #include <minecraft-file.hpp>
 #include <nfd.h>
 #include <variant>
 
 #include "udev_gothic35_regular.h"
+#include "nbte32.h"
 #include "version.hpp"
 #include "string.hpp"
 #include "state.hpp"
@@ -69,8 +73,16 @@ int main(int, char **) {
 
   // Create window with graphics context
   GLFWwindow *window = glfwCreateWindow(1280, 720, "nbte", NULL, NULL);
-  if (window == NULL)
+  if (window == NULL) {
     return 1;
+  }
+
+  int width, height, components;
+  unsigned char *img = stbi_load_from_memory(nbte32_png, nbte32_png_len, &width, &height, &components, 4);
+  GLFWimage icon = {width, height, img};
+  glfwSetWindowIcon(window, 1, &icon);
+  stbi_image_free(img);
+
   glfwMakeContextCurrent(window);
   glfwSwapInterval(1); // Enable vsync
 
