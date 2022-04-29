@@ -62,7 +62,7 @@ list(APPEND nbte_files
 if ("${CMAKE_SYSTEM_NAME}" STREQUAL "Darwin")
   list(APPEND nbte_files
     src/main.mm
-    deps/imgui/backends/imgui_impl_opengl2.cpp
+    deps/imgui/backends/imgui_impl_metal.mm
     deps/imgui/backends/imgui_impl_osx.mm
     deps/nativefiledialog/src/nfd_cocoa.m)
 elseif ("${CMAKE_SYSTEM_NAME}" STREQUAL "Windows")
@@ -89,8 +89,9 @@ list(APPEND nbte_link_libraries
   mcfile)
 if ("${CMAKE_SYSTEM_NAME}" STREQUAL "Darwin")
   list(APPEND nbte_link_libraries
+    "-framework MetalKit"
     "-framework GameController"
-    "-framework OpenGL"
+    "-framework Metal"
     "-framework AppKit")
 elseif("${CMAKE_SYSTEM_NAME}" STREQUAL "Windows")
   list(APPEND nbte_link_libraries
