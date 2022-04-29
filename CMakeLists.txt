@@ -5,7 +5,15 @@ set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
-if ("${CMAKE_SYSTEM_NAME}" STREQUAL "Windows")
+set(nbte_product_bundle_identifier com.github.kbinani.nbte)
+set(nbte_macos_deployment_target "10.15")
+set(nbte_apple_development_team_id "XM695N4A7T")
+
+if ("${CMAKE_SYSTEM_NAME}" STREQUAL "Darwin")
+  set(CMAKE_OSX_ARCHITECTURES "arm64;x86_64")
+  set(CMAKE_XCODE_ATTRIBUTE_DEVELOPMENT_TEAM "${nbte_apple_development_team_id}")
+  set(CMAKE_OSX_DEPLOYMENT_TARGET "${nbte_macos_deployment_target}")
+elseif ("${CMAKE_SYSTEM_NAME}" STREQUAL "Windows")
   add_definitions(
     /DUNICODE
     /D_UNICODE
@@ -61,6 +69,7 @@ list(APPEND nbte_files
 if ("${CMAKE_SYSTEM_NAME}" STREQUAL "Darwin")
   list(APPEND nbte_files
     src/main.mm
+    resource/assets.xcassets
     deps/imgui/backends/imgui_impl_metal.mm
     deps/imgui/backends/imgui_impl_osx.mm
     deps/nativefiledialog/src/nfd_cocoa.m)
@@ -73,7 +82,22 @@ elseif ("${CMAKE_SYSTEM_NAME}" STREQUAL "Windows")
     deps/nativefiledialog/src/nfd_win.cpp)
 endif()
 
-add_executable(nbte ${nbte_files})
+if ("${CMAKE_SYSTEM_NAME}" STREQUAL "Darwin")
+  add_executable(nbte MACOSX_BUNDLE ${nbte_files})
+  set_target_properties(nbte PROPERTIES
+    MACOSX_BUNDLE_BUNDLE_NAME nbte
+    MACOSX_BUNDLE_GUI_IDENTIFIER "${nbte_product_bundle_identifier}"
+    MACOSX_BUNDLE_SHORT_VERSION_STRING "${CMAKE_PROJECT_VERSION}"
+    MACOSX_BUNDLE_LONG_VERSION_STRING "${CMAKE_PROJECT_VERSION}"
+    MACOSX_BUNDLE_COPYRIGHT "Copyright © kbinani"
+    XCODE_ATTRIBUTE_PRODUCT_BUNDLE_IDENTIFIER "${nbte_product_bundle_identifier}"
+    XCODE_ATTRIBUTE_ASSETCATALOG_COMPILER_APPICON_NAME AppIcon
+  )
+  set_source_files_properties(resource/assets.xcassets PROPERTIES MACOSX_PACKAGE_LOCATION Resources)
+  set_source_files_properties(resource/MainMenu.storyboard PROPERTIES MACOSX_PACKAGE_LOCATION Resources/MainMenu.storyboard)
+else()
+  add_executable(nbte ${nbte_files})
+endif()
 
 target_include_directories(nbte
   PRIVATE
