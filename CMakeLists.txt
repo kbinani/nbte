@@ -23,8 +23,21 @@ add_subdirectory(deps/glfw EXCLUDE_FROM_ALL)
 add_subdirectory(deps/libminecraft-file EXCLUDE_FROM_ALL)
 
 configure_file(src/version.hpp.in ${CMAKE_CURRENT_SOURCE_DIR}/src/version.hpp)
+
 string(REPLACE "." "," NBTE_FILE_VERSION ${CMAKE_PROJECT_VERSION})
 configure_file(resource/appicon.rc.in ${CMAKE_CURRENT_SOURCE_DIR}/resource/appicon.rc)
+
+file(READ deps/libminecraft-file/LICENSE NBTE_LEGAL_LIBMINECRAFT_FILE)
+string(STRIP "${NBTE_LEGAL_LIBMINECRAFT_FILE}" NBTE_LEGAL_LIBMINECRAFT_FILE)
+file(READ deps/nativefiledialog/LICENSE NBTE_LEGAL_NATIVEFILEDIALOG)
+string(STRIP "${NBTE_LEGAL_NATIVEFILEDIALOG}" NBTE_LEGAL_NATIVEFILEDIALOG)
+file(READ deps/stb/LICENSE NBTE_LEGAL_STB)
+string(STRIP "${NBTE_LEGAL_STB}" NBTE_LEGAL_STB)
+file(READ deps/GLFW/LICENSE.md NBTE_LEGAL_GLFW)
+string(STRIP "${NBTE_LEGAL_GLFW}" NBTE_LEGAL_GLFW)
+file(READ deps/imgui/LICENSE.txt NBTE_LEGAL_DEARIMGUI)
+string(STRIP "${NBTE_LEGAL_DEARIMGUI}" NBTE_LEGAL_DEARIMGUI)
+configure_file(src/render-legal.hpp.in ${CMAKE_CURRENT_SOURCE_DIR}/src/render-legal.hpp)
 
 list(APPEND nbte_files
   src/main.cpp
@@ -34,6 +47,7 @@ list(APPEND nbte_files
   src/udev_gothic35_regular.h
   src/version.hpp
   src/nbte32.h
+  src/render-legal.hpp
   deps/imgui/imgui.cpp
   deps/imgui/imgui_draw.cpp
   deps/imgui/imgui_tables.cpp

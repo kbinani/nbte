@@ -25,6 +25,7 @@
 #include "version.hpp"
 #include "string.hpp"
 #include "state.hpp"
+#include "render-legal.hpp"
 #include "render.hpp"
 
 // [Win32] Our example includes a copy of glfw3.lib pre-compiled with VS2010 to maximize ease of testing and compatibility with old VS compilers.

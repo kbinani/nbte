@@ -1,3 +1,4 @@
 /build
 /src/version.hpp
+/src/render-legal.hpp
 /resource/appicon.rc
