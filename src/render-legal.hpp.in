@@ -9,7 +9,7 @@ static void RenderLegal(State &s) {
     return;
   }
   OpenPopup("Legal");
-  SetNextWindowSize(ImVec2(s.fDisplaySize.x * 0.5f, s.fDisplaySize.y * 0.5f), ImGuiCond_Once);
+  SetNextWindowSize(ImVec2(s.fDisplaySize.x * 0.75f, s.fDisplaySize.y * 0.75f), ImGuiCond_Once);
   if (BeginPopupModal("Legal", &s.fMainMenuBarHelpOpenSourceLicensesOpened, ImGuiWindowFlags_NoSavedSettings)) {
     TextWrapped("%s", R"(Dear ImGui: https://github.com/ocornut/imgui
 
