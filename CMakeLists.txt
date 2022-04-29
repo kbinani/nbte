@@ -90,3 +90,7 @@ target_link_libraries(nbte PRIVATE ${nbte_link_libraries})
 source_group(TREE ${CMAKE_CURRENT_LIST_DIR} FILES ${nbte_files})
 
 add_executable(binary_to_compressed_c deps/imgui/misc/fonts/binary_to_compressed_c.cpp)
+
+include_external_msproject(package ${CMAKE_CURRENT_SOURCE_DIR}/package/package.wapproj
+  TYPE C7167F0D-BC9F-4E6E-AFE1-012C56B48DB5
+  GUID 03182add-54ab-4518-b6a3-cfd896bcd9a4)
