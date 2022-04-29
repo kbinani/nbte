@@ -44,7 +44,6 @@ configure_file(src/render-legal.hpp.in ${CMAKE_CURRENT_SOURCE_DIR}/src/render-le
 configure_file(package/Package.appxmanifest.in ${CMAKE_CURRENT_SOURCE_DIR}/package/Package.appxmanifest)
 
 list(APPEND nbte_files
-  src/main.cpp
   src/render.hpp
   src/state.hpp
   src/string.hpp
@@ -53,19 +52,24 @@ list(APPEND nbte_files
   src/nbte32.h
   src/render-legal.hpp
   deps/imgui/imgui.cpp
+  deps/imgui/imgui_demo.cpp
   deps/imgui/imgui_draw.cpp
   deps/imgui/imgui_tables.cpp
   deps/imgui/imgui_widgets.cpp
-  deps/imgui/backends/imgui_impl_glfw.cpp
-  deps/imgui/backends/imgui_impl_opengl3.cpp
   deps/imgui/misc/cpp/imgui_stdlib.cpp
   deps/nativefiledialog/src/nfd_common.c
   deps/stb/stb_image.h)
 if ("${CMAKE_SYSTEM_NAME}" STREQUAL "Darwin")
   list(APPEND nbte_files
+    src/main.mm
+    deps/imgui/backends/imgui_impl_opengl2.cpp
+    deps/imgui/backends/imgui_impl_osx.mm
     deps/nativefiledialog/src/nfd_cocoa.m)
 elseif ("${CMAKE_SYSTEM_NAME}" STREQUAL "Windows")
   list(APPEND nbte_files
+    src/main.cpp
+    deps/imgui/backends/imgui_impl_glfw.cpp
+    deps/imgui/backends/imgui_impl_opengl3.cpp
     resource/appicon.rc
     deps/nativefiledialog/src/nfd_win.cpp)
 endif()
@@ -82,12 +86,16 @@ target_include_directories(nbte
     deps/stb)
 
 list(APPEND nbte_link_libraries
-  glfw
   mcfile)
 if ("${CMAKE_SYSTEM_NAME}" STREQUAL "Darwin")
-  list(APPEND nbte_link_libraries "-framework OpenGL")
+  list(APPEND nbte_link_libraries
+    "-framework GameController"
+    "-framework OpenGL"
+    "-framework AppKit")
 elseif("${CMAKE_SYSTEM_NAME}" STREQUAL "Windows")
-  list(APPEND nbte_link_libraries opengl32.lib)
+  list(APPEND nbte_link_libraries
+    glfw
+    opengl32.lib)
 endif()
 target_link_libraries(nbte PRIVATE ${nbte_link_libraries})
 
