@@ -37,6 +37,8 @@ file(READ deps/GLFW/LICENSE.md NBTE_LEGAL_GLFW)
 string(STRIP "${NBTE_LEGAL_GLFW}" NBTE_LEGAL_GLFW)
 file(READ deps/imgui/LICENSE.txt NBTE_LEGAL_DEARIMGUI)
 string(STRIP "${NBTE_LEGAL_DEARIMGUI}" NBTE_LEGAL_DEARIMGUI)
+file(READ deps/libminecraft-file/deps/zlib-ng/LICENSE.md NBTE_LEGAL_ZLIB_NG)
+string(STRIP "${NBTE_LEGAL_ZLIB_NG}" NBTE_LEGAL_ZLIB_NG)
 configure_file(src/render-legal.hpp.in ${CMAKE_CURRENT_SOURCE_DIR}/src/render-legal.hpp)
 
 configure_file(package/Package.appxmanifest.in ${CMAKE_CURRENT_SOURCE_DIR}/package/Package.appxmanifest)

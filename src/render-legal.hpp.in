@@ -150,6 +150,13 @@ ${NBTE_LEGAL_NATIVEFILEDIALOG})");
     TextWrapped("%s", R"(libminecraft-file: https://github.com/kbinani/libminecraft-file
 
 ${NBTE_LEGAL_LIBMINECRAFT_FILE})");
+    TextUnformatted("");
+    Separator();
+
+    TextWrapped("%s", R"(zlib-ng: https://github.com/zlib-ng/zlib-ng
+
+${NBTE_LEGAL_ZLIB_NG})");
+
     if (IsKeyDown(GetKeyIndex(ImGuiKey_Escape))) {
       s.fMainMenuBarHelpOpenSourceLicensesOpened = false;
       CloseCurrentPopup();
