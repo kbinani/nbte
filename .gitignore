@@ -4,4 +4,7 @@
 /resource/appicon.rc
 /package/obj
 /package/Package.appxmanifest
+/package/AppPackages
+/package/bin
+/package/BundleArtifacts
 *.user
