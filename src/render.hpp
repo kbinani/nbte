@@ -51,8 +51,11 @@ static void RenderMainMenu(State &s) {
       EndMenu();
     }
     if (BeginMenu("Help", &s.fMainMenuBarHelpSelected)) {
-      if (MenuItem("About", nullptr, nullptr)) {
+      if (MenuItem("About nbte", nullptr, nullptr)) {
         s.fMainMenuBarHelpAboutOpened = true;
+      }
+      if (MenuItem("Open Source Licenses", nullptr, nullptr)) {
+        s.fMainMenuBarHelpOpenSourceLicensesOpened = true;
       }
       EndMenu();
     }
@@ -97,6 +100,41 @@ This program is distributed in the hope that it will be useful, but WITHOUT ANY 
     TextUnformatted("");
     if (Button("OK")) {
       s.fMainMenuBarHelpAboutOpened = false;
+      CloseCurrentPopup();
+    }
+    EndPopup();
+  }
+}
+
+static void RenderOpenSourceLicenses(State &s) {
+  using namespace ImGui;
+
+  if (!s.fMainMenuBarHelpOpenSourceLicensesOpened) {
+    return;
+  }
+  OpenPopup("Open Source Licenses");
+  SetNextWindowSize(ImVec2(s.fDisplaySize.x * 0.5f, s.fDisplaySize.y * 0.5f));
+  if (BeginPopupModal("Open Source Licenses", nullptr, ImGuiWindowFlags_NoSavedSettings)) {
+    TextUnformatted("Dear ImGui");
+    TextUnformatted("https://github.com/ocornut/imgui");
+    TextUnformatted("");
+    TextUnformatted("GLFW");
+    TextUnformatted("https://github.com/glfw/glfw");
+    TextUnformatted("");
+    TextUnformatted("stb");
+    TextUnformatted("https://github.com/nothings/stb");
+    TextUnformatted("");
+    TextUnformatted("UDEV Gothic");
+    TextUnformatted("https://github.com/yuru7/udev-gothic");
+    TextUnformatted("");
+    TextUnformatted("nativefiledialog");
+    TextUnformatted("https://github.com/mlabbe/nativefiledialog");
+    TextUnformatted("");
+    TextUnformatted("libminecraft-file");
+    TextUnformatted("https://github.com/kbinani/libminecraft-file");
+    TextUnformatted("");
+    if (Button("OK")) {
+      s.fMainMenuBarHelpOpenSourceLicensesOpened = false;
       CloseCurrentPopup();
     }
     EndPopup();
@@ -563,6 +601,7 @@ static void Render(State &s) {
   RenderMainMenu(s);
   RenderErrorPopup(s);
   RenderAboutDialog(s);
+  RenderOpenSourceLicenses(s);
   RenderFilterBar(s);
 
   BeginChild("editor");
