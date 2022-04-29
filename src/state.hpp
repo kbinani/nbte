@@ -42,6 +42,8 @@ struct State {
   bool fMainMenuBarFileSelected = false;
   bool fMainMenuBarFileOpenSelected = false;
   bool fMainMenuBarFindSelected = false;
+  bool fMainMenuBarHelpSelected = false;
+  bool fMainMenuBarHelpAboutOpened = false;
 
   Format fOpenedFormat;
   std::variant<std::nullopt_t, std::shared_ptr<mcfile::nbt::CompoundTag>> fOpened = std::nullopt;

@@ -42,20 +42,25 @@ static void RenderMainMenu(State &s) {
       if (MenuItem("Save", "Ctrl+S", nullptr, s.fOpened.index() != 0)) {
         s.save();
       }
-      ImGui::EndMenu();
+      EndMenu();
     }
     if (BeginMenu("Find", &s.fMainMenuBarFindSelected)) {
       if (MenuItem("Filter", "Ctrl+F", nullptr)) {
         s.fFilterBarOpened = true;
       }
-      ImGui::EndMenu();
+      EndMenu();
+    }
+    if (BeginMenu("Help", &s.fMainMenuBarHelpSelected)) {
+      if (MenuItem("About", nullptr, nullptr)) {
+        s.fMainMenuBarHelpAboutOpened = true;
+      }
+      EndMenu();
     }
     EndMenuBar();
   }
 }
 
 static void RenderErrorPopup(State &s) {
-  using namespace std;
   using namespace ImGui;
 
   if (s.fError.empty()) {
@@ -66,6 +71,35 @@ static void RenderErrorPopup(State &s) {
     TextUnformatted(s.fError.c_str());
     if (Button("OK")) {
       s.fError.clear();
+      CloseCurrentPopup();
+    }
+    EndPopup();
+  }
+}
+
+static void RenderAboutDialog(State &s) {
+  using namespace ImGui;
+
+  if (!s.fMainMenuBarHelpAboutOpened) {
+    return;
+  }
+  OpenPopup("About");
+  SetNextWindowSize(ImVec2(512, 300));
+  if (BeginPopupModal("About", nullptr, ImGuiWindowFlags_NoSavedSettings)) {
+    auto textWidth = CalcTextSize("nbte").x;
+    auto windowSize = GetWindowSize();
+
+    SetCursorPosX(windowSize.x * 0.5f - textWidth * 0.5f);
+    TextUnformatted("nbte");
+    TextUnformatted("");
+    TextUnformatted("Copyright © 2022 kbinani");
+    TextUnformatted("");
+    TextWrapped("%s", R"(This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
+
+This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.)");
+    TextUnformatted("");
+    if (Button("OK")) {
+      s.fMainMenuBarHelpAboutOpened = false;
       CloseCurrentPopup();
     }
     EndPopup();
@@ -452,7 +486,7 @@ static void RenderFooter(State &s) {
 
   float const frameHeight = GetFrameHeightWithSpacing();
 
-  Begin("footer", nullptr, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoDecoration);
+  Begin("footer", nullptr, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoSavedSettings);
   SetWindowPos(ImVec2(0, s.fDisplaySize.y - frameHeight));
   SetWindowSize(ImVec2(s.fDisplaySize.x, frameHeight));
 
@@ -531,6 +565,7 @@ static void Render(State &s) {
 
   RenderMainMenu(s);
   RenderErrorPopup(s);
+  RenderAboutDialog(s);
   RenderFilterBar(s);
 
   BeginChild("editor");
