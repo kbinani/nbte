@@ -122,6 +122,9 @@ int main(int, char **) {
 
     state.fDisplaySize = ImVec2(display_w, display_h);
     nbte::Render(state);
+    if (state.fMainMenuBarQuitSelected) {
+      glfwSetWindowShouldClose(window, 1);
+    }
 
     ImGui::Render();
 

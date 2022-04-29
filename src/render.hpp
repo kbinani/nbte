@@ -42,6 +42,10 @@ static void RenderMainMenu(State &s) {
       if (MenuItem("Save", "Ctrl+S", nullptr, s.fOpened.index() != 0)) {
         s.save();
       }
+      Separator();
+      if (MenuItem("Quit")) {
+        s.fMainMenuBarQuitSelected = true;
+      }
       EndMenu();
     }
     if (BeginMenu("Find", &s.fMainMenuBarFindSelected)) {

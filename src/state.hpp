@@ -45,6 +45,7 @@ struct State {
   bool fMainMenuBarHelpSelected = false;
   bool fMainMenuBarHelpAboutOpened = false;
   bool fMainMenuBarHelpOpenSourceLicensesOpened = false;
+  bool fMainMenuBarQuitSelected = false;
 
   Format fOpenedFormat;
   std::variant<std::nullopt_t, std::shared_ptr<mcfile::nbt::CompoundTag>> fOpened = std::nullopt;
