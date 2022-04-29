@@ -327,6 +327,13 @@
 
 int main(int argc, const char * argv[])
 {
+    @autoreleasepool
+    {
+        NSApp = [NSApplication sharedApplication];
+        AppDelegate* delegate = [[AppDelegate alloc] init];
+        [[NSApplication sharedApplication] setDelegate:delegate];
+        [NSApp run];
+    }
     return NSApplicationMain(argc, argv);
 }
 
