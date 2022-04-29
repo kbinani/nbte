@@ -54,7 +54,7 @@ static void RenderMainMenu(State &s) {
       if (MenuItem("About nbte", nullptr, nullptr)) {
         s.fMainMenuBarHelpAboutOpened = true;
       }
-      if (MenuItem("Open Source Licenses", nullptr, nullptr)) {
+      if (MenuItem("Legal", nullptr, nullptr)) {
         s.fMainMenuBarHelpOpenSourceLicensesOpened = true;
       }
       EndMenu();
@@ -88,7 +88,7 @@ static void RenderAboutDialog(State &s) {
   }
   OpenPopup("About");
   SetNextWindowSize(ImVec2(512, 320));
-  if (BeginPopupModal("About", nullptr, ImGuiWindowFlags_NoSavedSettings)) {
+  if (BeginPopupModal("About", &s.fMainMenuBarHelpAboutOpened, ImGuiWindowFlags_NoSavedSettings)) {
     TextUnformatted("nbte");
     Text("Version %s", kAppVersion);
     TextUnformatted("");
@@ -98,7 +98,7 @@ static void RenderAboutDialog(State &s) {
 
 This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.)");
     TextUnformatted("");
-    if (Button("OK") || IsKeyDown(GetKeyIndex(ImGuiKey_Escape))) {
+    if (IsKeyDown(GetKeyIndex(ImGuiKey_Escape))) {
       s.fMainMenuBarHelpAboutOpened = false;
       CloseCurrentPopup();
     }
@@ -112,9 +112,9 @@ static void RenderOpenSourceLicenses(State &s) {
   if (!s.fMainMenuBarHelpOpenSourceLicensesOpened) {
     return;
   }
-  OpenPopup("Open Source Licenses");
+  OpenPopup("Legal");
   SetNextWindowSize(ImVec2(s.fDisplaySize.x * 0.5f, s.fDisplaySize.y * 0.5f));
-  if (BeginPopupModal("Open Source Licenses", nullptr, ImGuiWindowFlags_NoSavedSettings)) {
+  if (BeginPopupModal("Legal", &s.fMainMenuBarHelpOpenSourceLicensesOpened, ImGuiWindowFlags_NoSavedSettings)) {
     TextUnformatted("Dear ImGui");
     TextUnformatted("https://github.com/ocornut/imgui");
     TextUnformatted("");
@@ -133,7 +133,7 @@ static void RenderOpenSourceLicenses(State &s) {
     TextUnformatted("libminecraft-file");
     TextUnformatted("https://github.com/kbinani/libminecraft-file");
     TextUnformatted("");
-    if (Button("OK") || IsKeyDown(GetKeyIndex(ImGuiKey_Escape))) {
+    if (IsKeyDown(GetKeyIndex(ImGuiKey_Escape))) {
       s.fMainMenuBarHelpOpenSourceLicensesOpened = false;
       CloseCurrentPopup();
     }
@@ -593,20 +593,21 @@ static void CaptureShortcutKey(State &s) {
 static void Render(State &s) {
   using namespace ImGui;
 
-  ImGuiWindowFlags flags = ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove;
+  ImGuiWindowFlags flags = ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoBringToFrontOnFocus;
   Begin("main", nullptr, flags);
   SetWindowPos(ImVec2(0, 0));
   SetWindowSize(ImVec2(s.fDisplaySize.x, s.fDisplaySize.y - GetFrameHeightWithSpacing()));
 
   RenderMainMenu(s);
   RenderErrorPopup(s);
-  RenderAboutDialog(s);
-  RenderOpenSourceLicenses(s);
   RenderFilterBar(s);
 
   BeginChild("editor");
   RenderCompoundTag(s);
   EndChild();
+
+  RenderAboutDialog(s);
+  RenderOpenSourceLicenses(s);
 
   End();
 
