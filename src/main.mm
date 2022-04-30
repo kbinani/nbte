@@ -27,6 +27,8 @@
 #include "nbte32.h"
 #include "version.hpp"
 #include "string.hpp"
+#include "node.decl.hpp"
+#include "node.hpp"
 #include "state.hpp"
 #include "platform.hpp"
 #include "render-legal.hpp"

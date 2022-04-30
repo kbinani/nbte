@@ -65,6 +65,8 @@ list(APPEND nbte_files
   src/render-legal.hpp
   src/render-legal.hpp.in
   src/platform.hpp
+  src/node.decl.hpp
+  src/node.hpp
   resource/appicon.rc.in
   deps/imgui/imgui.cpp
   deps/imgui/imgui_draw.cpp
