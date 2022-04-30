@@ -185,14 +185,10 @@
 
 @interface AppDelegate : NSObject <NSApplicationDelegate>
 @property (nonatomic, strong) NSWindow *window;
+@property (strong) NSWindowController *windowController;
 @end
 
 @implementation AppDelegate
-
--(BOOL)applicationShouldTerminateAfterLastWindowClosed:(NSApplication *)sender
-{
-    return YES;
-}
 
 -(instancetype)init
 {
@@ -209,6 +205,17 @@
         [self.window becomeKeyWindow];
     }
     return self;
+}
+
+-(void)applicationDidFinishLaunching:(NSNotification *)notification
+{
+    _windowController = [[NSWindowController alloc] initWithWindowNibName:@"MainMenu"];
+    [_windowController showWindow:self.window];
+}
+
+-(BOOL)applicationShouldTerminateAfterLastWindowClosed:(NSApplication *)sender
+{
+    return YES;
 }
 
 @end

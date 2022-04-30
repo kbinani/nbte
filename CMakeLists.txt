@@ -74,6 +74,7 @@ if ("${CMAKE_SYSTEM_NAME}" STREQUAL "Darwin")
   list(APPEND nbte_files
     src/main.mm
     resource/assets.xcassets
+    resource/MainMenu.xib
     deps/imgui/backends/imgui_impl_metal.mm
     deps/imgui/backends/imgui_impl_osx.mm
     deps/nativefiledialog/src/nfd_cocoa.m)
@@ -97,6 +98,7 @@ if ("${CMAKE_SYSTEM_NAME}" STREQUAL "Darwin")
     XCODE_ATTRIBUTE_CODE_SIGN_ENTITLEMENTS "${CMAKE_CURRENT_SOURCE_DIR}/resource/codesign.entitlements"
     XCODE_ATTRIBUTE_INSTALL_PATH "$(LOCAL_APPS_DIR)")
   set_source_files_properties(resource/assets.xcassets PROPERTIES MACOSX_PACKAGE_LOCATION Resources)
+  set_source_files_properties(resource/MainMenu.xib PROPERTIES MACOSX_PACKAGE_LOCATION Resources)
 else()
   add_executable(nbte ${nbte_files})
 endif()
