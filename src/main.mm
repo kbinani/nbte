@@ -207,9 +207,6 @@
                                                     backing:NSBackingStoreBuffered
                                                       defer:NO];
         self.window.contentViewController = rootViewController;
-        [self.window orderFront:self];
-        [self.window center];
-        [self.window becomeKeyWindow];
     }
     return self;
 }
@@ -217,7 +214,11 @@
 -(void)applicationDidFinishLaunching:(NSNotification *)notification
 {
     _windowController = [[NSWindowController alloc] initWithWindowNibName:@"MainMenu"];
-    [_windowController showWindow:self.window];
+    [_windowController showWindow:self];
+
+    [self.window orderFront:self];
+    [self.window center];
+    [self.window becomeKeyWindow];
 }
 
 -(BOOL)applicationShouldTerminateAfterLastWindowClosed:(NSApplication *)sender
