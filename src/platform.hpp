@@ -33,4 +33,12 @@ static std::string DecorateModCtrl(std::string const &pair) {
 #endif
 }
 
+static std::string QuitMenuShortcut() {
+#if defined(__APPLE__)
+  return "Cmd+Q";
+#else
+  return "Alt+F4";
+#endif
+}
+
 } // namespace nbte

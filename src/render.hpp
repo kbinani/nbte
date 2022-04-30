@@ -28,7 +28,7 @@ static void RenderMainMenu(State &s) {
         s.save();
       }
       Separator();
-      if (MenuItem("Quit")) {
+      if (MenuItem("Quit", QuitMenuShortcut().c_str())) {
         s.fMainMenuBarQuitSelected = true;
       }
       EndMenu();
