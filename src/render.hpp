@@ -14,21 +14,6 @@ static void Visit(State &s,
                   std::string const &path,
                   std::string const &filter);
 
-static std::optional<std::filesystem::path> OpenFileDialog() {
-  using namespace std;
-  namespace fs = std::filesystem;
-
-  nfdchar_t *outPath = nullptr;
-  if (NFD_OpenDialog(nullptr, nullptr, &outPath) == NFD_OKAY) {
-    u8string selected;
-    selected.assign((char8_t const *)outPath);
-    free(outPath);
-    return fs::path(selected);
-  } else {
-    return nullopt;
-  }
-}
-
 static void RenderMainMenu(State &s) {
   using namespace ImGui;
 
@@ -39,7 +24,7 @@ static void RenderMainMenu(State &s) {
           s.open(*selected);
         }
       }
-      if (MenuItem("Save", "Ctrl+S", nullptr, s.fOpened.index() != 0)) {
+      if (MenuItem("Save", DecorateModCtrl("S").c_str(), nullptr, s.fOpened.index() != 0)) {
         s.save();
       }
       Separator();
@@ -49,7 +34,7 @@ static void RenderMainMenu(State &s) {
       EndMenu();
     }
     if (BeginMenu("Find", &s.fMainMenuBarFindSelected)) {
-      if (MenuItem("Filter", "Ctrl+F", nullptr)) {
+      if (MenuItem("Filter", DecorateModCtrl("F").c_str(), nullptr)) {
         s.fFilterBarOpened = true;
       }
       EndMenu();
@@ -526,7 +511,7 @@ static void RenderFilterBar(State &s) {
 
     SameLine();
     PushID("filter_panel#text");
-    if (!s.fFilterBarGotFocus || (IsKeyDown(GetKeyIndex(ImGuiKey_ModCtrl)) && IsKeyDown(GetKeyIndex(ImGuiKey_F)))) {
+    if (!s.fFilterBarGotFocus || (IsKeyDown(GetModCtrlKeyIndex()) && IsKeyDown(GetKeyIndex(ImGuiKey_F)))) {
       SetKeyboardFocusHere();
       s.fFilterBarGotFocus = true;
     }
@@ -553,7 +538,7 @@ static void RenderFilterBar(State &s) {
 static void CaptureShortcutKey(State &s) {
   using namespace ImGui;
 
-  if (IsKeyDown(GetKeyIndex(ImGuiKey_ModCtrl))) {
+  if (IsKeyDown(GetModCtrlKeyIndex())) {
     if (IsKeyDown(GetKeyIndex(ImGuiKey_F))) {
       s.fFilterBarOpened = true;
     } else if (IsKeyDown(GetKeyIndex(ImGuiKey_S)) && s.fOpened.index() != 0) {

@@ -28,6 +28,7 @@
 #include "version.hpp"
 #include "string.hpp"
 #include "state.hpp"
+#include "platform.hpp"
 #include "render-legal.hpp"
 #include "render.hpp"
 

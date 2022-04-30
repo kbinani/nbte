@@ -63,6 +63,7 @@ list(APPEND nbte_files
   src/version.hpp
   src/nbte32.h
   src/render-legal.hpp
+  src/platform.hpp
   deps/imgui/imgui.cpp
   deps/imgui/imgui_draw.cpp
   deps/imgui/imgui_tables.cpp
