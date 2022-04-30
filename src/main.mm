@@ -149,6 +149,12 @@
     [commandBuffer presentDrawable:view.currentDrawable];
     [commandBuffer commit];
     
+    NSWindow *window = [[NSApplication sharedApplication] keyWindow];
+    NSString *title = [[NSString alloc] initWithUTF8String:self->state.winowTitle().c_str()];
+    if (window && window.title != title) {
+        window.title = title;
+    }
+    
     if (state.fMainMenuBarQuitSelected) {
         [[NSApplication sharedApplication] terminate:self];
     }
