@@ -89,13 +89,12 @@ endif()
 if ("${CMAKE_SYSTEM_NAME}" STREQUAL "Darwin")
   add_executable(nbte MACOSX_BUNDLE ${nbte_files})
   set_target_properties(nbte PROPERTIES
-    MACOSX_BUNDLE_BUNDLE_NAME nbte
-    MACOSX_BUNDLE_GUI_IDENTIFIER "${nbte_product_bundle_identifier}"
-    MACOSX_BUNDLE_SHORT_VERSION_STRING "${CMAKE_PROJECT_VERSION}"
-    MACOSX_BUNDLE_LONG_VERSION_STRING "${CMAKE_PROJECT_VERSION}"
-    MACOSX_BUNDLE_COPYRIGHT "Copyright © kbinani"
+    MACOSX_BUNDLE_INFO_PLIST "${CMAKE_CURRENT_SOURCE_DIR}/resource/Info.plist"
     XCODE_ATTRIBUTE_PRODUCT_BUNDLE_IDENTIFIER "${nbte_product_bundle_identifier}"
     XCODE_ATTRIBUTE_ASSETCATALOG_COMPILER_APPICON_NAME AppIcon
+    XCODE_ATTRIBUTE_CLANG_ENABLE_OBJC_ARC NO
+    XCODE_ATTRIBUTE_ENABLE_APP_SANDBOX YES
+    XCODE_ATTRIBUTE_INSTALL_PATH "$(LOCAL_APPS_DIR)"
   )
   set_source_files_properties(resource/assets.xcassets PROPERTIES MACOSX_PACKAGE_LOCATION Resources)
   set_source_files_properties(resource/MainMenu.storyboard PROPERTIES MACOSX_PACKAGE_LOCATION Resources/MainMenu.storyboard)

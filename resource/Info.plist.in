@@ -6,31 +6,33 @@
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
-	<key>CFBundleIconFile</key>
-	<string></string>
 	<key>CFBundleIdentifier</key>
-	<string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
+	<string>${nbte_product_bundle_identifier}</string>
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleName</key>
 	<string>nbte</string>
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
+    <key>CFBundleSignature</key>
+    <string>????</string>
 	<key>CFBundleShortVersionString</key>
 	<string>${CMAKE_PROJECT_VERSION}</string>
 	<key>CFBundleVersion</key>
 	<string>${CMAKE_PROJECT_VERSION}</string>
 	<key>LSMinimumSystemVersion</key>
 	<string>$(MACOSX_DEPLOYMENT_TARGET)</string>
-	<key>NSMainStoryboardFile</key>
-	<string>MainMenu</string>
-	<key>NSPrincipalClass</key>
-	<string>NSApplication</string>
     <key>LSApplicationCategoryType</key>
 	<string>public.app-category.developer-tools</string>
     <key>ITSAppUsesNonExemptEncryption</key>
     <false/>
     <key>LSMinimumSystemVersion</key>
     <string>${nbte_macos_deployment_target}</string>
+    <key>CFBundleDisplayName</key>
+    <string>nbte</string>
+    <key>NSHumanReadableCopyright</key>
+    <string>Copyright &#169; 2022 kbinani</string>
+    <key>NSHighResolutionCapable</key>
+    <true/>
 </dict>
 </plist>
