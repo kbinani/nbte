@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.16)
-project(nbte VERSION 0.1.0)
+project(nbte VERSION 0.1.1)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -63,7 +63,9 @@ list(APPEND nbte_files
   src/version.hpp
   src/nbte32.h
   src/render-legal.hpp
+  src/render-legal.hpp.in
   src/platform.hpp
+  resource/appicon.rc.in
   deps/imgui/imgui.cpp
   deps/imgui/imgui_draw.cpp
   deps/imgui/imgui_tables.cpp
