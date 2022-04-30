@@ -95,10 +95,8 @@ if ("${CMAKE_SYSTEM_NAME}" STREQUAL "Darwin")
     XCODE_ATTRIBUTE_CLANG_ENABLE_OBJC_ARC NO
     XCODE_ATTRIBUTE_ENABLE_APP_SANDBOX YES
     XCODE_ATTRIBUTE_CODE_SIGN_ENTITLEMENTS "${CMAKE_CURRENT_SOURCE_DIR}/resource/codesign.entitlements"
-    XCODE_ATTRIBUTE_INSTALL_PATH "$(LOCAL_APPS_DIR)"
-  )
+    XCODE_ATTRIBUTE_INSTALL_PATH "$(LOCAL_APPS_DIR)")
   set_source_files_properties(resource/assets.xcassets PROPERTIES MACOSX_PACKAGE_LOCATION Resources)
-  set_source_files_properties(resource/MainMenu.storyboard PROPERTIES MACOSX_PACKAGE_LOCATION Resources/MainMenu.storyboard)
 else()
   add_executable(nbte ${nbte_files})
 endif()
