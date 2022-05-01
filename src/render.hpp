@@ -535,6 +535,12 @@ static void Visit(State &s,
     Indent(GetTreeNodeToLabelSpacing());
     PushID(path + "/" + unsupported->filename().string());
     TextDisabled("%s", unsupported->filename().string().c_str());
+    auto pos = GetItemRectMin();
+    auto size = GetItemRectSize();
+    auto mouse = GetMousePos();
+    if (IsMouseHoveringRect(GetItemRectMin(), GetItemRectMax())) {
+      SetTooltip("Unsupported format");
+    }
     PopID();
     Unindent(GetTreeNodeToLabelSpacing());
   }
