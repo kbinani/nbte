@@ -35,7 +35,7 @@ struct State {
   void open(Path const &selected) {
     fError.clear();
 
-    if (auto node = Node::OpenCompound(selected); node) {
+    if (auto node = Node::OpenFile(selected); node) {
       fOpened = node;
       fOpenedPath = selected;
       return;

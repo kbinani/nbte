@@ -3,11 +3,26 @@
 namespace nbte {
 
 using Path = std::filesystem::path;
+class Node;
 
 class Region {
+public:
+  Region(int x, int z) : fX(x), fZ(z) {}
+
+  int fX;
+  int fZ;
+  std::vector<std::shared_ptr<Node>> fValue;
 };
 
-class Node;
+class UnopenedChunk {
+public:
+  UnopenedChunk(int cx, int cz, int localX, int localZ) : fChunkX(cx), fChunkZ(cz), fLocalChunkX(localX), fLocalChunkZ(localZ) {}
+
+  int fChunkX;
+  int fChunkZ;
+  int fLocalChunkX;
+  int fLocalChunkZ;
+};
 
 class DirectoryContents {
 public:
@@ -41,16 +56,18 @@ public:
     TypeFileUnopened,
     TypeDirectoryUnopened,
     TypeUnsupportedFile,
-    TypeRegionJava,
-    TypeChunkJava,
+    TypeRegion,
+    TypeUnopenedChunk,
+    TypeChunk,
     TypeCompound,
   };
   using Value = std::variant<DirectoryContents,                  // DirectoryContents
                              Path,                               // FileUnopened
                              Path,                               // DirectoryUnopened
                              Path,                               // UnsupportedFile
-                             std::shared_ptr<Region>,            // Region
-                             std::shared_ptr<mcfile::je::Chunk>, // ChunkJava
+                             Region,                             // Region
+                             UnopenedChunk,                      // UnopenedChunk
+                             std::shared_ptr<mcfile::je::Chunk>, // Chunk
                              Compound                            // Compound
                              >;
 
@@ -63,12 +80,14 @@ public:
   Path const *directoryUnopened() const;
   Compound const *compound() const;
   Path const *unsupportedFile() const;
+  Region const *region() const;
+  UnopenedChunk const *unopenedChunk() const;
 
   std::string description() const;
   bool hasParent() const;
 
   static std::shared_ptr<Node> OpenDirectory(Path const &path);
-  static std::shared_ptr<Node> OpenCompound(Path const &path);
+  static std::shared_ptr<Node> OpenFile(Path const &path);
 
   static std::shared_ptr<Node> DirectoryUnopened(Path const &path, std::shared_ptr<Node> const &parent);
   static std::shared_ptr<Node> FileUnopened(Path const &path, std::shared_ptr<Node> const &parent);

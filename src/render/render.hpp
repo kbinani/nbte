@@ -514,6 +514,36 @@ static void Visit(State &s,
       }
     }
     PopID();
+  } else if (auto region = node->region(); region) {
+    string name = mcfile::je::Region::GetDefaultRegionFileName(region->fX, region->fZ);
+    PushID(path + "/" + name);
+    if (node->hasParent()) {
+      SetNextItemOpen(true, ImGuiCond_Once);
+      if (TreeNodeEx(name.c_str())) {
+        for (auto const &it : region->fValue) {
+          Visit(s, it, path + "/" + name, filter);
+        }
+        TreePop();
+      }
+    } else {
+      for (auto const &it : region->fValue) {
+        Visit(s, it, path + "/" + name, filter);
+      }
+    }
+    PopID();
+  } else if (auto unopenedChunk = node->unopenedChunk(); unopenedChunk) {
+    Indent(GetTreeNodeToLabelSpacing());
+    string label = "chunk " + to_string(unopenedChunk->fChunkX) + " " + to_string(unopenedChunk->fChunkZ) + " [" + to_string(unopenedChunk->fLocalChunkX) + " " + to_string(unopenedChunk->fLocalChunkZ) + " in region]";
+    PushID(path + "/" + label);
+    PushStyleColor(ImGuiCol_Button, ImVec4(0, 0, 0, 0));
+    PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(0, 0));
+    if (Button(label.c_str())) {
+      node->open();
+    }
+    PopStyleVar();
+    PopStyleColor();
+    PopID();
+    Unindent(GetTreeNodeToLabelSpacing());
   } else if (auto unopenedFile = node->fileUnopened(); unopenedFile) {
     Indent(GetTreeNodeToLabelSpacing());
     PushID(path + "/" + unopenedFile->filename().string());

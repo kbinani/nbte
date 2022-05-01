@@ -25,6 +25,13 @@ std::shared_ptr<Node> Node::OpenDirectory(Path const &path) {
   return ret;
 }
 
+std::shared_ptr<Node> Node::OpenFile(Path const &path) {
+  using namespace std;
+  auto ret = FileUnopened(path, nullptr);
+  ret->open();
+  return ret;
+}
+
 std::shared_ptr<Node> Node::DirectoryUnopened(Path const &path, std::shared_ptr<Node> const &parent) {
   using namespace std;
   return shared_ptr<Node>(new Node(Value(in_place_index<TypeDirectoryUnopened>, path), parent));
@@ -70,17 +77,6 @@ static std::shared_ptr<mcfile::nbt::CompoundTag> ReadCompound(Path const &path, 
   return nullptr;
 }
 
-std::shared_ptr<Node> Node::OpenCompound(Path const &path) {
-  using namespace std;
-  static std::set<mcfile::Endian> const sEndians = {mcfile::Endian::Big, mcfile::Endian::Little};
-
-  Compound::Format format;
-  if (auto tag = ReadCompound(path, &format); tag) {
-    return shared_ptr<Node>(new Node(Value(in_place_index<TypeCompound>, Compound(path.filename().string(), tag, format)), nullptr));
-  }
-  return nullptr;
-}
-
 Node::Node(Node::Value &&value, std::shared_ptr<Node> parent) : fValue(value), fParent(parent) {}
 
 DirectoryContents const *Node::directoryContents() const {
@@ -118,6 +114,20 @@ Path const *Node::unsupportedFile() const {
   return &std::get<TypeUnsupportedFile>(fValue);
 }
 
+Region const *Node::region() const {
+  if (fValue.index() != TypeRegion) {
+    return nullptr;
+  }
+  return &std::get<TypeRegion>(fValue);
+}
+
+UnopenedChunk const *Node::unopenedChunk() const {
+  if (fValue.index() != TypeUnopenedChunk) {
+    return nullptr;
+  }
+  return &std::get<TypeUnopenedChunk>(fValue);
+}
+
 std::string Node::description() const {
   if (auto compound = this->compound(); compound) {
     switch (compound->fFormat) {
@@ -142,6 +152,39 @@ bool Node::hasParent() const {
   return !!fParent;
 }
 
+static std::optional<Region> ReadRegion(Path const &path, std::shared_ptr<Node> const &parent) {
+  using namespace std;
+
+  auto pos = mcfile::je::Region::RegionXZFromFile(path);
+  if (!pos) {
+    return nullopt;
+  }
+
+  Region r(pos->fX, pos->fZ);
+
+  auto stream = make_shared<mcfile::stream::FileInputStream>(path);
+  mcfile::stream::InputStreamReader reader(stream, mcfile::Endian::Big);
+  for (int z = 0; z < 32; z++) {
+    for (int x = 0; x < 32; x++) {
+      uint64_t const index = (x & 31) + (z & 31) * 32;
+      if (!reader.seek(index * 4)) {
+        return nullopt;
+      }
+      uint32_t loc = 0;
+      if (!reader.read(&loc)) {
+        return nullopt;
+      }
+      if (loc == 0) {
+        continue;
+      }
+      UnopenedChunk uc(pos->fX * 32 + x, pos->fZ * 32 + z, x, z);
+      auto node = shared_ptr<Node>(new Node(Node::Value(in_place_index<Node::TypeUnopenedChunk>, uc), parent));
+      r.fValue.push_back(node);
+    }
+  }
+  return r;
+}
+
 void Node::open() {
   if (auto unopened = directoryUnopened(); unopened) {
     DirectoryContents contents(*unopened, shared_from_this());
@@ -154,6 +197,12 @@ void Node::open() {
       fValue = Value(std::in_place_index<TypeCompound>, Compound(unopened->filename().string(), tag, format));
       return;
     }
+
+    if (auto region = ReadRegion(*unopened, shared_from_this()); region) {
+      fValue = Value(std::in_place_index<TypeRegion>, *region);
+      return;
+    }
+
     fValue = Value(std::in_place_index<TypeUnsupportedFile>, *unopened);
     return;
   }
