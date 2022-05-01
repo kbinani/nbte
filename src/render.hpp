@@ -4,15 +4,15 @@ namespace nbte {
 
 constexpr float kIndent = 6.0f;
 
-static void VisitCompoundTag(State &s,
+static void VisitNbtCompound(State &s,
                              mcfile::nbt::CompoundTag const &tag,
                              std::string const &path,
                              std::string const &filter);
-static void Visit(State &s,
-                  std::string const &name,
-                  std::shared_ptr<mcfile::nbt::Tag> const &tag,
-                  std::string const &path,
-                  std::string const &filter);
+static void VisitNbt(State &s,
+                     std::string const &name,
+                     std::shared_ptr<mcfile::nbt::Tag> const &node,
+                     std::string const &path,
+                     std::string const &filter);
 
 static void RenderMainMenu(State &s) {
   using namespace ImGui;
@@ -222,11 +222,11 @@ static void PopScalarInput() {
   PopItemWidth();
 }
 
-static void VisitScalar(State &s,
-                        std::string const &name,
-                        std::shared_ptr<mcfile::nbt::Tag> const &tag,
-                        std::string const &path,
-                        std::string const &filter) {
+static void VisitNbtScalar(State &s,
+                           std::string const &name,
+                           std::shared_ptr<mcfile::nbt::Tag> const &tag,
+                           std::string const &path,
+                           std::string const &filter) {
   using namespace std;
   using namespace ImGui;
   using namespace mcfile::nbt;
@@ -282,20 +282,17 @@ static void VisitScalar(State &s,
   PopScalarInput();
 }
 
-static void VisitNonScalar(State &s,
-                           std::string const &name,
-                           std::shared_ptr<mcfile::nbt::Tag> const &tag,
-                           std::string const &path,
-                           std::string const &filterTerm) {
+static void VisitNbtNonScalar(State &s,
+                              std::string const &name,
+                              std::shared_ptr<mcfile::nbt::Tag> const &tag,
+                              std::string const &path,
+                              std::string const &filterTerm) {
   using namespace std;
   using namespace ImGui;
   using namespace mcfile::nbt;
 
   string filter = filterTerm;
   bool matchedNode = !filter.empty() && (s.fFilterCaseSensitive ? name : ToLower(name)).find(filter) != string::npos;
-  if (name == "Player") {
-    int a = 0;
-  }
   if (matchedNode) {
     filter = "";
   }
@@ -361,7 +358,7 @@ static void VisitNonScalar(State &s,
     switch (tag->type()) {
     case Tag::Type::Compound:
       if (auto v = dynamic_pointer_cast<CompoundTag>(tag); v) {
-        VisitCompoundTag(s, *v, nextPath, filter);
+        VisitNbtCompound(s, *v, nextPath, filter);
       }
       break;
     case Tag::Type::List:
@@ -369,7 +366,7 @@ static void VisitNonScalar(State &s,
         for (size_t i = 0; i < v->fValue.size(); i++) {
           auto const &it = v->fValue[i];
           auto label = "#" + to_string(i);
-          Visit(s, label, it, nextPath, filter);
+          VisitNbt(s, label, it, nextPath, filter);
         }
       }
       break;
@@ -411,11 +408,11 @@ static void VisitNonScalar(State &s,
   PopID();
 }
 
-static void Visit(State &s,
-                  std::string const &name,
-                  std::shared_ptr<mcfile::nbt::Tag> const &tag,
-                  std::string const &path,
-                  std::string const &filter) {
+static void VisitNbt(State &s,
+                     std::string const &name,
+                     std::shared_ptr<mcfile::nbt::Tag> const &tag,
+                     std::string const &path,
+                     std::string const &filter) {
   using namespace mcfile::nbt;
 
   switch (tag->type()) {
@@ -424,19 +421,20 @@ static void Visit(State &s,
   case Tag::Type::ByteArray:
   case Tag::Type::IntArray:
   case Tag::Type::LongArray:
-    VisitNonScalar(s, name, tag, path, filter);
+    VisitNbtNonScalar(s, name, tag, path, filter);
     break;
   default:
-    VisitScalar(s, name, tag, path, filter);
+    VisitNbtScalar(s, name, tag, path, filter);
     break;
   }
 }
 
-static void VisitCompoundTag(State &s,
+static void VisitNbtCompound(State &s,
                              mcfile::nbt::CompoundTag const &tag,
                              std::string const &path,
                              std::string const &filter) {
   using namespace std;
+  using namespace mcfile::nbt;
 
   for (auto &it : tag) {
     auto const &name = it.first;
@@ -454,8 +452,11 @@ static void VisitCompoundTag(State &s,
         }
       }
     }
-    Visit(s, name, it.second, path, filter);
+    VisitNbt(s, name, it.second, path, filter);
   }
+}
+
+static void VisitDirectoryContents(State &s, DirectoryContents const *contents) {
 }
 
 static void RenderNode(State &s) {
@@ -463,7 +464,9 @@ static void RenderNode(State &s) {
     return;
   }
   if (auto compound = s.fOpened->compound(); compound) {
-    VisitCompoundTag(s, *compound->fTag, "", s.filterTerm());
+    VisitNbtCompound(s, *compound->fTag, "", s.filterTerm());
+  } else if (auto contents = s.fOpened->directoryContents(); contents) {
+    VisitDirectoryContents(s, contents);
   }
 }
 

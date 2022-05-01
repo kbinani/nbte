@@ -46,26 +46,26 @@ std::shared_ptr<Node> Node::OpenCompound(Path const &path) {
 
   if (auto tag = mcfile::nbt::CompoundTag::Read(path, mcfile::Endian::Little); tag) {
     return shared_ptr<Node>(new Node(TypeCompound,
-                                     Value(in_place_index<TypeCompound>, Compound(tag, Compound::Format::CompoundTagRawLittleEndian)),
+                                     Value(in_place_index<TypeCompound>, Compound(tag, Compound::Format::RawLittleEndian)),
                                      nullptr));
   } else if (auto tag = mcfile::nbt::CompoundTag::Read(path, mcfile::Endian::Big); tag) {
     return shared_ptr<Node>(new Node(TypeCompound,
-                                     Value(in_place_index<TypeCompound>, Compound(tag, Compound::Format::CompoundTagRawBigEndian)),
+                                     Value(in_place_index<TypeCompound>, Compound(tag, Compound::Format::RawBigEndian)),
                                      nullptr));
   } else if (auto tag = mcfile::nbt::CompoundTag::ReadCompressed(path, mcfile::Endian::Little); tag) {
     return shared_ptr<Node>(new Node(TypeCompound,
-                                     Value(in_place_index<TypeCompound>, Compound(tag, Compound::Format::CompoundTagDeflatedLittleEndian)),
+                                     Value(in_place_index<TypeCompound>, Compound(tag, Compound::Format::DeflatedLittleEndian)),
                                      nullptr));
   } else if (auto tag = mcfile::nbt::CompoundTag::ReadCompressed(path, mcfile::Endian::Big); tag) {
     return shared_ptr<Node>(new Node(TypeCompound,
-                                     Value(in_place_index<TypeCompound>, Compound(tag, Compound::Format::CompoundTagDeflatedBigEndian)),
+                                     Value(in_place_index<TypeCompound>, Compound(tag, Compound::Format::DeflatedBigEndian)),
                                      nullptr));
   }
   {
     auto stream = std::make_shared<mcfile::stream::GzFileInputStream>(path);
     if (auto tag = mcfile::nbt::CompoundTag::Read(stream, mcfile::Endian::Big); tag) {
       return shared_ptr<Node>(new Node(TypeCompound,
-                                       Value(in_place_index<TypeCompound>, Compound(tag, Compound::Format::CompoundTagGzippedBigEndian)),
+                                       Value(in_place_index<TypeCompound>, Compound(tag, Compound::Format::GzippedBigEndian)),
                                        nullptr));
     }
   }
@@ -73,7 +73,7 @@ std::shared_ptr<Node> Node::OpenCompound(Path const &path) {
     auto stream = std::make_shared<mcfile::stream::GzFileInputStream>(path);
     if (auto tag = mcfile::nbt::CompoundTag::Read(stream, mcfile::Endian::Little); tag) {
       return shared_ptr<Node>(new Node(TypeCompound,
-                                       Value(in_place_index<TypeCompound>, Compound(tag, Compound::Format::CompoundTagGzippedLittleEndian)),
+                                       Value(in_place_index<TypeCompound>, Compound(tag, Compound::Format::GzippedLittleEndian)),
                                        nullptr));
     }
   }
@@ -113,17 +113,17 @@ Compound const *Node::compound() const {
 std::string Node::description() const {
   if (auto compound = this->compound(); compound) {
     switch (compound->fFormat) {
-    case Compound::Format::CompoundTagRawLittleEndian:
+    case Compound::Format::RawLittleEndian:
       return "Raw NBT (LittleEndian)";
-    case Compound::Format::CompoundTagRawBigEndian:
+    case Compound::Format::RawBigEndian:
       return "Raw NBT (BigEndian)";
-    case Compound::Format::CompoundTagDeflatedLittleEndian:
+    case Compound::Format::DeflatedLittleEndian:
       return "Deflated NBT (LittleEndian)";
-    case Compound::Format::CompoundTagDeflatedBigEndian:
+    case Compound::Format::DeflatedBigEndian:
       return "Deflated NBT (BigEndian)";
-    case Compound::Format::CompoundTagGzippedBigEndian:
+    case Compound::Format::GzippedBigEndian:
       return "Gzipped NBT (BigEndian)";
-    case Compound::Format::CompoundTagGzippedLittleEndian:
+    case Compound::Format::GzippedLittleEndian:
       return "Gzipped NBT (LittleEndian)";
     }
   }

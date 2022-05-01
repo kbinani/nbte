@@ -18,12 +18,12 @@ public:
 class Compound {
 public:
   enum class Format {
-    CompoundTagRawLittleEndian,
-    CompoundTagRawBigEndian,
-    CompoundTagDeflatedLittleEndian,
-    CompoundTagDeflatedBigEndian,
-    CompoundTagGzippedLittleEndian,
-    CompoundTagGzippedBigEndian,
+    RawLittleEndian,
+    RawBigEndian,
+    DeflatedLittleEndian,
+    DeflatedBigEndian,
+    GzippedLittleEndian,
+    GzippedBigEndian,
   };
 
   Compound(std::shared_ptr<mcfile::nbt::CompoundTag> const &tag, Format format) : fTag(tag), fFormat(format) {}
