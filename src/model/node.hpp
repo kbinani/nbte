@@ -7,11 +7,15 @@ class Node;
 
 class Region {
 public:
-  Region(int x, int z) : fX(x), fZ(z) {}
+  Region(hwm::task_queue &queue, int x, int z, Path const &path, std::shared_ptr<Node> const &parent);
+
+  bool wait();
+
+  using ValueType = std::vector<std::shared_ptr<Node>>;
 
   int fX;
   int fZ;
-  std::vector<std::shared_ptr<Node>> fValue;
+  std::variant<ValueType, std::shared_ptr<std::future<std::optional<ValueType>>>> fValue;
 };
 
 class UnopenedChunk {
@@ -81,21 +85,21 @@ public:
 
   Node(Value &&value, std::shared_ptr<Node> parent);
 
-  void open();
+  void open(hwm::task_queue &queue);
 
   DirectoryContents const *directoryContents() const;
   Path const *fileUnopened() const;
   Path const *directoryUnopened() const;
   Compound const *compound() const;
   Path const *unsupportedFile() const;
-  Region const *region() const;
+  Region *region();
   UnopenedChunk const *unopenedChunk() const;
 
   std::string description() const;
   bool hasParent() const;
 
-  static std::shared_ptr<Node> OpenDirectory(Path const &path);
-  static std::shared_ptr<Node> OpenFile(Path const &path);
+  static std::shared_ptr<Node> OpenDirectory(Path const &path, hwm::task_queue &queue);
+  static std::shared_ptr<Node> OpenFile(Path const &path, hwm::task_queue &queue);
 
   static std::shared_ptr<Node> DirectoryUnopened(Path const &path, std::shared_ptr<Node> const &parent);
   static std::shared_ptr<Node> FileUnopened(Path const &path, std::shared_ptr<Node> const &parent);

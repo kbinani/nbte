@@ -115,7 +115,8 @@ target_include_directories(nbte
     deps/imgui/misc/cpp
     deps/glfw/include
     deps/nativefiledialog/src/include
-    deps/stb)
+    deps/stb
+    deps/hwm.task)
 
 list(APPEND nbte_link_libraries
   mcfile)

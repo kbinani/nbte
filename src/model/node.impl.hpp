@@ -18,17 +18,17 @@ DirectoryContents::DirectoryContents(Path const &dir, std::shared_ptr<Node> pare
   }
 }
 
-std::shared_ptr<Node> Node::OpenDirectory(Path const &path) {
+std::shared_ptr<Node> Node::OpenDirectory(Path const &path, hwm::task_queue &queue) {
   using namespace std;
   auto ret = DirectoryUnopened(path, nullptr);
-  ret->open();
+  ret->open(queue);
   return ret;
 }
 
-std::shared_ptr<Node> Node::OpenFile(Path const &path) {
+std::shared_ptr<Node> Node::OpenFile(Path const &path, hwm::task_queue &queue) {
   using namespace std;
   auto ret = FileUnopened(path, nullptr);
-  ret->open();
+  ret->open(queue);
   return ret;
 }
 
@@ -114,7 +114,7 @@ Path const *Node::unsupportedFile() const {
   return &std::get<TypeUnsupportedFile>(fValue);
 }
 
-Region const *Node::region() const {
+Region *Node::region() {
   if (fValue.index() != TypeRegion) {
     return nullptr;
   }
@@ -152,15 +152,10 @@ bool Node::hasParent() const {
   return !!fParent;
 }
 
-static std::optional<Region> ReadRegion(Path const &path, std::shared_ptr<Node> const &parent) {
+static std::optional<Region::ValueType> ReadRegion(int regionX, int regionZ, Path path, std::shared_ptr<Node> parent) {
   using namespace std;
 
-  auto pos = mcfile::je::Region::RegionXZFromFile(path);
-  if (!pos) {
-    return nullopt;
-  }
-
-  Region r(pos->fX, pos->fZ);
+  Region::ValueType ret;
 
   constexpr uint64_t kSectorSize = 4096;
 
@@ -206,15 +201,39 @@ static std::optional<Region> ReadRegion(Path const &path, std::shared_ptr<Node> 
         // chunk not saved yet
         continue;
       }
-      UnopenedChunk uc(path, sectorOffset * kSectorSize, chunkSize, pos->fX * 32 + x, pos->fZ * 32 + z, x, z);
+      UnopenedChunk uc(path, sectorOffset * kSectorSize, chunkSize, regionX * 32 + x, regionZ * 32 + z, x, z);
       auto node = shared_ptr<Node>(new Node(Node::Value(in_place_index<Node::TypeUnopenedChunk>, uc), parent));
-      r.fValue.push_back(node);
+      ret.push_back(node);
     }
   }
-  return r;
+
+  return ret;
 }
 
-void Node::open() {
+Region::Region(hwm::task_queue &queue, int x, int z, Path const &path, std::shared_ptr<Node> const &parent) : fX(x), fZ(z) {
+  fValue = std::make_shared<std::future<std::optional<ValueType>>>(queue.enqueue(ReadRegion, x, z, path, parent));
+}
+
+bool Region::wait() {
+  using namespace std;
+  if (fValue.index() == 0) {
+    return true;
+  }
+  shared_ptr<future<optional<ValueType>>> future = get<1>(fValue);
+  auto state = future->wait_for(chrono::seconds(0));
+  if (state != future_status::ready) {
+    return false;
+  }
+  if (auto v = future->get(); v) {
+    fValue = *v;
+  } else {
+    fValue = ValueType();
+  }
+  future.reset();
+  return true;
+}
+
+void Node::open(hwm::task_queue &queue) {
   using namespace std;
 
   if (auto unopened = directoryUnopened(); unopened) {
@@ -229,8 +248,8 @@ void Node::open() {
       return;
     }
 
-    if (auto region = ReadRegion(*unopened, shared_from_this()); region) {
-      fValue = Value(std::in_place_index<TypeRegion>, *region);
+    if (auto pos = mcfile::je::Region::RegionXZFromFile(*unopened); pos) {
+      fValue = Value(std::in_place_index<TypeRegion>, Region(queue, pos->fX, pos->fZ, *unopened, shared_from_this()));
       return;
     }
 

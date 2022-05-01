@@ -19,6 +19,7 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
 
+#include <hwm/task/task_queue.hpp>
 #include <minecraft-file.hpp>
 #include <nfd.h>
 #include <variant>

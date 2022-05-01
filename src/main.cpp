@@ -20,6 +20,7 @@
 #include <windows.h>
 #include <shlobj_core.h>
 
+#include <hwm/task/task_queue.hpp>
 #include <minecraft-file.hpp>
 #include <nfd.h>
 #include <variant>

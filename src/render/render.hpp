@@ -520,16 +520,29 @@ static void Visit(State &s,
     string name = mcfile::je::Region::GetDefaultRegionFileName(region->fX, region->fZ);
     PushID(path + "/" + name);
     if (node->hasParent()) {
-      SetNextItemOpen(true, ImGuiCond_Once);
+      bool ready = region->wait();
+      SetNextItemOpen(true, ready ? ImGuiCond_Once : ImGuiCond_Always);
       if (TreeNodeEx(name.c_str())) {
-        for (auto const &it : region->fValue) {
-          Visit(s, it, path + "/" + name, filter);
+        if (ready) {
+          for (auto const &it : std::get<0>(region->fValue)) {
+            Visit(s, it, path + "/" + name, filter);
+          }
+        } else {
+          Indent(GetTreeNodeToLabelSpacing());
+          TextUnformatted("loading...");
+          Unindent(GetTreeNodeToLabelSpacing());
         }
         TreePop();
       }
     } else {
-      for (auto const &it : region->fValue) {
-        Visit(s, it, path + "/" + name, filter);
+      if (region->wait()) {
+        for (auto const &it : std::get<0>(region->fValue)) {
+          Visit(s, it, path + "/" + name, filter);
+        }
+      } else {
+        Indent(GetTreeNodeToLabelSpacing());
+        TextUnformatted("loading...");
+        Unindent(GetTreeNodeToLabelSpacing());
       }
     }
     PopID();
@@ -540,7 +553,7 @@ static void Visit(State &s,
     PushStyleColor(ImGuiCol_Button, ImVec4(0, 0, 0, 0));
     PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(0, 0));
     if (Button(name.c_str())) {
-      node->open();
+      node->open(*s.fPool);
     }
     PopStyleVar();
     PopStyleColor();
@@ -552,7 +565,7 @@ static void Visit(State &s,
     PushStyleColor(ImGuiCol_Button, ImVec4(0, 0, 0, 0));
     PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(0, 0));
     if (Button(unopenedFile->filename().string().c_str())) {
-      node->open();
+      node->open(*s.fPool);
     }
     PopStyleVar();
     PopStyleColor();
@@ -561,7 +574,7 @@ static void Visit(State &s,
   } else if (auto unopenedDirectory = node->directoryUnopened(); unopenedDirectory) {
     PushID(path + "/" + unopenedDirectory->filename().string());
     if (TreeNodeEx(unopenedDirectory->filename().string().c_str())) {
-      node->open();
+      node->open(*s.fPool);
       Indent(GetTreeNodeToLabelSpacing());
       TextUnformatted("opening...");
       Unindent(GetTreeNodeToLabelSpacing());

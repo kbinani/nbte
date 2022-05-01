@@ -32,10 +32,14 @@ struct State {
 
   std::optional<Path> fMinecraftSaveDirectory;
 
+  std::unique_ptr<hwm::task_queue> fPool;
+
+  State() : fPool(new hwm::task_queue(std::thread::hardware_concurrency())) {}
+
   void open(Path const &selected) {
     fError.clear();
 
-    if (auto node = Node::OpenFile(selected); node) {
+    if (auto node = Node::OpenFile(selected, *fPool); node) {
       fOpened = node;
       fOpenedPath = selected;
       return;
@@ -45,7 +49,7 @@ struct State {
 
   void openDirectory(Path const &path) {
     fError.clear();
-    if (auto node = Node::OpenDirectory(path); node) {
+    if (auto node = Node::OpenDirectory(path, *fPool); node) {
       fOpened = node;
       fOpenedPath = path;
       return;
