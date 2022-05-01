@@ -15,6 +15,23 @@ public:
   std::vector<std::shared_ptr<Node>> fValue;
 };
 
+class Compound {
+public:
+  enum class Format {
+    CompoundTagRawLittleEndian,
+    CompoundTagRawBigEndian,
+    CompoundTagDeflatedLittleEndian,
+    CompoundTagDeflatedBigEndian,
+    CompoundTagGzippedLittleEndian,
+    CompoundTagGzippedBigEndian,
+  };
+
+  Compound(std::shared_ptr<mcfile::nbt::CompoundTag> const &tag, Format format) : fTag(tag), fFormat(format) {}
+
+  std::shared_ptr<mcfile::nbt::CompoundTag> fTag;
+  Format fFormat;
+};
+
 class Node : std::enable_shared_from_this<Node> {
 public:
   enum Type : int {
@@ -26,24 +43,31 @@ public:
     TypeChunkJava,
     TypeCompound,
   };
-  using Value = std::variant<DirectoryContents,                        // DirectoryContents
-                             Path,                                     // FileUnopened
-                             Path,                                     // DirectoryUnopened
-                             Path,                                     // UnsupportedFile
-                             std::shared_ptr<Region>,                  // Region
-                             std::shared_ptr<mcfile::je::Chunk>,       // ChunkJava
-                             std::shared_ptr<mcfile::nbt::CompoundTag> // Compound
+  using Value = std::variant<DirectoryContents,                  // DirectoryContents
+                             Path,                               // FileUnopened
+                             Path,                               // DirectoryUnopened
+                             Path,                               // UnsupportedFile
+                             std::shared_ptr<Region>,            // Region
+                             std::shared_ptr<mcfile::je::Chunk>, // ChunkJava
+                             Compound                            // Compound
                              >;
 
-  Type const fType;
-
   Node(Type type, Value &&value, std::shared_ptr<Node> parent);
+
+  DirectoryContents const *directoryContents() const;
+  Path const *fileUnopened() const;
+  Path const *directoryUnopened() const;
+  Compound const *compound() const;
+
+  std::string description() const;
 
   static std::shared_ptr<Node> OpenFolder(Path const &path);
   static std::shared_ptr<Node> DirectoryUnopened(Path const &path, std::shared_ptr<Node> const &parent);
   static std::shared_ptr<Node> FileUnopened(Path const &path, std::shared_ptr<Node> const &parent);
+  static std::shared_ptr<Node> OpenCompound(Path const &path);
 
 private:
+  Type const fType;
   Value fValue;
   std::shared_ptr<Node> const fParent;
 };

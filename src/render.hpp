@@ -24,7 +24,7 @@ static void RenderMainMenu(State &s) {
           s.open(*selected);
         }
       }
-      if (MenuItem("Save", DecorateModCtrl("S").c_str(), nullptr, s.fOpened.index() != 0)) {
+      if (MenuItem("Save", DecorateModCtrl("S").c_str(), nullptr, !!s.fOpened)) {
         s.save();
       }
       Separator();
@@ -458,16 +458,13 @@ static void VisitCompoundTag(State &s,
   }
 }
 
-static void RenderCompoundTag(State &s) {
-  if (s.fOpened.index() != 1) {
+static void RenderNode(State &s) {
+  if (!s.fOpened) {
     return;
   }
-  std::shared_ptr<mcfile::nbt::CompoundTag> const &tag = get<1>(s.fOpened);
-  if (!tag) {
-    return;
+  if (auto compound = s.fOpened->compound(); compound) {
+    VisitCompoundTag(s, *compound->fTag, "", s.filterTerm());
   }
-
-  VisitCompoundTag(s, *tag, "", s.filterTerm());
 }
 
 static void RenderFooter(State &s) {
@@ -479,9 +476,9 @@ static void RenderFooter(State &s) {
   SetWindowPos(ImVec2(0, s.fDisplaySize.y - frameHeight));
   SetWindowSize(ImVec2(s.fDisplaySize.x, frameHeight));
 
-  if (!s.fOpenedPath.empty()) {
+  if (s.fOpened && !s.fOpenedPath.empty()) {
     PushItemWidth(-FLT_EPSILON);
-    auto formatDescription = TypeDescription(s.fOpenedFormat);
+    auto formatDescription = s.fOpened->description();
     Text("Path: %s, Format: %s", s.fOpenedPath.u8string().c_str(), formatDescription.c_str());
     PopItemWidth();
   }
@@ -541,7 +538,7 @@ static void CaptureShortcutKey(State &s) {
   if (IsKeyDown(GetModCtrlKeyIndex())) {
     if (IsKeyDown(GetKeyIndex(ImGuiKey_F))) {
       s.fFilterBarOpened = true;
-    } else if (IsKeyDown(GetKeyIndex(ImGuiKey_S)) && s.fOpened.index() != 0) {
+    } else if (IsKeyDown(GetKeyIndex(ImGuiKey_S)) && s.fOpened) {
       s.save();
     }
   }
@@ -560,7 +557,7 @@ static void Render(State &s) {
   RenderFilterBar(s);
 
   BeginChild("editor");
-  RenderCompoundTag(s);
+  RenderNode(s);
   EndChild();
 
   RenderAboutDialog(s);

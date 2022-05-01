@@ -40,6 +40,94 @@ std::shared_ptr<Node> Node::FileUnopened(Path const &path, std::shared_ptr<Node>
                                    parent));
 }
 
+std::shared_ptr<Node> Node::OpenCompound(Path const &path) {
+  using namespace std;
+  static std::set<mcfile::Endian> const sEndians = {mcfile::Endian::Big, mcfile::Endian::Little};
+
+  if (auto tag = mcfile::nbt::CompoundTag::Read(path, mcfile::Endian::Little); tag) {
+    return shared_ptr<Node>(new Node(TypeCompound,
+                                     Value(in_place_index<TypeCompound>, Compound(tag, Compound::Format::CompoundTagRawLittleEndian)),
+                                     nullptr));
+  } else if (auto tag = mcfile::nbt::CompoundTag::Read(path, mcfile::Endian::Big); tag) {
+    return shared_ptr<Node>(new Node(TypeCompound,
+                                     Value(in_place_index<TypeCompound>, Compound(tag, Compound::Format::CompoundTagRawBigEndian)),
+                                     nullptr));
+  } else if (auto tag = mcfile::nbt::CompoundTag::ReadCompressed(path, mcfile::Endian::Little); tag) {
+    return shared_ptr<Node>(new Node(TypeCompound,
+                                     Value(in_place_index<TypeCompound>, Compound(tag, Compound::Format::CompoundTagDeflatedLittleEndian)),
+                                     nullptr));
+  } else if (auto tag = mcfile::nbt::CompoundTag::ReadCompressed(path, mcfile::Endian::Big); tag) {
+    return shared_ptr<Node>(new Node(TypeCompound,
+                                     Value(in_place_index<TypeCompound>, Compound(tag, Compound::Format::CompoundTagDeflatedBigEndian)),
+                                     nullptr));
+  }
+  {
+    auto stream = std::make_shared<mcfile::stream::GzFileInputStream>(path);
+    if (auto tag = mcfile::nbt::CompoundTag::Read(stream, mcfile::Endian::Big); tag) {
+      return shared_ptr<Node>(new Node(TypeCompound,
+                                       Value(in_place_index<TypeCompound>, Compound(tag, Compound::Format::CompoundTagGzippedBigEndian)),
+                                       nullptr));
+    }
+  }
+  {
+    auto stream = std::make_shared<mcfile::stream::GzFileInputStream>(path);
+    if (auto tag = mcfile::nbt::CompoundTag::Read(stream, mcfile::Endian::Little); tag) {
+      return shared_ptr<Node>(new Node(TypeCompound,
+                                       Value(in_place_index<TypeCompound>, Compound(tag, Compound::Format::CompoundTagGzippedLittleEndian)),
+                                       nullptr));
+    }
+  }
+  return nullptr;
+}
+
 Node::Node(Type type, Node::Value &&value, std::shared_ptr<Node> parent) : fType(type), fValue(value), fParent(parent) {}
+
+DirectoryContents const *Node::directoryContents() const {
+  if (fValue.index() != TypeDirectoryContents) {
+    return nullptr;
+  }
+  return &std::get<TypeDirectoryContents>(fValue);
+}
+
+Path const *Node::fileUnopened() const {
+  if (fValue.index() != TypeFileUnopened) {
+    return nullptr;
+  }
+  return &std::get<TypeFileUnopened>(fValue);
+}
+
+Path const *Node::directoryUnopened() const {
+  if (fValue.index() != TypeDirectoryUnopened) {
+    return nullptr;
+  }
+  return &std::get<TypeDirectoryUnopened>(fValue);
+}
+
+Compound const *Node::compound() const {
+  if (fValue.index() != TypeCompound) {
+    return nullptr;
+  }
+  return &std::get<TypeCompound>(fValue);
+}
+
+std::string Node::description() const {
+  if (auto compound = this->compound(); compound) {
+    switch (compound->fFormat) {
+    case Compound::Format::CompoundTagRawLittleEndian:
+      return "Raw NBT (LittleEndian)";
+    case Compound::Format::CompoundTagRawBigEndian:
+      return "Raw NBT (BigEndian)";
+    case Compound::Format::CompoundTagDeflatedLittleEndian:
+      return "Deflated NBT (LittleEndian)";
+    case Compound::Format::CompoundTagDeflatedBigEndian:
+      return "Deflated NBT (BigEndian)";
+    case Compound::Format::CompoundTagGzippedBigEndian:
+      return "Gzipped NBT (BigEndian)";
+    case Compound::Format::CompoundTagGzippedLittleEndian:
+      return "Gzipped NBT (LittleEndian)";
+    }
+  }
+  return "Unknown";
+}
 
 } // namespace nbte

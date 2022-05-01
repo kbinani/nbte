@@ -2,36 +2,6 @@
 
 namespace nbte {
 
-enum class Format {
-  CompoundTagRawLittleEndian,
-  CompoundTagRawBigEndian,
-  CompoundTagDeflatedLittleEndian,
-  CompoundTagDeflatedBigEndian,
-  CompoundTagGzippedLittleEndian,
-  CompoundTagGzippedBigEndian,
-  // Directory,
-  // Anvil,
-};
-
-static std::string TypeDescription(Format type) {
-  switch (type) {
-  case Format::CompoundTagRawLittleEndian:
-    return "Raw NBT (LittleEndian)";
-  case Format::CompoundTagRawBigEndian:
-    return "Raw NBT (BigEndian)";
-  case Format::CompoundTagDeflatedLittleEndian:
-    return "Deflated NBT (LittleEndian)";
-  case Format::CompoundTagDeflatedBigEndian:
-    return "Deflated NBT (BigEndian)";
-  case Format::CompoundTagGzippedBigEndian:
-    return "Gzipped NBT (BigEndian)";
-  case Format::CompoundTagGzippedLittleEndian:
-    return "Gzipped NBT (LittleEndian)";
-  default:
-    return "Unknown";
-  }
-}
-
 enum class FilterMode {
   Key,
   Value,
@@ -47,8 +17,7 @@ struct State {
   bool fMainMenuBarHelpOpenSourceLicensesOpened = false;
   bool fMainMenuBarQuitSelected = false;
 
-  Format fOpenedFormat;
-  std::variant<std::nullopt_t, std::shared_ptr<mcfile::nbt::CompoundTag>> fOpened = std::nullopt;
+  std::shared_ptr<Node> fOpened;
   std::filesystem::path fOpenedPath;
 
   std::string fError;
@@ -62,55 +31,12 @@ struct State {
   bool fEdited = false;
 
   void open(std::filesystem::path const &selected) {
-    using namespace std;
-    namespace fs = std::filesystem;
     fError.clear();
 
-    static std::set<mcfile::Endian> const sEndians = {mcfile::Endian::Big, mcfile::Endian::Little};
-
-    if (fs::is_regular_file(selected)) {
-      if (auto tag = mcfile::nbt::CompoundTag::Read(selected, mcfile::Endian::Little); tag) {
-        fOpened = tag;
-        fOpenedFormat = Format::CompoundTagRawLittleEndian;
-        fOpenedPath = fs::absolute(selected);
-        return;
-      }
-      if (auto tag = mcfile::nbt::CompoundTag::Read(selected, mcfile::Endian::Big); tag) {
-        fOpened = tag;
-        fOpenedFormat = Format::CompoundTagRawBigEndian;
-        fOpenedPath = fs::absolute(selected);
-        return;
-      }
-      if (auto tag = mcfile::nbt::CompoundTag::ReadCompressed(selected, mcfile::Endian::Little); tag) {
-        fOpened = tag;
-        fOpenedFormat = Format::CompoundTagDeflatedLittleEndian;
-        fOpenedPath = fs::absolute(selected);
-        return;
-      }
-      if (auto tag = mcfile::nbt::CompoundTag::ReadCompressed(selected, mcfile::Endian::Big); tag) {
-        fOpened = tag;
-        fOpenedFormat = Format::CompoundTagDeflatedBigEndian;
-        fOpenedPath = fs::absolute(selected);
-        return;
-      }
-      {
-        auto stream = std::make_shared<mcfile::stream::GzFileInputStream>(selected);
-        if (auto tag = mcfile::nbt::CompoundTag::Read(stream, mcfile::Endian::Big); tag) {
-          fOpened = tag;
-          fOpenedFormat = Format::CompoundTagGzippedBigEndian;
-          fOpenedPath = fs::absolute(selected);
-          return;
-        }
-      }
-      {
-        auto stream = std::make_shared<mcfile::stream::GzFileInputStream>(selected);
-        if (auto tag = mcfile::nbt::CompoundTag::Read(stream, mcfile::Endian::Little); tag) {
-          fOpened = tag;
-          fOpenedFormat = Format::CompoundTagGzippedLittleEndian;
-          fOpenedPath = fs::absolute(selected);
-          return;
-        }
-      }
+    if (auto node = Node::OpenCompound(selected); node) {
+      fOpened = node;
+      fOpenedPath = selected;
+      return;
     }
     fError = "Can't open file";
   }
@@ -125,41 +51,40 @@ struct State {
     fError.clear();
     auto file = fOpenedPath;
 
-    if (fOpened.index() == 1) {
-      auto tag = std::get<1>(fOpened);
-      if (!tag) {
-        return;
-      }
+    if (!fOpened) {
+      return;
+    }
+    if (auto compound = fOpened->compound(); compound) {
       Endian endian = Endian::Big;
-      switch (fOpenedFormat) {
-      case Format::CompoundTagRawLittleEndian:
+      switch (compound->fFormat) {
+      case Compound::Format::CompoundTagRawLittleEndian:
         endian = Endian::Little;
         [[fallthrough]];
-      case Format::CompoundTagRawBigEndian: {
+      case Compound::Format::CompoundTagRawBigEndian: {
         auto stream = make_shared<FileOutputStream>(file);
         OutputStreamWriter writer(stream, endian);
-        if (!tag->writeAsRoot(writer)) {
+        if (!compound->fTag->writeAsRoot(writer)) {
           fError = "IO Error";
         }
         break;
       }
-      case Format::CompoundTagDeflatedLittleEndian:
+      case Compound::Format::CompoundTagDeflatedLittleEndian:
         endian = Endian::Little;
         [[fallthrough]];
-      case Format::CompoundTagDeflatedBigEndian: {
+      case Compound::Format::CompoundTagDeflatedBigEndian: {
         auto stream = make_shared<FileOutputStream>(file);
-        if (!CompoundTag::WriteCompressed(*tag, *stream, endian)) {
+        if (!CompoundTag::WriteCompressed(*compound->fTag, *stream, endian)) {
           fError = "IO Error";
         }
         break;
       }
-      case Format::CompoundTagGzippedLittleEndian:
+      case Compound::Format::CompoundTagGzippedLittleEndian:
         endian = Endian::Little;
         [[fallthrough]];
-      case Format::CompoundTagGzippedBigEndian: {
+      case Compound::Format::CompoundTagGzippedBigEndian: {
         auto stream = make_shared<GzFileOutputStream>(file);
         OutputStreamWriter writer(stream, endian);
-        if (!tag->writeAsRoot(writer)) {
+        if (!compound->fTag->writeAsRoot(writer)) {
           fError = "IO Error";
         }
         break;
@@ -185,7 +110,7 @@ struct State {
 
   std::string winowTitle() const {
     std::string title = "nbte";
-    if (fOpened.index() == 0) {
+    if (!fOpened) {
       return title;
     }
     if (!fOpenedPath.has_filename()) {
