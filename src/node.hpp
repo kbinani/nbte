@@ -20,21 +20,19 @@ DirectoryContents::DirectoryContents(Path const &dir, std::shared_ptr<Node> pare
 
 std::shared_ptr<Node> Node::OpenDirectory(Path const &path) {
   using namespace std;
-  DirectoryContents contents(path, nullptr);
-  return shared_ptr<Node>(new Node(Value(in_place_index<TypeDirectoryContents>, contents),
-                                   nullptr));
+  auto ret = DirectoryUnopened(path, nullptr);
+  ret->open();
+  return ret;
 }
 
 std::shared_ptr<Node> Node::DirectoryUnopened(Path const &path, std::shared_ptr<Node> const &parent) {
   using namespace std;
-  return shared_ptr<Node>(new Node(Value(in_place_index<TypeDirectoryUnopened>, path),
-                                   parent));
+  return shared_ptr<Node>(new Node(Value(in_place_index<TypeDirectoryUnopened>, path), parent));
 }
 
 std::shared_ptr<Node> Node::FileUnopened(Path const &path, std::shared_ptr<Node> const &parent) {
   using namespace std;
-  return shared_ptr<Node>(new Node(Value(in_place_index<TypeFileUnopened>, path),
-                                   parent));
+  return shared_ptr<Node>(new Node(Value(in_place_index<TypeFileUnopened>, path), parent));
 }
 
 static std::shared_ptr<mcfile::nbt::CompoundTag> ReadCompound(Path const &path, Compound::Format *format) {
@@ -140,9 +138,13 @@ std::string Node::description() const {
   return "Unknown";
 }
 
+bool Node::hasParent() const {
+  return !!fParent;
+}
+
 void Node::open() {
   if (auto unopened = directoryUnopened(); unopened) {
-    DirectoryContents contents(*unopened, fParent);
+    DirectoryContents contents(*unopened, shared_from_this());
     fValue = Value(std::in_place_index<TypeDirectoryContents>, contents);
     return;
   }

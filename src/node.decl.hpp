@@ -34,7 +34,7 @@ public:
   Format fFormat;
 };
 
-class Node : std::enable_shared_from_this<Node> {
+class Node : public std::enable_shared_from_this<Node> {
 public:
   enum Type : int {
     TypeDirectoryContents = 0,
@@ -65,6 +65,7 @@ public:
   Path const *unsupportedFile() const;
 
   std::string description() const;
+  bool hasParent() const;
 
   static std::shared_ptr<Node> OpenDirectory(Path const &path);
   static std::shared_ptr<Node> OpenCompound(Path const &path);

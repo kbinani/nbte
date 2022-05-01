@@ -469,42 +469,47 @@ static void VisitNbtCompound(State &s,
   }
 }
 
-static void VisitDirectoryContents(State &s, DirectoryContents const *contents, std::string const &path, std::string const &filter) {
-  using namespace std;
-  using namespace ImGui;
-  string name = contents->fDir.filename().string();
-  string label = name + ": " + to_string(contents->fValue.size());
-  if (contents->fValue.size() < 2) {
-    label += " entry";
-  } else {
-    label += " entries";
-  }
-  PushID(path + "/" + name);
-  SetNextItemOpen(true, ImGuiCond_Once);
-  if (TreeNodeEx(label.c_str())) {
-    for (auto const &it : contents->fValue) {
-      Visit(s, it, path + "/" + label, filter);
-    }
-    TreePop();
-  }
-  PopID();
-}
-
 static void Visit(State &s,
                   std::shared_ptr<Node> const &node,
                   std::string const &path,
                   std::string const &filter) {
+  using namespace std;
   using namespace ImGui;
   if (auto compound = node->compound(); compound) {
-    SetNextItemOpen(true, ImGuiCond_Once);
     PushID(path + "/" + compound->fName);
-    if (TreeNodeEx(compound->fName.c_str())) {
+    if (node->hasParent()) {
+      SetNextItemOpen(true, ImGuiCond_Once);
+      if (TreeNodeEx(compound->fName.c_str())) {
+        VisitNbtCompound(s, *compound->fTag, path, filter);
+        TreePop();
+      }
+    } else {
       VisitNbtCompound(s, *compound->fTag, path, filter);
-      TreePop();
     }
     PopID();
   } else if (auto contents = node->directoryContents(); contents) {
-    VisitDirectoryContents(s, contents, path, filter);
+    string name = contents->fDir.filename().string();
+    string label = name + ": " + to_string(contents->fValue.size());
+    if (contents->fValue.size() < 2) {
+      label += " entry";
+    } else {
+      label += " entries";
+    }
+    PushID(path + "/" + name);
+    if (node->hasParent()) {
+      SetNextItemOpen(true, ImGuiCond_Once);
+      if (TreeNodeEx(label.c_str())) {
+        for (auto const &it : contents->fValue) {
+          Visit(s, it, path + "/" + name, filter);
+        }
+        TreePop();
+      }
+    } else {
+      for (auto const &it : contents->fValue) {
+        Visit(s, it, path + "/" + name, filter);
+      }
+    }
+    PopID();
   } else if (auto unopenedFile = node->fileUnopened(); unopenedFile) {
     Indent(GetTreeNodeToLabelSpacing());
     PushID(path + "/" + unopenedFile->filename().string());
