@@ -27,12 +27,12 @@ static void RenderMainMenu(State &s) {
 
   if (BeginMenuBar()) {
     if (BeginMenu("File", &s.fMainMenuBarFileSelected)) {
-      if (MenuItem("Open", nullptr, nullptr)) {
+      if (MenuItem("Open", DecorateModCtrl("O").c_str(), nullptr)) {
         if (auto selected = OpenFileDialog(); selected) {
           s.open(*selected);
         }
       }
-      if (MenuItem("Open Folder", nullptr, nullptr)) {
+      if (MenuItem("Open Folder", DecorateModCtrl("Shift+O").c_str(), nullptr)) {
         if (auto selected = OpenDirectoryDialog(); selected) {
           s.openDirectory(*selected);
         }
@@ -627,6 +627,16 @@ static void CaptureShortcutKey(State &s) {
       s.fFilterBarOpened = true;
     } else if (IsKeyDown(GetKeyIndex(ImGuiKey_S)) && s.fOpened) {
       s.save();
+    } else if (IsKeyDown(GetKeyIndex(ImGuiKey_O))) {
+      if (IsKeyDown(GetKeyIndex(ImGuiKey_ModShift))) {
+        if (auto selected = OpenDirectoryDialog(); selected) {
+          s.openDirectory(*selected);
+        }
+      } else {
+        if (auto selected = OpenFileDialog(); selected) {
+          s.open(*selected);
+        }
+      }
     }
   }
 }
