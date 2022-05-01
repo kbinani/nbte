@@ -30,6 +30,8 @@ struct State {
 
   bool fEdited = false;
 
+  std::optional<Path> fMinecraftSaveDirectory;
+
   void open(Path const &selected) {
     fError.clear();
 

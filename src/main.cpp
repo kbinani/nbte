@@ -16,6 +16,10 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
 
+#define NOMINMAX
+#include <windows.h>
+#include <shlobj_core.h>
+
 #include <minecraft-file.hpp>
 #include <nfd.h>
 #include <variant>
@@ -105,6 +109,7 @@ int main(int, char **) {
   io.Fonts->AddFontFromMemoryCompressedTTF(udev_gothic35_regular_compressed_data, udev_gothic35_regular_compressed_size, 15.0f);
 
   nbte::State state;
+  state.fMinecraftSaveDirectory = nbte::MinecraftSaveDirectory();
 
   // Main loop
   while (!glfwWindowShouldClose(window)) {

@@ -56,4 +56,22 @@ static std::string QuitMenuShortcut() {
 #endif
 }
 
+#if defined(_MSC_VER)
+static std::optional<Path> MinecraftSaveDirectory() {
+  namespace fs = std::filesystem;
+  wchar_t path[MAX_PATH * 2];
+  if (!SHGetSpecialFolderPathW(nullptr, path, CSIDL_APPDATA, FALSE)) {
+    return std::nullopt;
+  }
+  Path appData(path);
+  Path saves = appData / ".minecraft" / "saves";
+  std::error_code ec;
+  if (fs::exists(saves, ec)) {
+    return saves;
+  } else {
+    return std::nullopt;
+  }
+}
+#endif
+
 } // namespace nbte

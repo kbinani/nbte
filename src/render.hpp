@@ -37,6 +37,11 @@ static void RenderMainMenu(State &s) {
           s.openDirectory(*selected);
         }
       }
+      if (s.fMinecraftSaveDirectory) {
+        if (MenuItem("Open Minecraft Save Directory", nullptr, nullptr)) {
+          s.openDirectory(*s.fMinecraftSaveDirectory);
+        }
+      }
       if (MenuItem("Save", DecorateModCtrl("S").c_str(), nullptr, !!s.fOpened)) {
         s.save();
       }
