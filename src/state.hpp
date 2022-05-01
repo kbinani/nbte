@@ -30,7 +30,7 @@ struct State {
 
   bool fEdited = false;
 
-  void open(std::filesystem::path const &selected) {
+  void open(Path const &selected) {
     fError.clear();
 
     if (auto node = Node::OpenCompound(selected); node) {
@@ -39,6 +39,16 @@ struct State {
       return;
     }
     fError = "Can't open file";
+  }
+
+  void openDirectory(Path const &path) {
+    fError.clear();
+    if (auto node = Node::OpenDirectory(path); node) {
+      fOpened = node;
+      fOpenedPath = path;
+      return;
+    }
+    fError = "Can't open directory";
   }
 
   void save() {

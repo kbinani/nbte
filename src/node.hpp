@@ -18,7 +18,7 @@ DirectoryContents::DirectoryContents(Path const &dir, std::shared_ptr<Node> pare
   }
 }
 
-std::shared_ptr<Node> Node::OpenFolder(Path const &path) {
+std::shared_ptr<Node> Node::OpenDirectory(Path const &path) {
   using namespace std;
   DirectoryContents contents(path, nullptr);
   return shared_ptr<Node>(new Node(TypeDirectoryContents,

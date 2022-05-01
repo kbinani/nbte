@@ -10,9 +10,13 @@ static void VisitNbtCompound(State &s,
                              std::string const &filter);
 static void VisitNbt(State &s,
                      std::string const &name,
-                     std::shared_ptr<mcfile::nbt::Tag> const &node,
+                     std::shared_ptr<mcfile::nbt::Tag> const &tag,
                      std::string const &path,
                      std::string const &filter);
+static void Visit(State &s,
+                  std::shared_ptr<Node> const &node,
+                  std::string const &path,
+                  std::string const &filter);
 
 static void RenderMainMenu(State &s) {
   using namespace ImGui;
@@ -22,6 +26,11 @@ static void RenderMainMenu(State &s) {
       if (MenuItem("Open", nullptr, nullptr)) {
         if (auto selected = OpenFileDialog(); selected) {
           s.open(*selected);
+        }
+      }
+      if (MenuItem("Open Folder", nullptr, nullptr)) {
+        if (auto selected = OpenDirectoryDialog(); selected) {
+          s.openDirectory(*selected);
         }
       }
       if (MenuItem("Save", DecorateModCtrl("S").c_str(), nullptr, !!s.fOpened)) {
@@ -456,18 +465,38 @@ static void VisitNbtCompound(State &s,
   }
 }
 
-static void VisitDirectoryContents(State &s, DirectoryContents const *contents) {
+static void VisitDirectoryContents(State &s, DirectoryContents const *contents, std::string const &path, std::string const &filter) {
+  using namespace ImGui;
+  for (auto const &it : contents->fValue) {
+    Visit(s, it, path, filter);
+  }
+}
+
+static void Visit(State &s,
+                  std::shared_ptr<Node> const &node,
+                  std::string const &path,
+                  std::string const &filter) {
+  using namespace ImGui;
+  if (auto compound = node->compound(); compound) {
+    VisitNbtCompound(s, *compound->fTag, path, filter);
+  } else if (auto contents = node->directoryContents(); contents) {
+    VisitDirectoryContents(s, contents, path, filter);
+  } else if (auto unopenedFile = node->fileUnopened(); unopenedFile) {
+    PushID(path.c_str());
+    TextUnformatted(unopenedFile->filename().string().c_str());
+    PopID();
+  } else if (auto unopenedDirectory = node->directoryUnopened(); unopenedDirectory) {
+    PushID(path.c_str());
+    TextUnformatted(unopenedDirectory->filename().string().c_str());
+    PopID();
+  }
 }
 
 static void RenderNode(State &s) {
   if (!s.fOpened) {
     return;
   }
-  if (auto compound = s.fOpened->compound(); compound) {
-    VisitNbtCompound(s, *compound->fTag, "", s.filterTerm());
-  } else if (auto contents = s.fOpened->directoryContents(); contents) {
-    VisitDirectoryContents(s, contents);
-  }
+  Visit(s, s.fOpened, "", s.filterTerm());
 }
 
 static void RenderFooter(State &s) {

@@ -61,10 +61,11 @@ public:
 
   std::string description() const;
 
-  static std::shared_ptr<Node> OpenFolder(Path const &path);
+  static std::shared_ptr<Node> OpenDirectory(Path const &path);
+  static std::shared_ptr<Node> OpenCompound(Path const &path);
+
   static std::shared_ptr<Node> DirectoryUnopened(Path const &path, std::shared_ptr<Node> const &parent);
   static std::shared_ptr<Node> FileUnopened(Path const &path, std::shared_ptr<Node> const &parent);
-  static std::shared_ptr<Node> OpenCompound(Path const &path);
 
 private:
   Type const fType;
