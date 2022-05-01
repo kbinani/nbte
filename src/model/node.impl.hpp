@@ -162,22 +162,51 @@ static std::optional<Region> ReadRegion(Path const &path, std::shared_ptr<Node> 
 
   Region r(pos->fX, pos->fZ);
 
+  constexpr uint64_t kSectorSize = 4096;
+
   auto stream = make_shared<mcfile::stream::FileInputStream>(path);
-  mcfile::stream::InputStreamReader reader(stream, mcfile::Endian::Big);
+  mcfile::stream::InputStreamReader sr(stream, mcfile::Endian::Big);
   for (int z = 0; z < 32; z++) {
     for (int x = 0; x < 32; x++) {
       uint64_t const index = (x & 31) + (z & 31) * 32;
-      if (!reader.seek(index * 4)) {
+      if (!sr.valid()) {
         return nullopt;
       }
-      uint32_t loc = 0;
-      if (!reader.read(&loc)) {
+      if (!sr.seek(4 * index)) {
+        return nullopt;
+      }
+
+      uint32_t loc;
+      if (!sr.read(&loc)) {
         return nullopt;
       }
       if (loc == 0) {
+        // chunk not saved yet
         continue;
       }
-      UnopenedChunk uc(pos->fX * 32 + x, pos->fZ * 32 + z, x, z);
+
+      uint64_t sectorOffset = loc >> 8;
+      if (!sr.seek(kSectorSize + 4 * index)) {
+        return nullopt;
+      }
+
+      uint32_t timestamp;
+      if (!sr.read(&timestamp)) {
+        return nullopt;
+      }
+
+      if (!sr.seek(sectorOffset * kSectorSize)) {
+        return nullopt;
+      }
+      uint32_t chunkSize;
+      if (!sr.read(&chunkSize)) {
+        return nullopt;
+      }
+      if (chunkSize == 0) {
+        // chunk not saved yet
+        continue;
+      }
+      UnopenedChunk uc(path, sectorOffset * kSectorSize, chunkSize, pos->fX * 32 + x, pos->fZ * 32 + z, x, z);
       auto node = shared_ptr<Node>(new Node(Node::Value(in_place_index<Node::TypeUnopenedChunk>, uc), parent));
       r.fValue.push_back(node);
     }
@@ -186,6 +215,8 @@ static std::optional<Region> ReadRegion(Path const &path, std::shared_ptr<Node> 
 }
 
 void Node::open() {
+  using namespace std;
+
   if (auto unopened = directoryUnopened(); unopened) {
     DirectoryContents contents(*unopened, shared_from_this());
     fValue = Value(std::in_place_index<TypeDirectoryContents>, contents);
@@ -205,6 +236,28 @@ void Node::open() {
 
     fValue = Value(std::in_place_index<TypeUnsupportedFile>, *unopened);
     return;
+  }
+  if (auto unopened = unopenedChunk(); unopened) {
+    auto stream = make_shared<mcfile::stream::FileInputStream>(unopened->fFile);
+    mcfile::stream::InputStreamReader reader(stream, mcfile::Endian::Big);
+    if (!reader.seek(unopened->fOffset + sizeof(uint32_t))) {
+      return;
+    }
+    uint8_t compressionType;
+    if (!reader.read(&compressionType)) {
+      return;
+    }
+    if (compressionType != 2) {
+      return;
+    }
+    vector<uint8_t> buffer(unopened->fSize - 1);
+    if (!reader.read(buffer)) {
+      return;
+    }
+    if (auto tag = mcfile::nbt::CompoundTag::ReadCompressed(buffer, mcfile::Endian::Big); tag) {
+      fValue = Value(std::in_place_index<TypeCompound>, Compound(unopened->name(), tag, Compound::Format::DeflatedBigEndian));
+      return;
+    }
   }
 }
 

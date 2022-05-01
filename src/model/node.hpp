@@ -16,8 +16,16 @@ public:
 
 class UnopenedChunk {
 public:
-  UnopenedChunk(int cx, int cz, int localX, int localZ) : fChunkX(cx), fChunkZ(cz), fLocalChunkX(localX), fLocalChunkZ(localZ) {}
+  UnopenedChunk(Path file, uint64_t offset, uint64_t size, int cx, int cz, int localX, int localZ) : fFile(file), fOffset(offset), fSize(size), fChunkX(cx), fChunkZ(cz), fLocalChunkX(localX), fLocalChunkZ(localZ) {}
 
+  std::string name() const {
+    using namespace std;
+    return "chunk " + to_string(fChunkX) + " " + to_string(fChunkZ) + " [" + to_string(fLocalChunkX) + " " + to_string(fLocalChunkZ) + " in region]";
+  }
+
+  Path fFile;
+  uint64_t fOffset;
+  uint64_t fSize;
   int fChunkX;
   int fChunkZ;
   int fLocalChunkX;
@@ -94,6 +102,8 @@ public:
 
 private:
   Value fValue;
+
+public:
   std::shared_ptr<Node> const fParent;
 };
 

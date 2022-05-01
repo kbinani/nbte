@@ -364,6 +364,8 @@ static void VisitNbtNonScalar(State &s,
 
   if (s.fFilterBarOpened && !filter.empty()) {
     SetNextItemOpen(true);
+  } else {
+    SetNextItemOpen(false, ImGuiCond_Once);
   }
   ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_DefaultOpen;
   if (matchedNode) {
@@ -533,11 +535,11 @@ static void Visit(State &s,
     PopID();
   } else if (auto unopenedChunk = node->unopenedChunk(); unopenedChunk) {
     Indent(GetTreeNodeToLabelSpacing());
-    string label = "chunk " + to_string(unopenedChunk->fChunkX) + " " + to_string(unopenedChunk->fChunkZ) + " [" + to_string(unopenedChunk->fLocalChunkX) + " " + to_string(unopenedChunk->fLocalChunkZ) + " in region]";
-    PushID(path + "/" + label);
+    string name = unopenedChunk->name();
+    PushID(path + "/" + name);
     PushStyleColor(ImGuiCol_Button, ImVec4(0, 0, 0, 0));
     PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(0, 0));
-    if (Button(label.c_str())) {
+    if (Button(name.c_str())) {
       node->open();
     }
     PopStyleVar();
