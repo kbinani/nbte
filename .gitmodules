@@ -13,6 +13,3 @@
 [submodule "deps/stb"]
 	path = deps/stb
 	url = https://github.com/nothings/stb.git
-[submodule "deps/ios-cmake"]
-	path = deps/ios-cmake
-	url = https://github.com/leetal/ios-cmake.git
