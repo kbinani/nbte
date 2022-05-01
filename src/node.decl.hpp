@@ -27,8 +27,9 @@ public:
     GzippedBigEndian,
   };
 
-  Compound(std::shared_ptr<mcfile::nbt::CompoundTag> const &tag, Format format) : fTag(tag), fFormat(format) {}
+  Compound(std::string const &name, std::shared_ptr<mcfile::nbt::CompoundTag> const &tag, Format format) : fName(name), fTag(tag), fFormat(format) {}
 
+  std::string fName;
   std::shared_ptr<mcfile::nbt::CompoundTag> fTag;
   Format fFormat;
 };
@@ -61,6 +62,7 @@ public:
   Path const *fileUnopened() const;
   Path const *directoryUnopened() const;
   Compound const *compound() const;
+  Path const *unsupportedFile() const;
 
   std::string description() const;
 

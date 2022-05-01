@@ -496,23 +496,43 @@ static void Visit(State &s,
                   std::string const &filter) {
   using namespace ImGui;
   if (auto compound = node->compound(); compound) {
-    VisitNbtCompound(s, *compound->fTag, path, filter);
+    SetNextItemOpen(true, ImGuiCond_Once);
+    PushID(path + "/" + compound->fName);
+    if (TreeNodeEx(compound->fName.c_str())) {
+      VisitNbtCompound(s, *compound->fTag, path, filter);
+      TreePop();
+    }
+    PopID();
   } else if (auto contents = node->directoryContents(); contents) {
     VisitDirectoryContents(s, contents, path, filter);
   } else if (auto unopenedFile = node->fileUnopened(); unopenedFile) {
     Indent(GetTreeNodeToLabelSpacing());
     PushID(path + "/" + unopenedFile->filename().string());
-    TextUnformatted(unopenedFile->filename().string().c_str());
+    PushStyleColor(ImGuiCol_Button, ImVec4(0, 0, 0, 0));
+    PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(0, 0));
+    if (Button(unopenedFile->filename().string().c_str())) {
+      node->open();
+    }
+    PopStyleVar();
+    PopStyleColor();
     PopID();
     Unindent(GetTreeNodeToLabelSpacing());
   } else if (auto unopenedDirectory = node->directoryUnopened(); unopenedDirectory) {
     PushID(path + "/" + unopenedDirectory->filename().string());
     if (TreeNodeEx(unopenedDirectory->filename().string().c_str())) {
       node->open();
+      Indent(GetTreeNodeToLabelSpacing());
       TextUnformatted("opening...");
+      Unindent(GetTreeNodeToLabelSpacing());
       TreePop();
     }
     PopID();
+  } else if (auto unsupported = node->unsupportedFile(); unsupported) {
+    Indent(GetTreeNodeToLabelSpacing());
+    PushID(path + "/" + unsupported->filename().string());
+    TextDisabled("%s", unsupported->filename().string().c_str());
+    PopID();
+    Unindent(GetTreeNodeToLabelSpacing());
   }
 }
 

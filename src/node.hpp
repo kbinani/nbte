@@ -37,36 +37,48 @@ std::shared_ptr<Node> Node::FileUnopened(Path const &path, std::shared_ptr<Node>
                                    parent));
 }
 
-std::shared_ptr<Node> Node::OpenCompound(Path const &path) {
-  using namespace std;
+static std::shared_ptr<mcfile::nbt::CompoundTag> ReadCompound(Path const &path, Compound::Format *format) {
+  using namespace mcfile::nbt;
+
   static std::set<mcfile::Endian> const sEndians = {mcfile::Endian::Big, mcfile::Endian::Little};
 
   if (auto tag = mcfile::nbt::CompoundTag::Read(path, mcfile::Endian::Little); tag) {
-    return shared_ptr<Node>(new Node(Value(in_place_index<TypeCompound>, Compound(tag, Compound::Format::RawLittleEndian)),
-                                     nullptr));
+    *format = Compound::Format::RawLittleEndian;
+    return tag;
   } else if (auto tag = mcfile::nbt::CompoundTag::Read(path, mcfile::Endian::Big); tag) {
-    return shared_ptr<Node>(new Node(Value(in_place_index<TypeCompound>, Compound(tag, Compound::Format::RawBigEndian)),
-                                     nullptr));
+    *format = Compound::Format::RawBigEndian;
+    return tag;
   } else if (auto tag = mcfile::nbt::CompoundTag::ReadCompressed(path, mcfile::Endian::Little); tag) {
-    return shared_ptr<Node>(new Node(Value(in_place_index<TypeCompound>, Compound(tag, Compound::Format::DeflatedLittleEndian)),
-                                     nullptr));
+    *format = Compound::Format::DeflatedLittleEndian;
+    return tag;
   } else if (auto tag = mcfile::nbt::CompoundTag::ReadCompressed(path, mcfile::Endian::Big); tag) {
-    return shared_ptr<Node>(new Node(Value(in_place_index<TypeCompound>, Compound(tag, Compound::Format::DeflatedBigEndian)),
-                                     nullptr));
+    *format = Compound::Format::DeflatedBigEndian;
+    return tag;
   }
   {
     auto stream = std::make_shared<mcfile::stream::GzFileInputStream>(path);
     if (auto tag = mcfile::nbt::CompoundTag::Read(stream, mcfile::Endian::Big); tag) {
-      return shared_ptr<Node>(new Node(Value(in_place_index<TypeCompound>, Compound(tag, Compound::Format::GzippedBigEndian)),
-                                       nullptr));
+      *format = Compound::Format::GzippedBigEndian;
+      return tag;
     }
   }
   {
     auto stream = std::make_shared<mcfile::stream::GzFileInputStream>(path);
     if (auto tag = mcfile::nbt::CompoundTag::Read(stream, mcfile::Endian::Little); tag) {
-      return shared_ptr<Node>(new Node(Value(in_place_index<TypeCompound>, Compound(tag, Compound::Format::GzippedLittleEndian)),
-                                       nullptr));
+      *format = Compound::Format::GzippedLittleEndian;
+      return tag;
     }
+  }
+  return nullptr;
+}
+
+std::shared_ptr<Node> Node::OpenCompound(Path const &path) {
+  using namespace std;
+  static std::set<mcfile::Endian> const sEndians = {mcfile::Endian::Big, mcfile::Endian::Little};
+
+  Compound::Format format;
+  if (auto tag = ReadCompound(path, &format); tag) {
+    return shared_ptr<Node>(new Node(Value(in_place_index<TypeCompound>, Compound(path.filename().string(), tag, format)), nullptr));
   }
   return nullptr;
 }
@@ -101,6 +113,13 @@ Compound const *Node::compound() const {
   return &std::get<TypeCompound>(fValue);
 }
 
+Path const *Node::unsupportedFile() const {
+  if (fValue.index() != TypeUnsupportedFile) {
+    return nullptr;
+  }
+  return &std::get<TypeUnsupportedFile>(fValue);
+}
+
 std::string Node::description() const {
   if (auto compound = this->compound(); compound) {
     switch (compound->fFormat) {
@@ -125,6 +144,16 @@ void Node::open() {
   if (auto unopened = directoryUnopened(); unopened) {
     DirectoryContents contents(*unopened, fParent);
     fValue = Value(std::in_place_index<TypeDirectoryContents>, contents);
+    return;
+  }
+  if (auto unopened = fileUnopened(); unopened) {
+    Compound::Format format;
+    if (auto tag = ReadCompound(*unopened, &format); tag) {
+      fValue = Value(std::in_place_index<TypeCompound>, Compound(unopened->filename().string(), tag, format));
+      return;
+    }
+    fValue = Value(std::in_place_index<TypeUnsupportedFile>, *unopened);
+    return;
   }
 }
 
