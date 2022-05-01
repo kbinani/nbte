@@ -2,7 +2,7 @@
 
 namespace nbte {
 
-DirectoryContents::DirectoryContents(Path const &dir, std::shared_ptr<Node> parent) {
+DirectoryContents::DirectoryContents(Path const &dir, std::shared_ptr<Node> parent) : fDir(dir) {
   namespace fs = std::filesystem;
   std::error_code ec;
   auto iterator = fs::directory_iterator(dir, ec);
@@ -21,22 +21,19 @@ DirectoryContents::DirectoryContents(Path const &dir, std::shared_ptr<Node> pare
 std::shared_ptr<Node> Node::OpenDirectory(Path const &path) {
   using namespace std;
   DirectoryContents contents(path, nullptr);
-  return shared_ptr<Node>(new Node(TypeDirectoryContents,
-                                   Value(in_place_index<TypeDirectoryContents>, contents),
+  return shared_ptr<Node>(new Node(Value(in_place_index<TypeDirectoryContents>, contents),
                                    nullptr));
 }
 
 std::shared_ptr<Node> Node::DirectoryUnopened(Path const &path, std::shared_ptr<Node> const &parent) {
   using namespace std;
-  return shared_ptr<Node>(new Node(TypeDirectoryUnopened,
-                                   Value(in_place_index<TypeDirectoryUnopened>, path),
+  return shared_ptr<Node>(new Node(Value(in_place_index<TypeDirectoryUnopened>, path),
                                    parent));
 }
 
 std::shared_ptr<Node> Node::FileUnopened(Path const &path, std::shared_ptr<Node> const &parent) {
   using namespace std;
-  return shared_ptr<Node>(new Node(TypeFileUnopened,
-                                   Value(in_place_index<TypeFileUnopened>, path),
+  return shared_ptr<Node>(new Node(Value(in_place_index<TypeFileUnopened>, path),
                                    parent));
 }
 
@@ -45,42 +42,36 @@ std::shared_ptr<Node> Node::OpenCompound(Path const &path) {
   static std::set<mcfile::Endian> const sEndians = {mcfile::Endian::Big, mcfile::Endian::Little};
 
   if (auto tag = mcfile::nbt::CompoundTag::Read(path, mcfile::Endian::Little); tag) {
-    return shared_ptr<Node>(new Node(TypeCompound,
-                                     Value(in_place_index<TypeCompound>, Compound(tag, Compound::Format::RawLittleEndian)),
+    return shared_ptr<Node>(new Node(Value(in_place_index<TypeCompound>, Compound(tag, Compound::Format::RawLittleEndian)),
                                      nullptr));
   } else if (auto tag = mcfile::nbt::CompoundTag::Read(path, mcfile::Endian::Big); tag) {
-    return shared_ptr<Node>(new Node(TypeCompound,
-                                     Value(in_place_index<TypeCompound>, Compound(tag, Compound::Format::RawBigEndian)),
+    return shared_ptr<Node>(new Node(Value(in_place_index<TypeCompound>, Compound(tag, Compound::Format::RawBigEndian)),
                                      nullptr));
   } else if (auto tag = mcfile::nbt::CompoundTag::ReadCompressed(path, mcfile::Endian::Little); tag) {
-    return shared_ptr<Node>(new Node(TypeCompound,
-                                     Value(in_place_index<TypeCompound>, Compound(tag, Compound::Format::DeflatedLittleEndian)),
+    return shared_ptr<Node>(new Node(Value(in_place_index<TypeCompound>, Compound(tag, Compound::Format::DeflatedLittleEndian)),
                                      nullptr));
   } else if (auto tag = mcfile::nbt::CompoundTag::ReadCompressed(path, mcfile::Endian::Big); tag) {
-    return shared_ptr<Node>(new Node(TypeCompound,
-                                     Value(in_place_index<TypeCompound>, Compound(tag, Compound::Format::DeflatedBigEndian)),
+    return shared_ptr<Node>(new Node(Value(in_place_index<TypeCompound>, Compound(tag, Compound::Format::DeflatedBigEndian)),
                                      nullptr));
   }
   {
     auto stream = std::make_shared<mcfile::stream::GzFileInputStream>(path);
     if (auto tag = mcfile::nbt::CompoundTag::Read(stream, mcfile::Endian::Big); tag) {
-      return shared_ptr<Node>(new Node(TypeCompound,
-                                       Value(in_place_index<TypeCompound>, Compound(tag, Compound::Format::GzippedBigEndian)),
+      return shared_ptr<Node>(new Node(Value(in_place_index<TypeCompound>, Compound(tag, Compound::Format::GzippedBigEndian)),
                                        nullptr));
     }
   }
   {
     auto stream = std::make_shared<mcfile::stream::GzFileInputStream>(path);
     if (auto tag = mcfile::nbt::CompoundTag::Read(stream, mcfile::Endian::Little); tag) {
-      return shared_ptr<Node>(new Node(TypeCompound,
-                                       Value(in_place_index<TypeCompound>, Compound(tag, Compound::Format::GzippedLittleEndian)),
+      return shared_ptr<Node>(new Node(Value(in_place_index<TypeCompound>, Compound(tag, Compound::Format::GzippedLittleEndian)),
                                        nullptr));
     }
   }
   return nullptr;
 }
 
-Node::Node(Type type, Node::Value &&value, std::shared_ptr<Node> parent) : fType(type), fValue(value), fParent(parent) {}
+Node::Node(Node::Value &&value, std::shared_ptr<Node> parent) : fValue(value), fParent(parent) {}
 
 DirectoryContents const *Node::directoryContents() const {
   if (fValue.index() != TypeDirectoryContents) {
@@ -128,6 +119,13 @@ std::string Node::description() const {
     }
   }
   return "Unknown";
+}
+
+void Node::open() {
+  if (auto unopened = directoryUnopened(); unopened) {
+    DirectoryContents contents(*unopened, fParent);
+    fValue = Value(std::in_place_index<TypeDirectoryContents>, contents);
+  }
 }
 
 } // namespace nbte

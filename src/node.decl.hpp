@@ -12,6 +12,7 @@ class Node;
 class DirectoryContents {
 public:
   DirectoryContents(Path const &dir, std::shared_ptr<Node> parent);
+  Path fDir;
   std::vector<std::shared_ptr<Node>> fValue;
 };
 
@@ -52,7 +53,9 @@ public:
                              Compound                            // Compound
                              >;
 
-  Node(Type type, Value &&value, std::shared_ptr<Node> parent);
+  Node(Value &&value, std::shared_ptr<Node> parent);
+
+  void open();
 
   DirectoryContents const *directoryContents() const;
   Path const *fileUnopened() const;
@@ -68,7 +71,6 @@ public:
   static std::shared_ptr<Node> FileUnopened(Path const &path, std::shared_ptr<Node> const &parent);
 
 private:
-  Type const fType;
   Value fValue;
   std::shared_ptr<Node> const fParent;
 };

@@ -18,6 +18,10 @@ static void Visit(State &s,
                   std::string const &path,
                   std::string const &filter);
 
+static void PushID(std::string const &id) {
+  ImGui::PushID(id.c_str());
+}
+
 static void RenderMainMenu(State &s) {
   using namespace ImGui;
 
@@ -40,13 +44,13 @@ static void RenderMainMenu(State &s) {
       if (MenuItem("Quit", QuitMenuShortcut().c_str())) {
         s.fMainMenuBarQuitSelected = true;
       }
-      EndMenu();
+      ImGui::EndMenu();
     }
     if (BeginMenu("Find", &s.fMainMenuBarFindSelected)) {
       if (MenuItem("Filter", DecorateModCtrl("F").c_str(), nullptr)) {
         s.fFilterBarOpened = true;
       }
-      EndMenu();
+      ImGui::EndMenu();
     }
     if (BeginMenu("Help", &s.fMainMenuBarHelpSelected)) {
       if (MenuItem("About nbte", nullptr, nullptr)) {
@@ -55,7 +59,7 @@ static void RenderMainMenu(State &s) {
       if (MenuItem("Legal", nullptr, nullptr)) {
         s.fMainMenuBarHelpOpenSourceLicensesOpened = true;
       }
-      EndMenu();
+      ImGui::EndMenu();
     }
     EndMenuBar();
   }
@@ -202,7 +206,7 @@ static void PushScalarInput(std::string const &name,
   using namespace ImGui;
   PushItemWidth(-FLT_EPSILON);
   Indent(GetTreeNodeToLabelSpacing());
-  PushID((path + "/" + name).c_str());
+  PushID(path + "/" + name);
   if (!filter.empty()) {
     ImDrawList *list = GetWindowDrawList();
     auto cursor = GetCursorScreenPos();
@@ -352,7 +356,7 @@ static void VisitNbtNonScalar(State &s,
   }
 
   auto nextPath = path + "/" + name;
-  PushID(nextPath.c_str());
+  PushID(nextPath);
 
   if (s.fFilterBarOpened && !filter.empty()) {
     SetNextItemOpen(true);
@@ -466,10 +470,24 @@ static void VisitNbtCompound(State &s,
 }
 
 static void VisitDirectoryContents(State &s, DirectoryContents const *contents, std::string const &path, std::string const &filter) {
+  using namespace std;
   using namespace ImGui;
-  for (auto const &it : contents->fValue) {
-    Visit(s, it, path, filter);
+  string name = contents->fDir.filename().string();
+  string label = name + ": " + to_string(contents->fValue.size());
+  if (contents->fValue.size() < 2) {
+    label += " entry";
+  } else {
+    label += " entries";
   }
+  PushID(path + "/" + name);
+  SetNextItemOpen(true, ImGuiCond_Once);
+  if (TreeNodeEx(label.c_str())) {
+    for (auto const &it : contents->fValue) {
+      Visit(s, it, path + "/" + label, filter);
+    }
+    TreePop();
+  }
+  PopID();
 }
 
 static void Visit(State &s,
@@ -482,12 +500,18 @@ static void Visit(State &s,
   } else if (auto contents = node->directoryContents(); contents) {
     VisitDirectoryContents(s, contents, path, filter);
   } else if (auto unopenedFile = node->fileUnopened(); unopenedFile) {
-    PushID(path.c_str());
+    Indent(GetTreeNodeToLabelSpacing());
+    PushID(path + "/" + unopenedFile->filename().string());
     TextUnformatted(unopenedFile->filename().string().c_str());
     PopID();
+    Unindent(GetTreeNodeToLabelSpacing());
   } else if (auto unopenedDirectory = node->directoryUnopened(); unopenedDirectory) {
-    PushID(path.c_str());
-    TextUnformatted(unopenedDirectory->filename().string().c_str());
+    PushID(path + "/" + unopenedDirectory->filename().string());
+    if (TreeNodeEx(unopenedDirectory->filename().string().c_str())) {
+      node->open();
+      TextUnformatted("opening...");
+      TreePop();
+    }
     PopID();
   }
 }
@@ -519,6 +543,7 @@ static void RenderFooter(State &s) {
 }
 
 static void RenderFilterBar(State &s) {
+  using namespace std;
   using namespace ImGui;
 
   auto const &style = GetStyle();
@@ -529,7 +554,7 @@ static void RenderFilterBar(State &s) {
     TextUnformatted("Filter: ");
 
     SameLine();
-    PushID("filter_panel#button_case_sensitive");
+    PushID(string("filter_panel#button_case_sensitive"));
     PushStyleColor(ImGuiCol_Text, s.fFilterCaseSensitive ? style.Colors[ImGuiCol_ButtonActive] : style.Colors[ImGuiCol_TextDisabled]);
     PushStyleColor(ImGuiCol_Button, s.fFilterCaseSensitive ? style.Colors[ImGuiCol_Button] : style.Colors[ImGuiCol_ChildBg]);
     if (Button("Aa")) {
@@ -539,7 +564,7 @@ static void RenderFilterBar(State &s) {
     PopID();
 
     SameLine();
-    PushID("filter_panel#text");
+    PushID(string("filter_panel#text"));
     if (!s.fFilterBarGotFocus || (IsKeyDown(GetModCtrlKeyIndex()) && IsKeyDown(GetKeyIndex(ImGuiKey_F)))) {
       SetKeyboardFocusHere();
       s.fFilterBarGotFocus = true;
@@ -551,7 +576,7 @@ static void RenderFilterBar(State &s) {
     PopID();
 
     SameLine();
-    PushID("filter_panel#close");
+    PushID(string("filter_panel#close"));
     if (Button("x", ImVec2(GetFrameHeight(), GetFrameHeight()))) {
       s.fFilterBarOpened = false;
     }
