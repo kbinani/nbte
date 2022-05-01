@@ -23,16 +23,16 @@
 #include <nfd.h>
 #include <variant>
 
-#include "udev_gothic35_regular.h"
-#include "nbte32.h"
+#include "resource/udev_gothic35_regular.h"
+#include "resource/nbte32.h"
 #include "version.hpp"
 #include "string.hpp"
-#include "node.decl.hpp"
-#include "node.hpp"
-#include "state.hpp"
+#include "model/node.hpp"
+#include "model/node.impl.hpp"
+#include "model/state.hpp"
 #include "platform.hpp"
-#include "render-legal.hpp"
-#include "render.hpp"
+#include "render/legal.hpp"
+#include "render/render.hpp"
 
 @interface AppViewController () <MTKViewDelegate>
 @property (nonatomic, readonly) MTKView *mtkView;

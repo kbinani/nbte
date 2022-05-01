@@ -47,7 +47,7 @@ file(READ deps/imgui/LICENSE.txt NBTE_LEGAL_DEARIMGUI)
 string(STRIP "${NBTE_LEGAL_DEARIMGUI}" NBTE_LEGAL_DEARIMGUI)
 file(READ deps/libminecraft-file/deps/zlib-ng/LICENSE.md NBTE_LEGAL_ZLIB_NG)
 string(STRIP "${NBTE_LEGAL_ZLIB_NG}" NBTE_LEGAL_ZLIB_NG)
-configure_file(src/render-legal.hpp.in ${CMAKE_CURRENT_SOURCE_DIR}/src/render-legal.hpp)
+configure_file(src/render/legal.hpp.in ${CMAKE_CURRENT_SOURCE_DIR}/src/render/legal.hpp)
 
 configure_file(package/Package.appxmanifest.in ${CMAKE_CURRENT_SOURCE_DIR}/package/Package.appxmanifest)
 
@@ -56,17 +56,17 @@ if ("${CMAKE_SYSTEM_NAME}" STREQUAL "Darwin")
 endif()
 
 list(APPEND nbte_files
-  src/render.hpp
-  src/state.hpp
+  src/render/render.hpp
+  src/model/state.hpp
   src/string.hpp
-  src/udev_gothic35_regular.h
   src/version.hpp
-  src/nbte32.h
-  src/render-legal.hpp
-  src/render-legal.hpp.in
+  src/render/legal.hpp
+  src/render/legal.hpp.in
   src/platform.hpp
-  src/node.decl.hpp
-  src/node.hpp
+  src/model/node.hpp
+  src/model/node.impl.hpp
+  src/resource/udev_gothic35_regular.h
+  src/resource/nbte32.h
   resource/appicon.rc.in
   deps/imgui/imgui.cpp
   deps/imgui/imgui_draw.cpp

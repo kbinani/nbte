@@ -1,6 +1,6 @@
 /build
 /src/version.hpp
-/src/render-legal.hpp
+/src/render/legal.hpp
 /resource/appicon.rc
 /resource/appicon.aps
 /resource/Info.plist
