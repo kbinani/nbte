@@ -89,7 +89,7 @@ static void RenderAboutDialog(State &s) {
     return;
   }
   OpenPopup("About");
-  SetNextWindowSize(ImVec2(512, 320), ImGuiCond_Once);
+  SetNextWindowSize(ImVec2(512, 0), ImGuiCond_Once);
   if (BeginPopupModal("About", &s.fMainMenuBarHelpAboutOpened)) {
     TextUnformatted("nbte: https://github.com/kbinani/nbte");
     Text("Version %s", kAppVersion);
@@ -99,7 +99,6 @@ static void RenderAboutDialog(State &s) {
     TextWrapped("%s", R"(This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
 
 This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.)");
-    TextUnformatted("");
     if (IsKeyDown(GetKeyIndex(ImGuiKey_Escape))) {
       s.fMainMenuBarHelpAboutOpened = false;
       CloseCurrentPopup();
