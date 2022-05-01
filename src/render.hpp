@@ -77,7 +77,7 @@ static void RenderAboutDialog(State &s) {
   }
   OpenPopup("About");
   SetNextWindowSize(ImVec2(512, 320), ImGuiCond_Once);
-  if (BeginPopupModal("About", &s.fMainMenuBarHelpAboutOpened, ImGuiWindowFlags_NoSavedSettings)) {
+  if (BeginPopupModal("About", &s.fMainMenuBarHelpAboutOpened)) {
     TextUnformatted("nbte: https://github.com/kbinani/nbte");
     Text("Version %s", kAppVersion);
     TextUnformatted("");
@@ -475,7 +475,7 @@ static void RenderFooter(State &s) {
 
   float const frameHeight = GetFrameHeightWithSpacing();
 
-  Begin("footer", nullptr, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoSavedSettings);
+  Begin("footer", nullptr, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoDecoration);
   SetWindowPos(ImVec2(0, s.fDisplaySize.y - frameHeight));
   SetWindowSize(ImVec2(s.fDisplaySize.x, frameHeight));
 
@@ -550,7 +550,7 @@ static void CaptureShortcutKey(State &s) {
 static void Render(State &s) {
   using namespace ImGui;
 
-  ImGuiWindowFlags flags = ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoBringToFrontOnFocus;
+  ImGuiWindowFlags flags = ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoBringToFrontOnFocus;
   Begin("main", nullptr, flags);
   SetWindowPos(ImVec2(0, 0));
   SetWindowSize(ImVec2(s.fDisplaySize.x, s.fDisplaySize.y - GetFrameHeightWithSpacing()));

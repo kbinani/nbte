@@ -95,6 +95,7 @@ int main(int, char **) {
   ImGui::CreateContext();
   ImGuiIO &io = ImGui::GetIO();
   io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard; // Enable Keyboard Controls
+  io.IniFilename = nullptr;
 
   ImGui::StyleColorsLight();
 
