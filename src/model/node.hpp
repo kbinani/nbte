@@ -58,6 +58,7 @@ public:
   std::string fName;
   std::shared_ptr<mcfile::nbt::CompoundTag> fTag;
   Format fFormat;
+  bool fEdited = false;
 };
 
 class Node : public std::enable_shared_from_this<Node> {
@@ -86,11 +87,15 @@ public:
   Path const *fileUnopened() const;
   Path const *directoryUnopened() const;
   Compound const *compound() const;
+  Compound *compound();
   Path const *unsupportedFile() const;
   Region *region();
+  Region const *region() const;
 
   std::string description() const;
   bool hasParent() const;
+  bool isDirty() const;
+  void clearDirty();
 
   static std::shared_ptr<Node> OpenDirectory(Path const &path, hwm::task_queue &queue);
   static std::shared_ptr<Node> OpenFile(Path const &path, hwm::task_queue &queue);

@@ -91,6 +91,13 @@ Compound const *Node::compound() const {
   return &std::get<TypeCompound>(fValue);
 }
 
+Compound *Node::compound() {
+  if (fValue.index() != TypeCompound) {
+    return nullptr;
+  }
+  return &std::get<TypeCompound>(fValue);
+}
+
 Path const *Node::unsupportedFile() const {
   if (fValue.index() != TypeUnsupportedFile) {
     return nullptr;
@@ -99,6 +106,13 @@ Path const *Node::unsupportedFile() const {
 }
 
 Region *Node::region() {
+  if (fValue.index() != TypeRegion) {
+    return nullptr;
+  }
+  return &std::get<TypeRegion>(fValue);
+}
+
+Region const *Node::region() const {
   if (fValue.index() != TypeRegion) {
     return nullptr;
   }
@@ -129,6 +143,45 @@ std::string Node::description() const {
 
 bool Node::hasParent() const {
   return !!fParent;
+}
+
+bool Node::isDirty() const {
+  if (auto contents = directoryContents(); contents) {
+    for (auto const &it : contents->fValue) {
+      if (it->isDirty()) {
+        return true;
+      }
+    }
+  } else if (auto r = region(); r) {
+    if (r->fValue.index() == 0) {
+      for (auto const &it : std::get<0>(r->fValue)) {
+        if (it->isDirty()) {
+          return true;
+        }
+      }
+    }
+  } else if (auto c = compound(); c) {
+    if (c->fEdited) {
+      return true;
+    }
+  }
+  return false;
+}
+
+void Node::clearDirty() {
+  if (auto contents = directoryContents(); contents) {
+    for (auto const &it : contents->fValue) {
+      it->clearDirty();
+    }
+  } else if (auto r = region(); r) {
+    if (r->fValue.index() == 0) {
+      for (auto const &it : std::get<0>(r->fValue)) {
+        it->clearDirty();
+      }
+    }
+  } else if (auto c = compound(); c) {
+    c->fEdited = false;
+  }
 }
 
 void Node::load(hwm::task_queue &queue) {

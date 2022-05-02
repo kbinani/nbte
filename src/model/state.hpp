@@ -28,8 +28,6 @@ struct State {
   bool fFilterCaseSensitive = false;
   bool fFilterBarGotFocus = false;
 
-  bool fEdited = false;
-
   std::optional<Path> fMinecraftSaveDirectory;
 
   std::unique_ptr<hwm::task_queue> fPool;
@@ -122,10 +120,16 @@ struct State {
         break;
       }
       }
+    } else if (auto r = fOpened->region(); r) {
+      // TODO:
+      fError = "Unimplemented yet";
+    } else if (auto contents = fOpened->directoryContents(); contents) {
+      // TODO:
+      fError = "Unimplemented yet";
     }
 
     if (fError.empty()) {
-      fEdited = false;
+      fOpened->clearDirty();
     }
   }
 
@@ -149,7 +153,7 @@ struct State {
       return title;
     }
     title += " - " + fOpenedPath.filename().string();
-    if (fEdited) {
+    if (fOpened->isDirty()) {
       title += " *";
     }
     return title;

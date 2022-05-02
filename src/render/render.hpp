@@ -5,10 +5,12 @@ namespace nbte {
 constexpr float kIndent = 6.0f;
 
 static void VisitNbtCompound(State &s,
+                             Compound &root,
                              mcfile::nbt::CompoundTag const &tag,
                              std::string const &path,
                              std::string const &filter);
 static void VisitNbt(State &s,
+                     Compound &root,
                      std::string const &name,
                      std::shared_ptr<mcfile::nbt::Tag> const &tag,
                      std::string const &path,
@@ -179,25 +181,25 @@ static bool ContainsTerm(std::shared_ptr<mcfile::nbt::Tag> const &tag,
 }
 
 template <class T>
-static void InputScalar(T &v, State &s) {
+static void InputScalar(T &v, Compound &root) {
   int t = v;
   if (ImGui::InputInt("", &t)) {
     T n = Clamp<T, int>(t);
     if (n != v) {
       v = n;
-      s.fEdited = true;
+      root.fEdited = true;
     }
   }
 }
 
 template <>
-static void InputScalar(int64_t &v, State &s) {
+static void InputScalar(int64_t &v, Compound &root) {
   std::string t = std::to_string(v);
   if (ImGui::InputText("", &t, ImGuiInputTextFlags_CharsDecimal)) {
     int64_t n = atoll(t.c_str());
     if (v != n) {
       v = n;
-      s.fEdited = true;
+      root.fEdited = true;
     }
   }
 }
@@ -248,6 +250,7 @@ static void PopScalarInput() {
 }
 
 static void VisitNbtScalar(State &s,
+                           Compound &root,
                            std::string const &name,
                            std::shared_ptr<mcfile::nbt::Tag> const &tag,
                            std::string const &path,
@@ -260,32 +263,32 @@ static void VisitNbtScalar(State &s,
   case Tag::Type::Int:
     if (auto v = dynamic_pointer_cast<IntTag>(tag); v) {
       PushScalarInput(name, path, filter, s.fFilterCaseSensitive, s.fIconDocumentAttributeI);
-      InputScalar<int>(v->fValue, s);
+      InputScalar<int>(v->fValue, root);
     }
     break;
   case Tag::Type::Byte:
     if (auto v = dynamic_pointer_cast<ByteTag>(tag); v) {
       PushScalarInput(name, path, filter, s.fFilterCaseSensitive, s.fIconDocumentAttributeB);
-      InputScalar<uint8_t>(v->fValue, s);
+      InputScalar<uint8_t>(v->fValue, root);
     }
     break;
   case Tag::Type::Short:
     if (auto v = dynamic_pointer_cast<ShortTag>(tag); v) {
       PushScalarInput(name, path, filter, s.fFilterCaseSensitive, s.fIconDocumentAttributeS);
-      InputScalar<int16_t>(v->fValue, s);
+      InputScalar<int16_t>(v->fValue, root);
     }
     break;
   case Tag::Type::Long:
     if (auto v = dynamic_pointer_cast<LongTag>(tag); v) {
       PushScalarInput(name, path, filter, s.fFilterCaseSensitive, s.fIconDocumentAttributeL);
-      InputScalar(v->fValue, s);
+      InputScalar(v->fValue, root);
     }
     break;
   case Tag::Type::String:
     if (auto v = dynamic_pointer_cast<StringTag>(tag); v) {
       PushScalarInput(name, path, filter, s.fFilterCaseSensitive, s.fIconEditSmallCaps);
       if (InputText("", &v->fValue)) {
-        s.fEdited = true;
+        root.fEdited = true;
       }
     }
     break;
@@ -293,7 +296,7 @@ static void VisitNbtScalar(State &s,
     if (auto v = dynamic_pointer_cast<FloatTag>(tag); v) {
       PushScalarInput(name, path, filter, s.fFilterCaseSensitive, s.fIconDocumentAttributeF);
       if (InputFloat("", &v->fValue)) {
-        s.fEdited = true;
+        root.fEdited = true;
       }
     }
     break;
@@ -301,7 +304,7 @@ static void VisitNbtScalar(State &s,
     if (auto v = dynamic_pointer_cast<DoubleTag>(tag); v) {
       PushScalarInput(name, path, filter, s.fFilterCaseSensitive, s.fIconDocumentAttributeD);
       if (InputDouble("", &v->fValue)) {
-        s.fEdited = true;
+        root.fEdited = true;
       }
     }
     break;
@@ -313,6 +316,7 @@ static void VisitNbtScalar(State &s,
 }
 
 static void VisitNbtNonScalar(State &s,
+                              Compound &root,
                               std::string const &name,
                               std::shared_ptr<mcfile::nbt::Tag> const &tag,
                               std::string const &path,
@@ -390,7 +394,7 @@ static void VisitNbtNonScalar(State &s,
     switch (tag->type()) {
     case Tag::Type::Compound:
       if (auto v = dynamic_pointer_cast<CompoundTag>(tag); v) {
-        VisitNbtCompound(s, *v, nextPath, filter);
+        VisitNbtCompound(s, root, *v, nextPath, filter);
       }
       break;
     case Tag::Type::List:
@@ -398,7 +402,7 @@ static void VisitNbtNonScalar(State &s,
         for (size_t i = 0; i < v->fValue.size(); i++) {
           auto const &it = v->fValue[i];
           auto label = "#" + to_string(i);
-          VisitNbt(s, label, it, nextPath, filter);
+          VisitNbt(s, root, label, it, nextPath, filter);
         }
       }
       break;
@@ -407,7 +411,7 @@ static void VisitNbtNonScalar(State &s,
         for (size_t i = 0; i < v->fValue.size(); i++) {
           auto label = "#" + to_string(i);
           PushScalarInput(label, nextPath, filter, s.fFilterCaseSensitive, nullopt);
-          InputScalar<uint8_t>(v->fValue[i], s);
+          InputScalar<uint8_t>(v->fValue[i], root);
           PopScalarInput();
         }
       }
@@ -417,7 +421,7 @@ static void VisitNbtNonScalar(State &s,
         for (size_t i = 0; i < v->fValue.size(); i++) {
           auto label = "#" + to_string(i);
           PushScalarInput(label, nextPath, filter, s.fFilterCaseSensitive, nullopt);
-          InputScalar<int>(v->fValue[i], s);
+          InputScalar<int>(v->fValue[i], root);
           PopScalarInput();
         }
       }
@@ -427,7 +431,7 @@ static void VisitNbtNonScalar(State &s,
         for (size_t i = 0; i < v->fValue.size(); i++) {
           auto label = "#" + to_string(i);
           PushScalarInput(label, nextPath, filter, s.fFilterCaseSensitive, nullopt);
-          InputScalar<int64_t>(v->fValue[i], s);
+          InputScalar<int64_t>(v->fValue[i], root);
           PopScalarInput();
         }
       }
@@ -441,6 +445,7 @@ static void VisitNbtNonScalar(State &s,
 }
 
 static void VisitNbt(State &s,
+                     Compound &root,
                      std::string const &name,
                      std::shared_ptr<mcfile::nbt::Tag> const &tag,
                      std::string const &path,
@@ -453,15 +458,16 @@ static void VisitNbt(State &s,
   case Tag::Type::ByteArray:
   case Tag::Type::IntArray:
   case Tag::Type::LongArray:
-    VisitNbtNonScalar(s, name, tag, path, filter);
+    VisitNbtNonScalar(s, root, name, tag, path, filter);
     break;
   default:
-    VisitNbtScalar(s, name, tag, path, filter);
+    VisitNbtScalar(s, root, name, tag, path, filter);
     break;
   }
 }
 
 static void VisitNbtCompound(State &s,
+                             Compound &root,
                              mcfile::nbt::CompoundTag const &tag,
                              std::string const &path,
                              std::string const &filter) {
@@ -484,7 +490,7 @@ static void VisitNbtCompound(State &s,
         }
       }
     }
-    VisitNbt(s, name, it.second, path, filter);
+    VisitNbt(s, root, name, it.second, path, filter);
   }
 }
 
@@ -499,11 +505,11 @@ static void Visit(State &s,
     if (node->hasParent()) {
       SetNextItemOpen(false, ImGuiCond_Once);
       if (TreeNodeEx(compound->fName.c_str())) {
-        VisitNbtCompound(s, *compound->fTag, path, filter);
+        VisitNbtCompound(s, *compound, *compound->fTag, path, filter);
         TreePop();
       }
     } else {
-      VisitNbtCompound(s, *compound->fTag, path, filter);
+      VisitNbtCompound(s, *compound, *compound->fTag, path, filter);
     }
     PopID();
   } else if (auto contents = node->directoryContents(); contents) {
