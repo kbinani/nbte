@@ -69,18 +69,14 @@ public:
     TypeDirectoryUnopened,
     TypeUnsupportedFile,
     TypeRegion,
-    TypeUnopenedChunk,
-    TypeChunk,
     TypeCompound,
   };
-  using Value = std::variant<DirectoryContents,                  // DirectoryContents
-                             Path,                               // FileUnopened
-                             Path,                               // DirectoryUnopened
-                             Path,                               // UnsupportedFile
-                             Region,                             // Region
-                             UnopenedChunk,                      // UnopenedChunk
-                             std::shared_ptr<mcfile::je::Chunk>, // Chunk
-                             Compound                            // Compound
+  using Value = std::variant<DirectoryContents, // DirectoryContents
+                             Path,              // FileUnopened
+                             Path,              // DirectoryUnopened
+                             Path,              // UnsupportedFile
+                             Region,            // Region
+                             Compound           // Compound
                              >;
 
   Node(Value &&value, std::shared_ptr<Node> parent);
@@ -93,7 +89,6 @@ public:
   Compound const *compound() const;
   Path const *unsupportedFile() const;
   Region *region();
-  UnopenedChunk const *unopenedChunk() const;
 
   std::string description() const;
   bool hasParent() const;

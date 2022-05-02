@@ -105,13 +105,6 @@ Region *Node::region() {
   return &std::get<TypeRegion>(fValue);
 }
 
-UnopenedChunk const *Node::unopenedChunk() const {
-  if (fValue.index() != TypeUnopenedChunk) {
-    return nullptr;
-  }
-  return &std::get<TypeUnopenedChunk>(fValue);
-}
-
 std::string Node::description() const {
   if (auto compound = this->compound(); compound) {
     switch (compound->fFormat) {
@@ -158,28 +151,6 @@ void Node::open(hwm::task_queue &queue) {
 
     fValue = Value(std::in_place_index<TypeUnsupportedFile>, *unopened);
     return;
-  }
-  if (auto unopened = unopenedChunk(); unopened) {
-    auto stream = make_shared<mcfile::stream::FileInputStream>(unopened->fFile);
-    mcfile::stream::InputStreamReader reader(stream, mcfile::Endian::Big);
-    if (!reader.seek(unopened->fOffset + sizeof(uint32_t))) {
-      return;
-    }
-    uint8_t compressionType;
-    if (!reader.read(&compressionType)) {
-      return;
-    }
-    if (compressionType != 2) {
-      return;
-    }
-    vector<uint8_t> buffer(unopened->fSize - 1);
-    if (!reader.read(buffer)) {
-      return;
-    }
-    if (auto tag = mcfile::nbt::CompoundTag::ReadCompressed(buffer, mcfile::Endian::Big); tag) {
-      fValue = Value(std::in_place_index<TypeCompound>, Compound(unopened->name(), tag, Compound::Format::DeflatedBigEndian));
-      return;
-    }
   }
 }
 

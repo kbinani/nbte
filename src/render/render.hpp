@@ -484,7 +484,7 @@ static void Visit(State &s,
   if (auto compound = node->compound(); compound) {
     PushID(path + "/" + compound->fName);
     if (node->hasParent()) {
-      SetNextItemOpen(true, ImGuiCond_Once);
+      SetNextItemOpen(false, ImGuiCond_Once);
       if (TreeNodeEx(compound->fName.c_str())) {
         VisitNbtCompound(s, *compound->fTag, path, filter);
         TreePop();
@@ -503,7 +503,7 @@ static void Visit(State &s,
     }
     PushID(path + "/" + name);
     if (node->hasParent()) {
-      SetNextItemOpen(true, ImGuiCond_Once);
+      SetNextItemOpen(false, ImGuiCond_Once);
       if (TreeNodeEx(label.c_str())) {
         for (auto const &it : contents->fValue) {
           Visit(s, it, path + "/" + name, filter);
@@ -546,19 +546,6 @@ static void Visit(State &s,
       }
     }
     PopID();
-  } else if (auto unopenedChunk = node->unopenedChunk(); unopenedChunk) {
-    Indent(GetTreeNodeToLabelSpacing());
-    string name = unopenedChunk->name();
-    PushID(path + "/" + name);
-    PushStyleColor(ImGuiCol_Button, ImVec4(0, 0, 0, 0));
-    PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(0, 0));
-    if (Button(name.c_str())) {
-      node->open(*s.fPool);
-    }
-    PopStyleVar();
-    PopStyleColor();
-    PopID();
-    Unindent(GetTreeNodeToLabelSpacing());
   } else if (auto unopenedFile = node->fileUnopened(); unopenedFile) {
     Indent(GetTreeNodeToLabelSpacing());
     PushID(path + "/" + unopenedFile->filename().string());
@@ -576,7 +563,7 @@ static void Visit(State &s,
     if (TreeNodeEx(unopenedDirectory->filename().string().c_str())) {
       node->open(*s.fPool);
       Indent(GetTreeNodeToLabelSpacing());
-      TextUnformatted("opening...");
+      TextUnformatted("loading...");
       Unindent(GetTreeNodeToLabelSpacing());
       TreePop();
     }
