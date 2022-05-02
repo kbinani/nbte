@@ -615,7 +615,11 @@ static void RenderFooter(State &s) {
   if (s.fOpened && !s.fOpenedPath.empty()) {
     PushItemWidth(-FLT_EPSILON);
     auto formatDescription = s.fOpened->description();
-    Text("Path: %s, Format: %s", s.fOpenedPath.u8string().c_str(), formatDescription.c_str());
+    if (formatDescription.empty()) {
+      Text("Path: %s", s.fOpenedPath.u8string().c_str());
+    } else {
+      Text("Path: %s, Format: %s", s.fOpenedPath.u8string().c_str(), formatDescription.c_str());
+    }
     PopItemWidth();
   }
 

@@ -120,9 +120,11 @@ std::string Node::description() const {
       return "Gzipped NBT (BigEndian)";
     case Compound::Format::GzippedLittleEndian:
       return "Gzipped NBT (LittleEndian)";
+    default:
+      return "Unknown";
     }
   }
-  return "Unknown";
+  return "";
 }
 
 bool Node::hasParent() const {
