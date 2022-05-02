@@ -2,7 +2,6 @@
 
 namespace nbte {
 
-using Path = std::filesystem::path;
 class Node;
 
 class Region {

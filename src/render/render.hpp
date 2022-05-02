@@ -205,11 +205,19 @@ static void InputScalar(int64_t &v, State &s) {
 static void PushScalarInput(std::string const &name,
                             std::string const &path,
                             std::string const &filter,
-                            bool filterCaseSensitive) {
+                            bool filterCaseSensitive,
+                            std::optional<Texture> const &icon) {
   using namespace std;
   using namespace ImGui;
   PushItemWidth(-FLT_EPSILON);
   Indent(GetTreeNodeToLabelSpacing());
+  if (icon) {
+    ImGui::Image((ImTextureID)(intptr_t)icon->fTexture, ImVec2(icon->fWidth, icon->fHeight));
+    SameLine();
+    auto cursor = GetCursorScreenPos();
+    auto style = GetStyle();
+    SetCursorScreenPos(ImVec2(cursor.x - style.FramePadding.x, cursor.y));
+  }
   PushID(path + "/" + name);
   if (!filter.empty()) {
     ImDrawList *list = GetWindowDrawList();
@@ -248,31 +256,34 @@ static void VisitNbtScalar(State &s,
   using namespace ImGui;
   using namespace mcfile::nbt;
 
-  PushScalarInput(name, path, filter, s.fFilterCaseSensitive);
-
   switch (tag->type()) {
   case Tag::Type::Int:
     if (auto v = dynamic_pointer_cast<IntTag>(tag); v) {
+      PushScalarInput(name, path, filter, s.fFilterCaseSensitive, nullopt);
       InputScalar<int>(v->fValue, s);
     }
     break;
   case Tag::Type::Byte:
     if (auto v = dynamic_pointer_cast<ByteTag>(tag); v) {
+      PushScalarInput(name, path, filter, s.fFilterCaseSensitive, s.fIconDocumentAttributeB);
       InputScalar<uint8_t>(v->fValue, s);
     }
     break;
   case Tag::Type::Short:
     if (auto v = dynamic_pointer_cast<ShortTag>(tag); v) {
+      PushScalarInput(name, path, filter, s.fFilterCaseSensitive, nullopt);
       InputScalar<int16_t>(v->fValue, s);
     }
     break;
   case Tag::Type::Long:
     if (auto v = dynamic_pointer_cast<LongTag>(tag); v) {
+      PushScalarInput(name, path, filter, s.fFilterCaseSensitive, nullopt);
       InputScalar(v->fValue, s);
     }
     break;
   case Tag::Type::String:
     if (auto v = dynamic_pointer_cast<StringTag>(tag); v) {
+      PushScalarInput(name, path, filter, s.fFilterCaseSensitive, nullopt);
       if (InputText("", &v->fValue)) {
         s.fEdited = true;
       }
@@ -280,6 +291,7 @@ static void VisitNbtScalar(State &s,
     break;
   case mcfile::nbt::Tag::Type::Float:
     if (auto v = dynamic_pointer_cast<FloatTag>(tag); v) {
+      PushScalarInput(name, path, filter, s.fFilterCaseSensitive, nullopt);
       if (InputFloat("", &v->fValue)) {
         s.fEdited = true;
       }
@@ -287,6 +299,7 @@ static void VisitNbtScalar(State &s,
     break;
   case mcfile::nbt::Tag::Type::Double:
     if (auto v = dynamic_pointer_cast<DoubleTag>(tag); v) {
+      PushScalarInput(name, path, filter, s.fFilterCaseSensitive, nullopt);
       if (InputDouble("", &v->fValue)) {
         s.fEdited = true;
       }
@@ -393,7 +406,7 @@ static void VisitNbtNonScalar(State &s,
       if (auto v = dynamic_pointer_cast<ByteArrayTag>(tag); v) {
         for (size_t i = 0; i < v->fValue.size(); i++) {
           auto label = "#" + to_string(i);
-          PushScalarInput(label, nextPath, filter, s.fFilterCaseSensitive);
+          PushScalarInput(label, nextPath, filter, s.fFilterCaseSensitive, nullopt);
           InputScalar<uint8_t>(v->fValue[i], s);
           PopScalarInput();
         }
@@ -403,7 +416,7 @@ static void VisitNbtNonScalar(State &s,
       if (auto v = dynamic_pointer_cast<IntArrayTag>(tag); v) {
         for (size_t i = 0; i < v->fValue.size(); i++) {
           auto label = "#" + to_string(i);
-          PushScalarInput(label, nextPath, filter, s.fFilterCaseSensitive);
+          PushScalarInput(label, nextPath, filter, s.fFilterCaseSensitive, nullopt);
           InputScalar<int>(v->fValue[i], s);
           PopScalarInput();
         }
@@ -413,7 +426,7 @@ static void VisitNbtNonScalar(State &s,
       if (auto v = dynamic_pointer_cast<LongArrayTag>(tag); v) {
         for (size_t i = 0; i < v->fValue.size(); i++) {
           auto label = "#" + to_string(i);
-          PushScalarInput(label, nextPath, filter, s.fFilterCaseSensitive);
+          PushScalarInput(label, nextPath, filter, s.fFilterCaseSensitive, nullopt);
           InputScalar<int64_t>(v->fValue[i], s);
           PopScalarInput();
         }

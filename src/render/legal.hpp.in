@@ -156,6 +156,16 @@ ${NBTE_LEGAL_LIBMINECRAFT_FILE})");
     TextWrapped("%s", R"(zlib-ng: https://github.com/zlib-ng/zlib-ng
 
 ${NBTE_LEGAL_ZLIB_NG})");
+    TextUnformatted("");
+    Separator();
+
+    TextWrapped("%s", R"(Fugue Icons: https://p.yusukekamiyamane.com/
+
+(C) 2013 Yusuke Kamiyamane. All rights reserved.
+
+These icons are licensed under a Creative Commons
+Attribution 3.0 License.
+<http://creativecommons.org/licenses/by/3.0/>)");
 
     if (IsKeyDown(GetKeyIndex(ImGuiKey_Escape))) {
       s.fMainMenuBarHelpOpenSourceLicensesOpened = false;

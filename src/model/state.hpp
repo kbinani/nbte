@@ -34,7 +34,11 @@ struct State {
 
   std::unique_ptr<hwm::task_queue> fPool;
 
-  State() : fPool(new hwm::task_queue(std::thread::hardware_concurrency())) {}
+  std::optional<Texture> fIconDocumentAttributeB;
+
+  State() : fPool(new hwm::task_queue(std::thread::hardware_concurrency())) {
+    fIconDocumentAttributeB = LoadTexture(document_attribute_b_png, document_attribute_b_png_len);
+  }
 
   void open(Path const &selected) {
     fError.clear();

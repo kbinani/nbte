@@ -2,6 +2,8 @@
 
 namespace nbte {
 
+using Path = std::filesystem::path;
+
 static std::optional<std::filesystem::path> OpenFileDialog() {
   using namespace std;
   namespace fs = std::filesystem;
@@ -73,5 +75,47 @@ static std::optional<Path> MinecraftSaveDirectory() {
   }
 }
 #endif
+
+struct Texture {
+#if defined(_MSC_VER)
+  GLuint fTexture;
+#else
+#endif
+  int fWidth;
+  int fHeight;
+};
+
+static std::optional<Texture> LoadTexture(unsigned char const *data, unsigned int size) {
+  // Load from file
+  int width, height, components;
+  unsigned char *img = stbi_load_from_memory(data, size, &width, &height, &components, 4);
+  if (img == NULL) {
+    return std::nullopt;
+  }
+
+  // Create a OpenGL texture identifier
+  GLuint image_texture;
+  glGenTextures(1, &image_texture);
+  glBindTexture(GL_TEXTURE_2D, image_texture);
+
+  // Setup filtering parameters for display
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+  // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE); // This is required on WebGL for non power-of-two textures
+  // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE); // Same
+
+  // Upload pixels into texture
+#if defined(GL_UNPACK_ROW_LENGTH) && !defined(__EMSCRIPTEN__)
+  glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
+#endif
+  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, img);
+  stbi_image_free(img);
+
+  Texture ret;
+  ret.fTexture = image_texture;
+  ret.fWidth = width;
+  ret.fHeight = height;
+  return ret;
+}
 
 } // namespace nbte
