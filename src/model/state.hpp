@@ -35,9 +35,21 @@ struct State {
   std::unique_ptr<hwm::task_queue> fPool;
 
   std::optional<Texture> fIconDocumentAttributeB;
+  std::optional<Texture> fIconDocumentAttributeD;
+  std::optional<Texture> fIconDocumentAttributeF;
+  std::optional<Texture> fIconDocumentAttributeI;
+  std::optional<Texture> fIconDocumentAttributeL;
+  std::optional<Texture> fIconDocumentAttributeS;
+  std::optional<Texture> fIconEditSmallCaps;
 
   State() : fPool(new hwm::task_queue(std::thread::hardware_concurrency())) {
     fIconDocumentAttributeB = LoadTexture(document_attribute_b_png, document_attribute_b_png_len);
+    fIconDocumentAttributeD = LoadTexture(document_attribute_d_png, document_attribute_d_png_len);
+    fIconDocumentAttributeF = LoadTexture(document_attribute_f_png, document_attribute_f_png_len);
+    fIconDocumentAttributeI = LoadTexture(document_attribute_i_png, document_attribute_i_png_len);
+    fIconDocumentAttributeL = LoadTexture(document_attribute_l_png, document_attribute_l_png_len);
+    fIconDocumentAttributeS = LoadTexture(document_attribute_s_png, document_attribute_s_png_len);
+    fIconEditSmallCaps = LoadTexture(edit_small_caps_png, edit_small_caps_png_len);
   }
 
   void open(Path const &selected) {

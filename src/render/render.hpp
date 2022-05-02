@@ -259,7 +259,7 @@ static void VisitNbtScalar(State &s,
   switch (tag->type()) {
   case Tag::Type::Int:
     if (auto v = dynamic_pointer_cast<IntTag>(tag); v) {
-      PushScalarInput(name, path, filter, s.fFilterCaseSensitive, nullopt);
+      PushScalarInput(name, path, filter, s.fFilterCaseSensitive, s.fIconDocumentAttributeI);
       InputScalar<int>(v->fValue, s);
     }
     break;
@@ -271,19 +271,19 @@ static void VisitNbtScalar(State &s,
     break;
   case Tag::Type::Short:
     if (auto v = dynamic_pointer_cast<ShortTag>(tag); v) {
-      PushScalarInput(name, path, filter, s.fFilterCaseSensitive, nullopt);
+      PushScalarInput(name, path, filter, s.fFilterCaseSensitive, s.fIconDocumentAttributeS);
       InputScalar<int16_t>(v->fValue, s);
     }
     break;
   case Tag::Type::Long:
     if (auto v = dynamic_pointer_cast<LongTag>(tag); v) {
-      PushScalarInput(name, path, filter, s.fFilterCaseSensitive, nullopt);
+      PushScalarInput(name, path, filter, s.fFilterCaseSensitive, s.fIconDocumentAttributeL);
       InputScalar(v->fValue, s);
     }
     break;
   case Tag::Type::String:
     if (auto v = dynamic_pointer_cast<StringTag>(tag); v) {
-      PushScalarInput(name, path, filter, s.fFilterCaseSensitive, nullopt);
+      PushScalarInput(name, path, filter, s.fFilterCaseSensitive, s.fIconEditSmallCaps);
       if (InputText("", &v->fValue)) {
         s.fEdited = true;
       }
@@ -291,7 +291,7 @@ static void VisitNbtScalar(State &s,
     break;
   case mcfile::nbt::Tag::Type::Float:
     if (auto v = dynamic_pointer_cast<FloatTag>(tag); v) {
-      PushScalarInput(name, path, filter, s.fFilterCaseSensitive, nullopt);
+      PushScalarInput(name, path, filter, s.fFilterCaseSensitive, s.fIconDocumentAttributeF);
       if (InputFloat("", &v->fValue)) {
         s.fEdited = true;
       }
@@ -299,7 +299,7 @@ static void VisitNbtScalar(State &s,
     break;
   case mcfile::nbt::Tag::Type::Double:
     if (auto v = dynamic_pointer_cast<DoubleTag>(tag); v) {
-      PushScalarInput(name, path, filter, s.fFilterCaseSensitive, nullopt);
+      PushScalarInput(name, path, filter, s.fFilterCaseSensitive, s.fIconDocumentAttributeD);
       if (InputDouble("", &v->fValue)) {
         s.fEdited = true;
       }

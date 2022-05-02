@@ -27,6 +27,12 @@
 #include "resource/udev_gothic35_regular.h"
 #include "resource/nbte32.h"
 #include "resource/icon_document_attribute_b.h"
+#include "resource/icon_document_attribute_d.h"
+#include "resource/icon_document_attribute_f.h"
+#include "resource/icon_document_attribute_i.h"
+#include "resource/icon_document_attribute_l.h"
+#include "resource/icon_document_attribute_s.h"
+#include "resource/icon_edit_small_caps.h"
 
 #include "version.hpp"
 #include "string.hpp"
