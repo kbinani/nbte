@@ -65,6 +65,8 @@ list(APPEND nbte_files
   src/platform.hpp
   src/model/node.hpp
   src/model/node.impl.hpp
+  src/model/directory-contents.impl.hpp
+  src/model/region.impl.hpp
   src/resource/udev_gothic35_regular.h
   src/resource/nbte32.h
   resource/appicon.rc.in

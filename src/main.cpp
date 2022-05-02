@@ -31,6 +31,8 @@
 #include "string.hpp"
 #include "model/node.hpp"
 #include "model/node.impl.hpp"
+#include "model/directory-contents.impl.hpp"
+#include "model/region.impl.hpp"
 #include "model/state.hpp"
 #include "platform.hpp"
 #include "render/legal.hpp"
