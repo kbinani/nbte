@@ -5,14 +5,14 @@ namespace nbte {
 std::shared_ptr<Node> Node::OpenDirectory(Path const &path, hwm::task_queue &queue) {
   using namespace std;
   auto ret = DirectoryUnopened(path, nullptr);
-  ret->open(queue);
+  ret->load(queue);
   return ret;
 }
 
 std::shared_ptr<Node> Node::OpenFile(Path const &path, hwm::task_queue &queue) {
   using namespace std;
   auto ret = FileUnopened(path, nullptr);
-  ret->open(queue);
+  ret->load(queue);
   return ret;
 }
 
@@ -129,7 +129,7 @@ bool Node::hasParent() const {
   return !!fParent;
 }
 
-void Node::open(hwm::task_queue &queue) {
+void Node::load(hwm::task_queue &queue) {
   using namespace std;
 
   if (auto unopened = directoryUnopened(); unopened) {

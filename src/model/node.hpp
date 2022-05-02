@@ -81,7 +81,7 @@ public:
 
   Node(Value &&value, std::shared_ptr<Node> parent);
 
-  void open(hwm::task_queue &queue);
+  void load(hwm::task_queue &queue);
 
   DirectoryContents const *directoryContents() const;
   Path const *fileUnopened() const;

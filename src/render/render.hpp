@@ -552,7 +552,7 @@ static void Visit(State &s,
     PushStyleColor(ImGuiCol_Button, ImVec4(0, 0, 0, 0));
     PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(0, 0));
     if (Button(unopenedFile->filename().string().c_str())) {
-      node->open(*s.fPool);
+      node->load(*s.fPool);
     }
     PopStyleVar();
     PopStyleColor();
@@ -561,7 +561,7 @@ static void Visit(State &s,
   } else if (auto unopenedDirectory = node->directoryUnopened(); unopenedDirectory) {
     PushID(path + "/" + unopenedDirectory->filename().string());
     if (TreeNodeEx(unopenedDirectory->filename().string().c_str())) {
-      node->open(*s.fPool);
+      node->load(*s.fPool);
       Indent(GetTreeNodeToLabelSpacing());
       TextUnformatted("loading...");
       Unindent(GetTreeNodeToLabelSpacing());
