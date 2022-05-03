@@ -9,7 +9,7 @@ public:
   Region(hwm::task_queue &queue, int x, int z, Path const &path, std::shared_ptr<Node> const &parent);
 
   bool wait();
-  std::string save();
+  std::string save(TemporaryDirectory &temp);
 
   using ValueType = std::vector<std::shared_ptr<Node>>;
 
@@ -22,7 +22,7 @@ public:
 class DirectoryContents {
 public:
   DirectoryContents(Path const &dir, std::shared_ptr<Node> parent);
-  std::string save();
+  std::string save(TemporaryDirectory &temp);
 
   Path fDir;
   std::vector<std::shared_ptr<Node>> fValue;
@@ -39,7 +39,8 @@ public:
     GzippedBigEndian,
   };
 
-  Compound(std::variant<std::string, Path> const &name, std::shared_ptr<mcfile::nbt::CompoundTag> const &tag, Format format) : fName(name), fTag(tag), fFormat(format) {}
+  Compound(Path const &name, std::shared_ptr<mcfile::nbt::CompoundTag> const &tag, Format format) : fName(name), fTag(tag), fFormat(format) {}
+  Compound(std::string const &name, int cx, int cz, std::shared_ptr<mcfile::nbt::CompoundTag> const &tag, Format format) : fName(name), fTag(tag), fFormat(format), fChunkX(cx), fChunkZ(cz) {}
 
   std::string save(Path const &file);
   std::string save();
@@ -49,6 +50,8 @@ public:
   std::shared_ptr<mcfile::nbt::CompoundTag> fTag;
   Format fFormat;
   bool fEdited = false;
+  int fChunkX = 0;
+  int fChunkZ = 0;
 };
 
 class Node : public std::enable_shared_from_this<Node> {
@@ -72,7 +75,7 @@ public:
   Node(Value &&value, std::shared_ptr<Node> parent);
 
   void load(hwm::task_queue &queue);
-  std::string save();
+  std::string save(TemporaryDirectory &temp);
 
   DirectoryContents const *directoryContents() const;
   DirectoryContents *directoryContents();

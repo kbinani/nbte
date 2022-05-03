@@ -71,8 +71,10 @@ static std::optional<Region::ValueType> ReadRegion(int rx, int rz, Path path, st
       if (!tag) {
         return nullopt;
       }
-      string name("chunk " + to_string(rx * 32 + x) + " " + to_string(rz * 32 + z) + " [" + to_string(x) + " " + to_string(z) + " in region]");
-      auto node = shared_ptr<Node>(new Node(Node::Value(in_place_index<Node::TypeCompound>, Compound(name, tag, Compound::Format::DeflatedBigEndian)), parent));
+      int cx = rx * 32 + x;
+      int cz = rz * 32 + z;
+      string name("chunk " + to_string(cx) + " " + to_string(cz) + " [" + to_string(x) + " " + to_string(z) + " in region]");
+      auto node = shared_ptr<Node>(new Node(Node::Value(in_place_index<Node::TypeCompound>, Compound(name, cx, cz, tag, Compound::Format::DeflatedBigEndian)), parent));
       ret.push_back(node);
     }
   }
@@ -103,7 +105,7 @@ bool Region::wait() {
   return true;
 }
 
-std::string Region::save() {
+std::string Region::save(TemporaryDirectory &tempRoot) {
   if (fValue.index() != 0) {
     return "";
   }
@@ -122,8 +124,26 @@ std::string Region::save() {
   if (!dirty) {
     return "";
   }
-  // TODO:
-  return "Not implemented yet";
+  Path temp = tempRoot.createTempChildDirectory();
+  for (auto &it : r) {
+    auto c = it->compound();
+    if (!c) {
+      continue;
+    }
+    auto nbtz = temp / mcfile::je::Region::GetDefaultCompressedChunkNbtFileName(c->fChunkX, c->fChunkZ);
+    auto err = c->save(nbtz);
+    if (!err.empty()) {
+      std::filesystem::remove_all(temp);
+      return err;
+    }
+  }
+  bool ok = mcfile::je::Region::ConcatCompressedNbt(fX, fZ, temp, this->fFile);
+  std::filesystem::remove_all(temp);
+  if (ok) {
+    return "";
+  } else {
+    return "IO error";
+  }
 }
 
 } // namespace nbte

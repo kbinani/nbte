@@ -18,9 +18,9 @@ DirectoryContents::DirectoryContents(Path const &dir, std::shared_ptr<Node> pare
   }
 }
 
-std::string DirectoryContents::save() {
+std::string DirectoryContents::save(TemporaryDirectory &temp) {
   for (auto &it : fValue) {
-    auto err = it->save();
+    auto err = it->save(temp);
     if (!err.empty()) {
       return err;
     }

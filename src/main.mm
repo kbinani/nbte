@@ -22,11 +22,15 @@
 #include <hwm/task/task_queue.hpp>
 #include <minecraft-file.hpp>
 #include <nfd.h>
+extern "C" {
+#include <uuid4.h>
+}
 #include <variant>
 
 #include "version.hpp"
 #include "string.hpp"
 #include "platform.hpp"
+#include "temporary-directory.hpp"
 #include "model/node.hpp"
 #include "model/node.impl.hpp"
 #include "model/directory-contents.impl.hpp"
@@ -80,6 +84,8 @@
 
   // Setup Renderer backend
   ImGui_ImplMetal_Init(_device);
+
+  uuid4_init();
 
   return self;
 }

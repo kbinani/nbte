@@ -70,6 +70,7 @@ list(APPEND nbte_files
   src/model/directory-contents.impl.hpp
   src/model/region.impl.hpp
   src/model/compound.impl.hpp
+  src/temporary-directory.hpp
   resource/appicon.rc.in
   resource/UDEVGothic35_Regular.ttf
   resource/document_attribute_b.png
@@ -140,7 +141,8 @@ target_include_directories(nbte
     deps/glfw/include
     deps/nativefiledialog/src/include
     deps/stb
-    deps/hwm.task)
+    deps/hwm.task
+    deps/uuid4/src)
 
 list(APPEND nbte_link_libraries
   mcfile)

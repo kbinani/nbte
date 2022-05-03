@@ -76,6 +76,25 @@ static std::optional<Path> MinecraftSaveDirectory() {
 }
 #endif
 
+static Path TemporaryDirectoryRoot() {
+#if defined(_MSC_VER)
+  wchar_t buffer[2048] = {0};
+  GetTempPathW(sizeof(buffer) / sizeof(buffer[0]), buffer);
+  return Path(buffer);
+#else
+  assert(false);
+  return std::filesystem::temp_directory_path();
+#endif
+}
+
+static std::string UuidString() {
+  char data[37] = {0};
+  uuid4_generate(data);
+  std::string ret;
+  ret.assign(data, data + 36);
+  return ret;
+}
+
 struct Texture {
   ImTextureID fTexture;
   int fWidth;

@@ -216,11 +216,11 @@ void Node::load(hwm::task_queue &queue) {
   }
 }
 
-std::string Node::save() {
+std::string Node::save(TemporaryDirectory &temp) {
   if (auto r = region(); r) {
-    return r->save();
+    return r->save(temp);
   } else if (auto contents = directoryContents(); contents) {
-    return contents->save();
+    return contents->save(temp);
   } else if (auto c = compound(); c) {
     return c->save();
   }

@@ -17,8 +17,10 @@ struct State {
   bool fMainMenuBarHelpOpenSourceLicensesOpened = false;
   bool fMainMenuBarQuitSelected = false;
 
+  TemporaryDirectory fTempRoot;
+
   std::shared_ptr<Node> fOpened;
-  std::filesystem::path fOpenedPath;
+  Path fOpenedPath;
 
   std::string fError;
 
@@ -76,7 +78,7 @@ struct State {
     if (!fOpened) {
       return;
     }
-    fError = fOpened->save();
+    fError = fOpened->save(fTempRoot);
     if (fError.empty()) {
       fOpened->clearDirty();
     }

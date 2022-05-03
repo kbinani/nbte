@@ -23,11 +23,15 @@
 #include <hwm/task/task_queue.hpp>
 #include <minecraft-file.hpp>
 #include <nfd.h>
+extern "C" {
+#include <uuid4.h>
+}
 #include <variant>
 
 #include "version.hpp"
 #include "string.hpp"
 #include "platform.hpp"
+#include "temporary-directory.hpp"
 #include "model/node.hpp"
 #include "model/node.impl.hpp"
 #include "model/directory-contents.impl.hpp"
@@ -116,6 +120,8 @@ int main(int, char **) {
     assert(udevFont->fSystemOwned);
     io.Fonts->AddFontFromMemoryTTF(udevFont->fData, udevFont->fSize, 15.0f, &cfg);
   }
+
+  uuid4_init();
 
   nbte::State state;
   state.fMinecraftSaveDirectory = nbte::MinecraftSaveDirectory();
