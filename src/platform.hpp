@@ -120,7 +120,6 @@ static std::optional<Resource> LoadNamedResource(char const *name) {
   Resource resource(address, size, true);
   return resource;
 #else
-
   @autoreleasepool {
     NSString *fileName = [NSString stringWithUTF8String:name];
     NSString *baseName = [fileName stringByDeletingPathExtension];
@@ -177,7 +176,7 @@ static std::optional<Texture> LoadTexture(char const *name) {
   stbi_image_free(img);
 
   Texture ret;
-  ret.fTexture = image_texture;
+  ret.fTexture = (ImTextureID)(intptr_t)image_texture;
   ret.fWidth = width;
   ret.fHeight = height;
   return ret;
