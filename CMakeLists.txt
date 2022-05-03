@@ -130,7 +130,7 @@ if ("${CMAKE_SYSTEM_NAME}" STREQUAL "Darwin")
   set_source_files_properties(resource/edit_small_caps.png PROPERTIES MACOSX_PACKAGE_LOCATION Resources)
   set_source_files_properties(resource/nbte32.png PROPERTIES MACOSX_PACKAGE_LOCATION Resources)
 else()
-  add_executable(nbte ${nbte_files})
+  add_executable(nbte WIN32 ${nbte_files})
 endif()
 
 target_include_directories(nbte

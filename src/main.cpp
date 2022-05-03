@@ -48,21 +48,18 @@ extern "C" {
 #pragma comment(lib, "legacy_stdio_definitions")
 #endif
 
-#if defined(_MSC_VER)
-#pragma comment(linker, "/SUBSYSTEM:windows /ENTRY:mainCRTStartup")
-#endif
-
 static void glfw_error_callback(int error, const char *description) {
   fprintf(stderr, "Glfw Error %d: %s\n", error, description);
 }
 
-int main(int, char **) {
+int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR pCmdLine, int nCmdShow) {
   // Setup window
   glfwSetErrorCallback(glfw_error_callback);
-  if (!glfwInit())
+  if (!glfwInit()) {
     return 1;
+  }
 
-    // Decide GL+GLSL versions
+  // Decide GL+GLSL versions
 #if defined(IMGUI_IMPL_OPENGL_ES2)
   // GL ES 2.0 + GLSL 100
   const char *glsl_version = "#version 100";
