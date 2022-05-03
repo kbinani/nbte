@@ -24,6 +24,24 @@ static void PushID(std::string const &id) {
   ImGui::PushID(id.c_str());
 }
 
+static void RenderSavingModal(State &s) {
+  using namespace ImGui;
+  OpenPopup("Info");
+  SetNextWindowSize(ImVec2(512, 0));
+  if (BeginPopupModal("Info", nullptr, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_AlwaysAutoResize)) {
+    TextUnformatted("Saving edited files...");
+    EndPopup();
+  }
+}
+
+static void Save(State &s) {
+  if (!s.canSave()) {
+    return;
+  }
+  RenderSavingModal(s);
+  s.save();
+}
+
 static void RenderMainMenu(State &s) {
   using namespace ImGui;
 
@@ -44,8 +62,8 @@ static void RenderMainMenu(State &s) {
           s.openDirectory(*s.fMinecraftSaveDirectory);
         }
       }
-      if (MenuItem("Save", DecorateModCtrl("S").c_str(), nullptr, !!s.fOpened)) {
-        s.save();
+      if (MenuItem("Save", DecorateModCtrl("S").c_str(), nullptr, s.canSave())) {
+        Save(s);
       }
       Separator();
       if (MenuItem("Quit", QuitMenuShortcut().c_str())) {
@@ -686,7 +704,7 @@ static void CaptureShortcutKey(State &s) {
     if (IsKeyDown(GetKeyIndex(ImGuiKey_F))) {
       s.fFilterBarOpened = true;
     } else if (IsKeyDown(GetKeyIndex(ImGuiKey_S)) && s.fOpened) {
-      s.save();
+      Save(s);
     } else if (IsKeyDown(GetKeyIndex(ImGuiKey_O))) {
       if (IsKeyDown(GetKeyIndex(ImGuiKey_ModShift))) {
         if (auto selected = OpenDirectoryDialog(); selected) {
@@ -709,6 +727,10 @@ static void Render(State &s) {
   SetWindowPos(ImVec2(0, 0));
   SetWindowSize(ImVec2(s.fDisplaySize.x, s.fDisplaySize.y - GetFrameHeightWithSpacing()));
 
+  if (s.fSaveTask) {
+    RenderSavingModal(s);
+  }
+
   RenderMainMenu(s);
   RenderErrorPopup(s);
   RenderFilterBar(s);
@@ -724,9 +746,13 @@ static void Render(State &s) {
 
   RenderFooter(s);
 
-  CaptureShortcutKey(s);
+  if (!s.fSaveTask) {
+    CaptureShortcutKey(s);
+  }
 
   ImGui::Render();
+
+  s.retrieveSaveTask();
 }
 
 } // namespace nbte

@@ -21,6 +21,7 @@ struct State {
 
   std::shared_ptr<Node> fOpened;
   Path fOpenedPath;
+  std::shared_ptr<std::future<std::string>> fSaveTask;
 
   std::string fError;
 
@@ -33,6 +34,7 @@ struct State {
   std::optional<Path> fMinecraftSaveDirectory;
 
   std::unique_ptr<hwm::task_queue> fPool;
+  std::unique_ptr<hwm::task_queue> fSaveQueue;
 
   std::optional<Texture> fIconDocumentAttributeB;
   std::optional<Texture> fIconDocumentAttributeD;
@@ -42,7 +44,7 @@ struct State {
   std::optional<Texture> fIconDocumentAttributeS;
   std::optional<Texture> fIconEditSmallCaps;
 
-  State() : fPool(new hwm::task_queue(std::thread::hardware_concurrency())) {
+  State() : fPool(new hwm::task_queue(std::thread::hardware_concurrency())), fSaveQueue(new hwm::task_queue(1)) {
     fIconDocumentAttributeB = LoadTexture("document_attribute_b.png");
     fIconDocumentAttributeD = LoadTexture("document_attribute_d.png");
     fIconDocumentAttributeF = LoadTexture("document_attribute_f.png");
@@ -73,15 +75,41 @@ struct State {
     fError = "Can't open directory";
   }
 
+  bool canSave() const {
+    if (!fOpened) {
+      return false;
+    }
+    if (fSaveTask) {
+      return false;
+    }
+    return true;
+  }
+
   void save() {
+    using namespace std;
+
     fError.clear();
     if (!fOpened) {
       return;
     }
-    fError = fOpened->save(fTempRoot);
+    fSaveTask = make_shared<future<string>>(fSaveQueue->enqueue([](Node &node, TemporaryDirectory &temp) { return node.save(temp); }, *fOpened, ref(fTempRoot)));
+  }
+
+  void retrieveSaveTask() {
+    using namespace std;
+    if (!fSaveTask) {
+      return;
+    }
+    auto state = fSaveTask->wait_for(chrono::seconds(0));
+    if (state != future_status::ready) {
+      return;
+    }
+    auto error = fSaveTask->get();
+    fError = error;
     if (fError.empty()) {
       fOpened->clearDirty();
     }
+    fSaveTask.reset();
   }
 
   std::string filterTerm() const {
