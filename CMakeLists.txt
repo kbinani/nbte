@@ -67,6 +67,7 @@ list(APPEND nbte_files
   src/model/node.impl.hpp
   src/model/directory-contents.impl.hpp
   src/model/region.impl.hpp
+  src/model/compound.impl.hpp
   resource/appicon.rc.in
   resource/UDEVGothic35_Regular.ttf
   resource/document_attribute_b.png

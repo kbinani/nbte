@@ -501,10 +501,10 @@ static void Visit(State &s,
   using namespace std;
   using namespace ImGui;
   if (auto compound = node->compound(); compound) {
-    PushID(path + "/" + compound->fName);
+    PushID(path + "/" + compound->name());
     if (node->hasParent()) {
       SetNextItemOpen(false, ImGuiCond_Once);
-      if (TreeNodeEx(compound->fName.c_str())) {
+      if (TreeNodeEx(compound->name().c_str())) {
         VisitNbtCompound(s, *compound, *compound->fTag, path, filter);
         TreePop();
       }

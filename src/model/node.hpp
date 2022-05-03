@@ -9,35 +9,21 @@ public:
   Region(hwm::task_queue &queue, int x, int z, Path const &path, std::shared_ptr<Node> const &parent);
 
   bool wait();
+  std::string save();
 
   using ValueType = std::vector<std::shared_ptr<Node>>;
 
+  Path fFile;
   int fX;
   int fZ;
   std::variant<ValueType, std::shared_ptr<std::future<std::optional<ValueType>>>> fValue;
 };
 
-class UnopenedChunk {
-public:
-  UnopenedChunk(Path file, uint64_t offset, uint64_t size, int cx, int cz, int localX, int localZ) : fFile(file), fOffset(offset), fSize(size), fChunkX(cx), fChunkZ(cz), fLocalChunkX(localX), fLocalChunkZ(localZ) {}
-
-  std::string name() const {
-    using namespace std;
-    return "chunk " + to_string(fChunkX) + " " + to_string(fChunkZ) + " [" + to_string(fLocalChunkX) + " " + to_string(fLocalChunkZ) + " in region]";
-  }
-
-  Path fFile;
-  uint64_t fOffset;
-  uint64_t fSize;
-  int fChunkX;
-  int fChunkZ;
-  int fLocalChunkX;
-  int fLocalChunkZ;
-};
-
 class DirectoryContents {
 public:
   DirectoryContents(Path const &dir, std::shared_ptr<Node> parent);
+  std::string save();
+
   Path fDir;
   std::vector<std::shared_ptr<Node>> fValue;
 };
@@ -53,9 +39,13 @@ public:
     GzippedBigEndian,
   };
 
-  Compound(std::string const &name, std::shared_ptr<mcfile::nbt::CompoundTag> const &tag, Format format) : fName(name), fTag(tag), fFormat(format) {}
+  Compound(std::variant<std::string, Path> const &name, std::shared_ptr<mcfile::nbt::CompoundTag> const &tag, Format format) : fName(name), fTag(tag), fFormat(format) {}
 
-  std::string fName;
+  std::string save(Path const &file);
+  std::string save();
+  std::string name() const;
+
+  std::variant<std::string, Path> fName;
   std::shared_ptr<mcfile::nbt::CompoundTag> fTag;
   Format fFormat;
   bool fEdited = false;
@@ -82,8 +72,10 @@ public:
   Node(Value &&value, std::shared_ptr<Node> parent);
 
   void load(hwm::task_queue &queue);
+  std::string save();
 
   DirectoryContents const *directoryContents() const;
+  DirectoryContents *directoryContents();
   Path const *fileUnopened() const;
   Path const *directoryUnopened() const;
   Compound const *compound() const;

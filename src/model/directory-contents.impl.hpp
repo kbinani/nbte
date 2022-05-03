@@ -18,4 +18,14 @@ DirectoryContents::DirectoryContents(Path const &dir, std::shared_ptr<Node> pare
   }
 }
 
+std::string DirectoryContents::save() {
+  for (auto &it : fValue) {
+    auto err = it->save();
+    if (!err.empty()) {
+      return err;
+    }
+  }
+  return "";
+}
+
 } // namespace nbte

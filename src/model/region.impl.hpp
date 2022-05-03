@@ -80,8 +80,8 @@ static std::optional<Region::ValueType> ReadRegion(int rx, int rz, Path path, st
   return ret;
 }
 
-Region::Region(hwm::task_queue &queue, int x, int z, Path const &path, std::shared_ptr<Node> const &parent) : fX(x), fZ(z) {
-  fValue = std::make_shared<std::future<std::optional<ValueType>>>(queue.enqueue(ReadRegion, x, z, path, parent));
+Region::Region(hwm::task_queue &queue, int x, int z, Path const &file, std::shared_ptr<Node> const &parent) : fFile(file), fX(x), fZ(z) {
+  fValue = std::make_shared<std::future<std::optional<ValueType>>>(queue.enqueue(ReadRegion, x, z, file, parent));
 }
 
 bool Region::wait() {
@@ -101,6 +101,29 @@ bool Region::wait() {
   }
   future.reset();
   return true;
+}
+
+std::string Region::save() {
+  if (fValue.index() != 0) {
+    return "";
+  }
+  bool dirty = false;
+  auto &r = get<0>(fValue);
+  for (auto &it : r) {
+    if (auto c = it->compound(); c) {
+      if (c->fEdited) {
+        dirty = true;
+        break;
+      }
+    } else {
+      continue;
+    }
+  }
+  if (!dirty) {
+    return "";
+  }
+  // TODO:
+  return "Not implemented yet";
 }
 
 } // namespace nbte

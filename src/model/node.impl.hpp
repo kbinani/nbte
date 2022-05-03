@@ -70,6 +70,13 @@ DirectoryContents const *Node::directoryContents() const {
   return &std::get<TypeDirectoryContents>(fValue);
 }
 
+DirectoryContents *Node::directoryContents() {
+  if (fValue.index() != TypeDirectoryContents) {
+    return nullptr;
+  }
+  return &std::get<TypeDirectoryContents>(fValue);
+}
+
 Path const *Node::fileUnopened() const {
   if (fValue.index() != TypeFileUnopened) {
     return nullptr;
@@ -195,7 +202,7 @@ void Node::load(hwm::task_queue &queue) {
   if (auto unopened = fileUnopened(); unopened) {
     Compound::Format format;
     if (auto tag = ReadCompound(*unopened, &format); tag) {
-      fValue = Value(std::in_place_index<TypeCompound>, Compound(unopened->filename().string(), tag, format));
+      fValue = Value(std::in_place_index<TypeCompound>, Compound(*unopened, tag, format));
       return;
     }
 
@@ -207,6 +214,18 @@ void Node::load(hwm::task_queue &queue) {
     fValue = Value(std::in_place_index<TypeUnsupportedFile>, *unopened);
     return;
   }
+}
+
+std::string Node::save() {
+  if (auto r = region(); r) {
+    return r->save();
+  } else if (auto contents = directoryContents(); contents) {
+    return contents->save();
+  } else if (auto c = compound(); c) {
+    return c->save();
+  }
+
+  return "";
 }
 
 } // namespace nbte

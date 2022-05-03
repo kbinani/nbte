@@ -72,62 +72,11 @@ struct State {
   }
 
   void save() {
-    using namespace std;
-    using namespace mcfile;
-    using namespace mcfile::stream;
-    using namespace mcfile::nbt;
-    namespace fs = std::filesystem;
-
     fError.clear();
-    auto file = fOpenedPath;
-
     if (!fOpened) {
       return;
     }
-    if (auto compound = fOpened->compound(); compound) {
-      Endian endian = Endian::Big;
-      switch (compound->fFormat) {
-      case Compound::Format::RawLittleEndian:
-        endian = Endian::Little;
-        [[fallthrough]];
-      case Compound::Format::RawBigEndian: {
-        auto stream = make_shared<FileOutputStream>(file);
-        OutputStreamWriter writer(stream, endian);
-        if (!compound->fTag->writeAsRoot(writer)) {
-          fError = "IO Error";
-        }
-        break;
-      }
-      case Compound::Format::DeflatedLittleEndian:
-        endian = Endian::Little;
-        [[fallthrough]];
-      case Compound::Format::DeflatedBigEndian: {
-        auto stream = make_shared<FileOutputStream>(file);
-        if (!CompoundTag::WriteCompressed(*compound->fTag, *stream, endian)) {
-          fError = "IO Error";
-        }
-        break;
-      }
-      case Compound::Format::GzippedLittleEndian:
-        endian = Endian::Little;
-        [[fallthrough]];
-      case Compound::Format::GzippedBigEndian: {
-        auto stream = make_shared<GzFileOutputStream>(file);
-        OutputStreamWriter writer(stream, endian);
-        if (!compound->fTag->writeAsRoot(writer)) {
-          fError = "IO Error";
-        }
-        break;
-      }
-      }
-    } else if (auto r = fOpened->region(); r) {
-      // TODO:
-      fError = "Unimplemented yet";
-    } else if (auto contents = fOpened->directoryContents(); contents) {
-      // TODO:
-      fError = "Unimplemented yet";
-    }
-
+    fError = fOpened->save();
     if (fError.empty()) {
       fOpened->clearDirty();
     }

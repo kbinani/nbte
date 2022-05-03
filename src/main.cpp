@@ -32,6 +32,7 @@
 #include "model/node.impl.hpp"
 #include "model/directory-contents.impl.hpp"
 #include "model/region.impl.hpp"
+#include "model/compound.impl.hpp"
 #include "model/state.hpp"
 #include "render/legal.hpp"
 #include "render/render.hpp"
