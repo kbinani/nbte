@@ -53,11 +53,23 @@ static void glfw_error_callback(int error, const char *description) {
 }
 
 int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR pCmdLine, int nCmdShow) {
+  namespace fs = std::filesystem;
+
   // Setup window
   glfwSetErrorCallback(glfw_error_callback);
   if (!glfwInit()) {
     return 1;
   }
+  int argc = 0;
+  LPWSTR *argv = CommandLineToArgvW(pCmdLine, &argc);
+  if (!argv) {
+    return 1;
+  }
+  fs::path file;
+  if (argc > 0) {
+    file = argv[0];
+  }
+  LocalFree(argv);
 
   // Decide GL+GLSL versions
 #if defined(IMGUI_IMPL_OPENGL_ES2)
@@ -122,6 +134,14 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR pCmdLine
 
   nbte::State state;
   state.fMinecraftSaveDirectory = nbte::MinecraftSaveDirectory();
+
+  if (fs::exists(file)) {
+    if (fs::is_regular_file(file)) {
+      state.open(file);
+    } else if (fs::is_directory(file)) {
+      state.openDirectory(file);
+    }
+  }
 
   // Main loop
   while (!glfwWindowShouldClose(window)) {
