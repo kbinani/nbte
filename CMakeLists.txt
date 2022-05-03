@@ -67,15 +67,6 @@ list(APPEND nbte_files
   src/model/node.impl.hpp
   src/model/directory-contents.impl.hpp
   src/model/region.impl.hpp
-  src/resource/udev_gothic35_regular.h
-  src/resource/nbte32.h
-  src/resource/icon_document_attribute_b.h
-  src/resource/icon_document_attribute_d.h
-  src/resource/icon_document_attribute_f.h
-  src/resource/icon_document_attribute_i.h
-  src/resource/icon_document_attribute_l.h
-  src/resource/icon_document_attribute_s.h
-  src/resource/icon_edit_small_caps.h
   resource/appicon.rc.in
   deps/imgui/imgui.cpp
   deps/imgui/imgui_draw.cpp

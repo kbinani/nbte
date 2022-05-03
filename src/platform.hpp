@@ -85,10 +85,58 @@ struct Texture {
   int fHeight;
 };
 
-static std::optional<Texture> LoadTexture(unsigned char const *data, unsigned int size) {
+struct Resource {
+  Resource(void *data, size_t size, bool systemOwned) : fData(data), fSize(size), fSystemOwned(free) {}
+
+  ~Resource() {
+    if (!fSystemOwned) {
+      free(fData);
+    }
+  }
+
+  void *fData;
+  size_t fSize;
+  bool const fSystemOwned;
+};
+
+static std::optional<Resource> LoadNamedResource(char const *name) {
+  using namespace std;
+#if defined(_MSC_VER)
+  HINSTANCE self = GetModuleHandle(nullptr);
+  HRSRC info = FindResourceA(self, name, "DATA");
+  if (!info) {
+    return nullopt;
+  }
+  HANDLE rc = LoadResource(self, info);
+  if (!rc) {
+    return nullopt;
+  }
+  void *address = LockResource(rc);
+  if (!address) {
+    return nullopt;
+  }
+  int size = SizeofResource(self, info);
+  if (size == 0) {
+    return nullopt;
+  }
+  Resource resource(address, size, true);
+  return resource;
+#else
+  // TODO:
+  return nullopt;
+#endif
+}
+
+static std::optional<Texture> LoadTexture(char const *name) {
+#if defined(_MSC_VER)
+  auto resource = LoadNamedResource(name);
+  if (!resource) {
+    return std::nullopt;
+  }
+
   // Load from file
   int width, height, components;
-  unsigned char *img = stbi_load_from_memory(data, size, &width, &height, &components, 4);
+  unsigned char *img = stbi_load_from_memory((stbi_uc const *)resource->fData, resource->fSize, &width, &height, &components, 4);
   if (img == NULL) {
     return std::nullopt;
   }
@@ -116,6 +164,10 @@ static std::optional<Texture> LoadTexture(unsigned char const *data, unsigned in
   ret.fWidth = width;
   ret.fHeight = height;
   return ret;
+#else
+  // TODO:
+  return std::nullopt;
+#endif
 }
 
 } // namespace nbte

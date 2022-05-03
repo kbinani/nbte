@@ -25,16 +25,6 @@
 #include <nfd.h>
 #include <variant>
 
-#include "resource/udev_gothic35_regular.h"
-#include "resource/nbte32.h"
-#include "resource/icon_document_attribute_b.h"
-#include "resource/icon_document_attribute_d.h"
-#include "resource/icon_document_attribute_f.h"
-#include "resource/icon_document_attribute_i.h"
-#include "resource/icon_document_attribute_l.h"
-#include "resource/icon_document_attribute_s.h"
-#include "resource/icon_edit_small_caps.h"
-
 #include "version.hpp"
 #include "string.hpp"
 #include "platform.hpp"
@@ -96,11 +86,13 @@ int main(int, char **) {
     return 1;
   }
 
-  int width, height, components;
-  unsigned char *img = stbi_load_from_memory(nbte32_png, nbte32_png_len, &width, &height, &components, 4);
-  GLFWimage icon = {width, height, img};
-  glfwSetWindowIcon(window, 1, &icon);
-  stbi_image_free(img);
+  if (auto nbte32 = nbte::LoadNamedResource("nbte32.png"); nbte32) {
+    int width, height, components;
+    unsigned char *img = stbi_load_from_memory((stbi_uc const *)nbte32->fData, nbte32->fSize, &width, &height, &components, 4);
+    GLFWimage icon = {width, height, img};
+    glfwSetWindowIcon(window, 1, &icon);
+    stbi_image_free(img);
+  }
 
   glfwMakeContextCurrent(window);
   glfwSwapInterval(1); // Enable vsync
@@ -117,7 +109,12 @@ int main(int, char **) {
   ImGui_ImplGlfw_InitForOpenGL(window, true);
   ImGui_ImplOpenGL3_Init(glsl_version);
 
-  io.Fonts->AddFontFromMemoryCompressedTTF(udev_gothic35_regular_compressed_data, udev_gothic35_regular_compressed_size, 15.0f);
+  if (auto udevFont = nbte::LoadNamedResource("UDEVGothic35_Regular.ttf"); udevFont) {
+    ImFontConfig cfg;
+    cfg.FontDataOwnedByAtlas = false;
+    assert(udevFont->fSystemOwned);
+    io.Fonts->AddFontFromMemoryTTF(udevFont->fData, udevFont->fSize, 15.0f, &cfg);
+  }
 
   nbte::State state;
   state.fMinecraftSaveDirectory = nbte::MinecraftSaveDirectory();
