@@ -24,16 +24,6 @@
 #include <nfd.h>
 #include <variant>
 
-#include "resource/udev_gothic35_regular.h"
-#include "resource/nbte32.h"
-#include "resource/icon_document_attribute_b.h"
-#include "resource/icon_document_attribute_d.h"
-#include "resource/icon_document_attribute_f.h"
-#include "resource/icon_document_attribute_i.h"
-#include "resource/icon_document_attribute_l.h"
-#include "resource/icon_document_attribute_s.h"
-#include "resource/icon_edit_small_caps.h"
-
 #include "version.hpp"
 #include "string.hpp"
 #include "platform.hpp"
@@ -59,15 +49,13 @@
   nbte::State state;
 }
 
--(instancetype)initWithNibName:(nullable NSString *)nibNameOrNil bundle:(nullable NSBundle *)nibBundleOrNil
-{
+- (instancetype)initWithNibName:(nullable NSString *)nibNameOrNil bundle:(nullable NSBundle *)nibBundleOrNil {
   self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
 
   _device = MTLCreateSystemDefaultDevice();
   _commandQueue = [_device newCommandQueue];
 
-    if (!self.device)
-    {
+  if (!self.device) {
     NSLog(@"Metal is not supported");
     abort();
   }
@@ -95,18 +83,15 @@
   return self;
 }
 
--(MTKView *)mtkView
-{
+- (MTKView *)mtkView {
   return (MTKView *)self.view;
 }
 
--(void)loadView
-{
+- (void)loadView {
   self.view = [[MTKView alloc] initWithFrame:CGRectMake(0, 0, 1200, 720)];
 }
 
--(void)viewDidLoad
-{
+- (void)viewDidLoad {
   [super viewDidLoad];
 
   self.mtkView.device = self.device;
@@ -122,8 +107,7 @@
   ImGui_ImplOSX_Init(self.view);
 }
 
--(void)drawInMTKView:(MTKView*)view
-{
+- (void)drawInMTKView:(MTKView *)view {
   ImGuiIO &io = ImGui::GetIO();
   io.DisplaySize.x = view.bounds.size.width;
   io.DisplaySize.y = view.bounds.size.height;
@@ -136,8 +120,7 @@
   id<MTLCommandBuffer> commandBuffer = [self.commandQueue commandBuffer];
 
   MTLRenderPassDescriptor *renderPassDescriptor = view.currentRenderPassDescriptor;
-    if (renderPassDescriptor == nil)
-    {
+  if (renderPassDescriptor == nil) {
     [commandBuffer commit];
     return;
   }
@@ -179,8 +162,7 @@
   }
 }
 
--(void)mtkView:(MTKView*)view drawableSizeWillChange:(CGSize)size
-{
+- (void)mtkView:(MTKView *)view drawableSizeWillChange:(CGSize)size {
 }
 
 //-----------------------------------------------------------------------------------
@@ -188,19 +170,45 @@
 //-----------------------------------------------------------------------------------
 
 // Forward Mouse events to Dear ImGui OSX backend.
--(void)mouseDown:(NSEvent *)event           { ImGui_ImplOSX_HandleEvent(event, self.view); }
--(void)rightMouseDown:(NSEvent *)event      { ImGui_ImplOSX_HandleEvent(event, self.view); }
--(void)otherMouseDown:(NSEvent *)event      { ImGui_ImplOSX_HandleEvent(event, self.view); }
--(void)mouseUp:(NSEvent *)event             { ImGui_ImplOSX_HandleEvent(event, self.view); }
--(void)rightMouseUp:(NSEvent *)event        { ImGui_ImplOSX_HandleEvent(event, self.view); }
--(void)otherMouseUp:(NSEvent *)event        { ImGui_ImplOSX_HandleEvent(event, self.view); }
--(void)mouseMoved:(NSEvent *)event          { ImGui_ImplOSX_HandleEvent(event, self.view); }
--(void)mouseDragged:(NSEvent *)event        { ImGui_ImplOSX_HandleEvent(event, self.view); }
--(void)rightMouseMoved:(NSEvent *)event     { ImGui_ImplOSX_HandleEvent(event, self.view); }
--(void)rightMouseDragged:(NSEvent *)event   { ImGui_ImplOSX_HandleEvent(event, self.view); }
--(void)otherMouseMoved:(NSEvent *)event     { ImGui_ImplOSX_HandleEvent(event, self.view); }
--(void)otherMouseDragged:(NSEvent *)event   { ImGui_ImplOSX_HandleEvent(event, self.view); }
--(void)scrollWheel:(NSEvent *)event         { ImGui_ImplOSX_HandleEvent(event, self.view); }
+- (void)mouseDown:(NSEvent *)event {
+  ImGui_ImplOSX_HandleEvent(event, self.view);
+}
+- (void)rightMouseDown:(NSEvent *)event {
+  ImGui_ImplOSX_HandleEvent(event, self.view);
+}
+- (void)otherMouseDown:(NSEvent *)event {
+  ImGui_ImplOSX_HandleEvent(event, self.view);
+}
+- (void)mouseUp:(NSEvent *)event {
+  ImGui_ImplOSX_HandleEvent(event, self.view);
+}
+- (void)rightMouseUp:(NSEvent *)event {
+  ImGui_ImplOSX_HandleEvent(event, self.view);
+}
+- (void)otherMouseUp:(NSEvent *)event {
+  ImGui_ImplOSX_HandleEvent(event, self.view);
+}
+- (void)mouseMoved:(NSEvent *)event {
+  ImGui_ImplOSX_HandleEvent(event, self.view);
+}
+- (void)mouseDragged:(NSEvent *)event {
+  ImGui_ImplOSX_HandleEvent(event, self.view);
+}
+- (void)rightMouseMoved:(NSEvent *)event {
+  ImGui_ImplOSX_HandleEvent(event, self.view);
+}
+- (void)rightMouseDragged:(NSEvent *)event {
+  ImGui_ImplOSX_HandleEvent(event, self.view);
+}
+- (void)otherMouseMoved:(NSEvent *)event {
+  ImGui_ImplOSX_HandleEvent(event, self.view);
+}
+- (void)otherMouseDragged:(NSEvent *)event {
+  ImGui_ImplOSX_HandleEvent(event, self.view);
+}
+- (void)scrollWheel:(NSEvent *)event {
+  ImGui_ImplOSX_HandleEvent(event, self.view);
+}
 
 @end
 
@@ -215,10 +223,8 @@
 
 @implementation AppDelegate
 
--(instancetype)init
-{
-    if (self = [super init])
-    {
+- (instancetype)init {
+  if (self = [super init]) {
     NSViewController *rootViewController = [[AppViewController alloc] initWithNibName:nil bundle:nil];
     self.window = [[NSWindow alloc] initWithContentRect:NSZeroRect
                                               styleMask:NSWindowStyleMaskTitled | NSWindowStyleMaskClosable | NSWindowStyleMaskResizable | NSWindowStyleMaskMiniaturizable
@@ -229,8 +235,7 @@
   return self;
 }
 
--(void)applicationDidFinishLaunching:(NSNotification *)notification
-{
+- (void)applicationDidFinishLaunching:(NSNotification *)notification {
   _windowController = [[NSWindowController alloc] initWithWindowNibName:@"MainMenu"];
   [_windowController showWindow:self];
 
@@ -239,8 +244,7 @@
   [self.window becomeKeyWindow];
 }
 
--(BOOL)applicationShouldTerminateAfterLastWindowClosed:(NSApplication *)sender
-{
+- (BOOL)applicationShouldTerminateAfterLastWindowClosed:(NSApplication *)sender {
   return YES;
 }
 
@@ -250,10 +254,8 @@
 // Application main() function
 //-----------------------------------------------------------------------------------
 
-int main(int argc, const char * argv[])
-{
-    @autoreleasepool
-    {
+int main(int argc, const char *argv[]) {
+  @autoreleasepool {
     NSApp = [NSApplication sharedApplication];
     AppDelegate *delegate = [[AppDelegate alloc] init];
     [[NSApplication sharedApplication] setDelegate:delegate];
