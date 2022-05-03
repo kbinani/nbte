@@ -215,6 +215,24 @@ extern "C" {
   ImGui_ImplOSX_HandleEvent(event, self.view);
 }
 
+- (BOOL)openFile:(NSString *)file {
+  namespace fs = std::filesystem;
+
+  nbte::Path filePath([file UTF8String]);
+  if (!fs::exists(filePath)) {
+    return NO;
+  }
+  if (fs::is_regular_file(filePath)) {
+    self->state.open(filePath);
+    return YES;
+  } else if (fs::is_directory(filePath)) {
+    self->state.openDirectory(filePath);
+    return YES;
+  } else {
+    return NO;
+  }
+}
+
 @end
 
 //-----------------------------------------------------------------------------------
@@ -224,6 +242,7 @@ extern "C" {
 @interface AppDelegate : NSObject <NSApplicationDelegate>
 @property(nonatomic, strong) NSWindow *window;
 @property(strong) NSWindowController *windowController;
+@property(strong) AppViewController *appViewController;
 @end
 
 @implementation AppDelegate
@@ -232,12 +251,13 @@ extern "C" {
   if (self = [super init]) {
     uuid4_init();
 
-    NSViewController *rootViewController = [[AppViewController alloc] initWithNibName:nil bundle:nil];
+    AppViewController *appViewController = [[AppViewController alloc] initWithNibName:nil bundle:nil];
     self.window = [[NSWindow alloc] initWithContentRect:NSZeroRect
                                               styleMask:NSWindowStyleMaskTitled | NSWindowStyleMaskClosable | NSWindowStyleMaskResizable | NSWindowStyleMaskMiniaturizable
                                                 backing:NSBackingStoreBuffered
                                                   defer:NO];
-    self.window.contentViewController = rootViewController;
+    self.window.contentViewController = appViewController;
+    self.appViewController = appViewController;
   }
   return self;
 }
@@ -253,6 +273,13 @@ extern "C" {
 
 - (BOOL)applicationShouldTerminateAfterLastWindowClosed:(NSApplication *)sender {
   return YES;
+}
+
+- (BOOL)application:(NSApplication *)sender openFile:(NSString *)filename {
+  if (!self.appViewController) {
+    return NO;
+  }
+  return [self.appViewController openFile:filename];
 }
 
 @end
