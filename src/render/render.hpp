@@ -193,7 +193,7 @@ static void InputScalar(T &v, Compound &root) {
 }
 
 template <>
-static void InputScalar(int64_t &v, Compound &root) {
+void InputScalar(int64_t &v, Compound &root) {
   std::string t = std::to_string(v);
   if (ImGui::InputText("", &t, ImGuiInputTextFlags_CharsDecimal)) {
     int64_t n = atoll(t.c_str());
