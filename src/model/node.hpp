@@ -102,7 +102,7 @@ private:
   Value fValue;
 
 public:
-  std::shared_ptr<Node> const fParent;
+  std::weak_ptr<Node> const fParent;
 };
 
 } // namespace nbte

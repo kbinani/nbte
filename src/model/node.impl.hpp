@@ -149,7 +149,7 @@ std::string Node::description() const {
 }
 
 bool Node::hasParent() const {
-  return !!fParent;
+  return fParent.use_count() != 0;
 }
 
 bool Node::isDirty() const {
