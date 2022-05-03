@@ -166,7 +166,12 @@ ${NBTE_LEGAL_ZLIB_NG})");
 These icons are licensed under a Creative Commons
 Attribution 3.0 License.
 <http://creativecommons.org/licenses/by/3.0/>)");
+    TextUnformatted("");
+    Separator();
 
+    TextWrapped("%s", R"(uuid4: https://github.com/rxi/uuid4
+
+${NBTE_LEGAL_UUID4})");
     if (IsKeyDown(GetKeyIndex(ImGuiKey_Escape))) {
       s.fMainMenuBarHelpOpenSourceLicensesOpened = false;
       CloseCurrentPopup();

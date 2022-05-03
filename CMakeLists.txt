@@ -47,6 +47,8 @@ file(READ deps/imgui/LICENSE.txt NBTE_LEGAL_DEARIMGUI)
 string(STRIP "${NBTE_LEGAL_DEARIMGUI}" NBTE_LEGAL_DEARIMGUI)
 file(READ deps/libminecraft-file/deps/zlib-ng/LICENSE.md NBTE_LEGAL_ZLIB_NG)
 string(STRIP "${NBTE_LEGAL_ZLIB_NG}" NBTE_LEGAL_ZLIB_NG)
+file(READ deps/uuid4/LICENSE NBTE_LEGAL_UUID4)
+string(STRIP "${NBTE_LEGAL_UUID4}" NBTE_LEGAL_UUID4)
 configure_file(src/render/legal.hpp.in ${CMAKE_CURRENT_SOURCE_DIR}/src/render/legal.hpp)
 
 configure_file(package/Package.appxmanifest.in ${CMAKE_CURRENT_SOURCE_DIR}/package/Package.appxmanifest)
@@ -84,7 +86,9 @@ list(APPEND nbte_files
   deps/imgui/imgui_widgets.cpp
   deps/imgui/misc/cpp/imgui_stdlib.cpp
   deps/nativefiledialog/src/nfd_common.c
-  deps/stb/stb_image.h)
+  deps/stb/stb_image.h
+  deps/uuid4/src/uuid4.h
+  deps/uuid4/src/uuid4.c)
 if ("${CMAKE_SYSTEM_NAME}" STREQUAL "Darwin")
   list(APPEND nbte_files
     src/main.mm
