@@ -77,10 +77,7 @@ static std::optional<Path> MinecraftSaveDirectory() {
 #endif
 
 struct Texture {
-#if defined(_MSC_VER)
-  GLuint fTexture;
-#else
-#endif
+  ImTextureID fTexture;
   int fWidth;
   int fHeight;
 };
@@ -101,6 +98,7 @@ struct Resource {
 
 static std::optional<Resource> LoadNamedResource(char const *name) {
   using namespace std;
+  namespace fs = std::filesystem;
 #if defined(_MSC_VER)
   HINSTANCE self = GetModuleHandle(nullptr);
   HRSRC info = FindResourceA(self, name, "DATA");
@@ -122,8 +120,27 @@ static std::optional<Resource> LoadNamedResource(char const *name) {
   Resource resource(address, size, true);
   return resource;
 #else
-  // TODO:
-  return nullopt;
+
+  @autoreleasepool {
+    NSString *fileName = [NSString stringWithUTF8String:name];
+    NSString *baseName = [fileName stringByDeletingPathExtension];
+    NSString *extension = [fileName pathExtension];
+    NSURL *url = [[NSBundle mainBundle] URLForResource:baseName withExtension:extension];
+    if (!url) {
+      return nullopt;
+    }
+    fs::path path([[url path] cStringUsingEncoding:NSUTF8StringEncoding]);
+    auto stream = make_shared<mcfile::stream::FileInputStream>(path);
+    vector<uint8_t> buffer;
+    mcfile::stream::InputStream::ReadUntilEos(*stream, buffer);
+    if (buffer.empty()) {
+      return nullopt;
+    }
+    void *copy = malloc(buffer.size());
+    memcpy(copy, buffer.data(), buffer.size());
+    Resource resource(copy, buffer.size(), false);
+    return resource;
+  }
 #endif
 }
 

@@ -68,6 +68,15 @@ list(APPEND nbte_files
   src/model/directory-contents.impl.hpp
   src/model/region.impl.hpp
   resource/appicon.rc.in
+  resource/UDEVGothic35_Regular.ttf
+  resource/document_attribute_b.png
+  resource/document_attribute_d.png
+  resource/document_attribute_f.png
+  resource/document_attribute_i.png
+  resource/document_attribute_l.png
+  resource/document_attribute_s.png
+  resource/edit_small_caps.png
+  resource/nbte32.png
   deps/imgui/imgui.cpp
   deps/imgui/imgui_draw.cpp
   deps/imgui/imgui_tables.cpp
@@ -104,6 +113,16 @@ if ("${CMAKE_SYSTEM_NAME}" STREQUAL "Darwin")
     XCODE_ATTRIBUTE_INSTALL_PATH "$(LOCAL_APPS_DIR)")
   set_source_files_properties(resource/assets.xcassets PROPERTIES MACOSX_PACKAGE_LOCATION Resources)
   set_source_files_properties(resource/MainMenu.xib PROPERTIES MACOSX_PACKAGE_LOCATION Resources)
+  set_source_files_properties(resource/MainMenu.xib PROPERTIES MACOSX_PACKAGE_LOCATION Resources)
+  set_source_files_properties(resource/UDEVGothic35_Regular.ttf PROPERTIES MACOSX_PACKAGE_LOCATION Resources)
+  set_source_files_properties(resource/document_attribute_b.png PROPERTIES MACOSX_PACKAGE_LOCATION Resources)
+  set_source_files_properties(resource/document_attribute_d.png PROPERTIES MACOSX_PACKAGE_LOCATION Resources)
+  set_source_files_properties(resource/document_attribute_f.png PROPERTIES MACOSX_PACKAGE_LOCATION Resources)
+  set_source_files_properties(resource/document_attribute_i.png PROPERTIES MACOSX_PACKAGE_LOCATION Resources)
+  set_source_files_properties(resource/document_attribute_l.png PROPERTIES MACOSX_PACKAGE_LOCATION Resources)
+  set_source_files_properties(resource/document_attribute_s.png PROPERTIES MACOSX_PACKAGE_LOCATION Resources)
+  set_source_files_properties(resource/edit_small_caps.png PROPERTIES MACOSX_PACKAGE_LOCATION Resources)
+  set_source_files_properties(resource/nbte32.png PROPERTIES MACOSX_PACKAGE_LOCATION Resources)
 else()
   add_executable(nbte ${nbte_files})
 endif()
