@@ -82,7 +82,6 @@ static Path TemporaryDirectoryRoot() {
   GetTempPathW(sizeof(buffer) / sizeof(buffer[0]), buffer);
   return Path(buffer);
 #else
-  assert(false);
   return std::filesystem::temp_directory_path();
 #endif
 }

@@ -85,8 +85,6 @@ extern "C" {
   // Setup Renderer backend
   ImGui_ImplMetal_Init(_device);
 
-  uuid4_init();
-
   return self;
 }
 
@@ -232,6 +230,8 @@ extern "C" {
 
 - (instancetype)init {
   if (self = [super init]) {
+    uuid4_init();
+
     NSViewController *rootViewController = [[AppViewController alloc] initWithNibName:nil bundle:nil];
     self.window = [[NSWindow alloc] initWithContentRect:NSZeroRect
                                               styleMask:NSWindowStyleMaskTitled | NSWindowStyleMaskClosable | NSWindowStyleMaskResizable | NSWindowStyleMaskMiniaturizable
