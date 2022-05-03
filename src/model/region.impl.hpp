@@ -106,6 +106,8 @@ bool Region::wait() {
 }
 
 std::string Region::save(TemporaryDirectory &tempRoot) {
+  using namespace std;
+  namespace fs = std::filesystem;
   if (fValue.index() != 0) {
     return "";
   }
@@ -124,24 +126,46 @@ std::string Region::save(TemporaryDirectory &tempRoot) {
   if (!dirty) {
     return "";
   }
+
   Path temp = tempRoot.createTempChildDirectory();
-  for (auto &it : r) {
-    auto c = it->compound();
-    if (!c) {
-      continue;
-    }
-    auto nbtz = temp / mcfile::je::Region::GetDefaultCompressedChunkNbtFileName(c->fChunkX, c->fChunkZ);
-    auto err = c->save(nbtz);
-    if (!err.empty()) {
-      std::filesystem::remove_all(temp);
-      return err;
-    }
+  Path backup = temp / "backup.mca";
+  error_code ec;
+  fs::rename(fFile, backup, ec);
+  if (ec) {
+    ec.clear();
+    fs::remove_all(temp, ec);
+    return "IO Error";
   }
-  bool ok = mcfile::je::Region::ConcatCompressedNbt(fX, fZ, temp, this->fFile);
-  std::filesystem::remove_all(temp);
+  ec.clear();
+
+  auto out = make_shared<mcfile::stream::FileOutputStream>(fFile);
+  bool ok = mcfile::je::Region::SquashChunksAsMca(*out, [this, &r](int x, int z, bool &stop) -> shared_ptr<mcfile::nbt::CompoundTag> {
+    for (auto const &it : r) {
+      auto c = it->compound();
+      if (!c) {
+        continue;
+      }
+      if (x != c->fChunkX - fX * 32) {
+        continue;
+      }
+      if (z != c->fChunkZ - fZ * 32) {
+        continue;
+      }
+      return c->fTag;
+    }
+    return nullptr;
+  });
+  out.reset();
+
   if (ok) {
+    fs::remove_all(temp, ec);
     return "";
   } else {
+    fs::remove(fFile, ec);
+    ec.clear();
+    fs::rename(backup, fFile, ec);
+    ec.clear();
+    fs::remove_all(temp, ec);
     return "IO error";
   }
 }
