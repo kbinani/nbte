@@ -45,13 +45,16 @@ struct State {
   std::optional<Texture> fIconEditSmallCaps;
 
   State() : fPool(new hwm::task_queue(std::thread::hardware_concurrency())), fSaveQueue(new hwm::task_queue(1)) {
-    fIconDocumentAttributeB = LoadTexture("document_attribute_b.png");
-    fIconDocumentAttributeD = LoadTexture("document_attribute_d.png");
-    fIconDocumentAttributeF = LoadTexture("document_attribute_f.png");
-    fIconDocumentAttributeI = LoadTexture("document_attribute_i.png");
-    fIconDocumentAttributeL = LoadTexture("document_attribute_l.png");
-    fIconDocumentAttributeS = LoadTexture("document_attribute_s.png");
-    fIconEditSmallCaps = LoadTexture("edit_small_caps.png");
+  }
+
+  void loadTextures(void *device) {
+    fIconDocumentAttributeB = LoadTexture("document_attribute_b.png", device);
+    fIconDocumentAttributeD = LoadTexture("document_attribute_d.png", device);
+    fIconDocumentAttributeF = LoadTexture("document_attribute_f.png", device);
+    fIconDocumentAttributeI = LoadTexture("document_attribute_i.png", device);
+    fIconDocumentAttributeL = LoadTexture("document_attribute_l.png", device);
+    fIconDocumentAttributeS = LoadTexture("document_attribute_s.png", device);
+    fIconEditSmallCaps = LoadTexture("edit_small_caps.png", device);
   }
 
   void open(Path const &selected) {

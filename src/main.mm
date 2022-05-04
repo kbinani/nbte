@@ -65,6 +65,8 @@ extern "C" {
     abort();
   }
 
+  state.loadTextures(_device);
+
   // Setup Dear ImGui context
   // FIXME: This example doesn't have proper cleanup...
   IMGUI_CHECKVERSION();
@@ -138,7 +140,7 @@ extern "C" {
 
   static ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
 
-  self->state.fDisplaySize = io.DisplaySize;
+  state.fDisplaySize = io.DisplaySize;
   nbte::Render(state);
 
   // Rendering
@@ -157,7 +159,7 @@ extern "C" {
   [commandBuffer commit];
 
   NSWindow *window = [[NSApplication sharedApplication] keyWindow];
-  NSString *title = [[NSString alloc] initWithUTF8String:self->state.winowTitle().c_str()];
+  NSString *title = [[NSString alloc] initWithUTF8String:state.winowTitle().c_str()];
   if (window && window.title != title) {
     window.title = title;
   }
@@ -223,10 +225,10 @@ extern "C" {
     return NO;
   }
   if (fs::is_regular_file(filePath)) {
-    self->state.open(filePath);
+    state.open(filePath);
     return YES;
   } else if (fs::is_directory(filePath)) {
-    self->state.openDirectory(filePath);
+    state.openDirectory(filePath);
     return YES;
   } else {
     return NO;

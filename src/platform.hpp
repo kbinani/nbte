@@ -161,7 +161,7 @@ static std::optional<Resource> LoadNamedResource(char const *name) {
 #endif
 }
 
-static std::optional<Texture> LoadTexture(char const *name) {
+static std::optional<Texture> LoadTexture(char const *name, void *devicePtr) {
 #if defined(_MSC_VER)
   auto resource = LoadNamedResource(name);
   if (!resource) {
@@ -199,8 +199,51 @@ static std::optional<Texture> LoadTexture(char const *name) {
   ret.fHeight = height;
   return ret;
 #else
-  // TODO:
-  return std::nullopt;
+  @autoreleasepool {
+    id<MTLDevice> device = (id<MTLDevice>)devicePtr;
+    NSImage *image = [NSImage imageNamed:[NSString stringWithUTF8String:name]];
+    NSSize size = image.size;
+    NSRect rect = NSMakeRect(0, 0, size.width, size.height);
+    CGImageRef imageRef = [image CGImageForProposedRect:&rect context:nil hints:nil];
+
+    NSUInteger width = CGImageGetWidth(imageRef);
+    NSUInteger height = CGImageGetHeight(imageRef);
+    CGColorSpaceRef colorSpace = CGColorSpaceCreateDeviceRGB();
+
+    NSUInteger components = 4;
+    void *data = calloc(width * height * components, 1);
+    NSUInteger bytesPerPixel = 4;
+    NSUInteger bytesPerRow = bytesPerPixel * width;
+    NSUInteger bitsPerComponent = 8;
+
+    uint32_t bitmapInfo = kCGImageAlphaPremultipliedLast | kCGImageByteOrder32Big;
+    CGContextRef ctx = CGBitmapContextCreate(data,
+                                             width,
+                                             height,
+                                             bitsPerComponent,
+                                             bytesPerRow,
+                                             colorSpace,
+                                             bitmapInfo);
+    CGContextDrawImage(ctx, CGRectMake(0, 0, width, height), imageRef);
+
+    CGColorSpaceRelease(colorSpace);
+    CGContextRelease(ctx);
+
+    MTLTextureDescriptor *textureDescriptor = [MTLTextureDescriptor texture2DDescriptorWithPixelFormat:MTLPixelFormatRGBA8Unorm
+                                                                                                 width:width
+                                                                                                height:height
+                                                                                             mipmapped:YES];
+    id<MTLTexture> texture = [device newTextureWithDescriptor:textureDescriptor];
+
+    MTLRegion region = MTLRegionMake2D(0, 0, width, height);
+    [texture replaceRegion:region mipmapLevel:0 withBytes:data bytesPerRow:bytesPerRow];
+
+    Texture ret;
+    ret.fTexture = texture;
+    ret.fWidth = width;
+    ret.fHeight = height;
+    return ret;
+  }
 #endif
 }
 
