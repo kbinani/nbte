@@ -73,7 +73,7 @@ list(APPEND nbte_files
   src/imgui-ext.cpp
   src/texture.hpp
   src/texture-set.hpp
-  resource/appicon.rc.in
+  resource/resource.rc.in
   resource/UDEVGothic35_Regular.ttf
   resource/nbte32.png
   deps/imgui/imgui.cpp
@@ -98,7 +98,7 @@ elseif ("${CMAKE_SYSTEM_NAME}" STREQUAL "Windows")
     src/main.cpp
     deps/imgui/backends/imgui_impl_glfw.cpp
     deps/imgui/backends/imgui_impl_opengl3.cpp
-    resource/appicon.rc
+    resource/resource.rc
     deps/nativefiledialog/src/nfd_win.cpp)
 endif()
 list(APPEND nbte_icon_files
@@ -123,7 +123,7 @@ foreach (icon_file IN LISTS nbte_icon_files)
   get_filename_component(basename ${icon_file} NAME)
   set(NBTE_ICON_FILES "${NBTE_ICON_FILES}${basename} DATA \"${basename}\"\n")
 endforeach()
-configure_file(resource/appicon.rc.in ${CMAKE_CURRENT_SOURCE_DIR}/resource/appicon.rc)
+configure_file(resource/resource.rc.in ${CMAKE_CURRENT_SOURCE_DIR}/resource/resource.rc)
 
 if ("${CMAKE_SYSTEM_NAME}" STREQUAL "Darwin")
   add_executable(nbte MACOSX_BUNDLE ${nbte_files} ${nbte_icon_files})
