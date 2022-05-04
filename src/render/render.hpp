@@ -634,7 +634,9 @@ static void Visit(State &s,
   } else if (auto unsupported = node->unsupportedFile(); unsupported) {
     Indent(GetTreeNodeToLabelSpacing());
     PushID(path + "/" + unsupported->filename().string());
-    TextDisabled("%s", unsupported->filename().string().c_str());
+    PushStyleColor(ImGuiCol_Text, style.Colors[ImGuiCol_TextDisabled]);
+    IconLabel(unsupported->filename().string(), s.fTextures.fIconDocumentExclamation);
+    PopStyleColor();
     auto pos = GetItemRectMin();
     auto size = GetItemRectSize();
     auto mouse = GetMousePos();

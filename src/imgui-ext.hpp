@@ -8,4 +8,6 @@ bool IconButton(std::string const &label, std::optional<Texture> icon);
 
 void InlineImage(Texture const &image);
 
+void IconLabel(std::string const &label, std::optional<Texture> icon);
+
 } // namespace nbte

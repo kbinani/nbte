@@ -131,4 +131,29 @@ void InlineImage(Texture const &image) {
   window->DC.CursorPos = ImVec2(pos.x + image.fWidth, pos.y);
 }
 
+void IconLabel(std::string const &label, std::optional<Texture> icon) {
+  using namespace ImGui;
+  ImGuiWindow *window = GetCurrentWindow();
+  if (window->SkipItems) {
+    return;
+  }
+  ImVec2 const pos = window->DC.CursorPos;
+  ImGuiID const id = window->GetID(label.c_str());
+  float const frameHeight = GetFrameHeight();
+  ImGuiStyle const &style = GetStyle();
+
+  ImVec2 p = pos;
+  if (icon) {
+    InlineImage(*icon);
+    p += ImVec2(icon->fWidth, 0);
+  }
+  float const textWidth = CalcTextSize(label.c_str()).x;
+  ImRect bounds(pos, p + ImVec2(textWidth + style.FramePadding.x, frameHeight));
+
+  RenderText(p + style.FramePadding, label.c_str());
+
+  ItemSize(bounds);
+  ItemAdd(bounds, id);
+}
+
 } // namespace nbte
