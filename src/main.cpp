@@ -60,16 +60,19 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR pCmdLine
   if (!glfwInit()) {
     return 1;
   }
-  int argc = 0;
-  LPWSTR *argv = CommandLineToArgvW(pCmdLine, &argc);
-  if (!argv) {
-    return 1;
-  }
+
   fs::path file;
-  if (argc > 0) {
-    file = argv[0];
+  if (lstrlenW(pCmdLine) > 0) {
+    int argc = 0;
+    LPWSTR *argv = CommandLineToArgvW(pCmdLine, &argc);
+    if (!argv) {
+      return 1;
+    }
+    if (argc > 0) {
+      file = argv[0];
+    }
+    LocalFree(argv);
   }
-  LocalFree(argv);
 
   // Decide GL+GLSL versions
 #if defined(IMGUI_IMPL_OPENGL_ES2)
