@@ -352,7 +352,7 @@ static void VisitNbtNonScalar(State &s,
   int size = 0;
   switch (tag->type()) {
   case Tag::Type::Compound:
-    if (s.fFilterBarOpened) {
+    if (!filter.empty()) {
       if (!ContainsTerm(tag, filter, s.fFilterMode, s.fFilterCaseSensitive)) {
         return;
       }
@@ -362,7 +362,7 @@ static void VisitNbtNonScalar(State &s,
     }
     break;
   case Tag::Type::List:
-    if (s.fFilterBarOpened) {
+    if (!filter.empty()) {
       if (!ContainsTerm(tag, filter, s.fFilterMode, s.fFilterCaseSensitive)) {
         return;
       }
@@ -397,7 +397,7 @@ static void VisitNbtNonScalar(State &s,
   auto nextPath = path + "/" + name;
   PushID(nextPath);
 
-  if (s.fFilterBarOpened && !filter.empty()) {
+  if (!filter.empty()) {
     SetNextItemOpen(true);
   }
   ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_NavLeftJumpsBackHere;
@@ -495,7 +495,7 @@ static void VisitNbtCompound(State &s,
     if (!it.second) {
       continue;
     }
-    if (s.fFilterBarOpened && !filter.empty()) {
+    if (!filter.empty()) {
       if (s.fFilterMode == FilterMode::Key) {
         if ((s.fFilterCaseSensitive ? name : ToLower(name)).find(filter) == string::npos && !ContainsTerm(it.second, filter, s.fFilterMode, s.fFilterCaseSensitive)) {
           continue;
@@ -520,7 +520,10 @@ static void Visit(State &s,
   if (auto compound = node->compound(); compound) {
     PushID(path + "/" + compound->name());
     if (node->hasParent()) {
-      if (TreeNodeEx(compound->name().c_str(), ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_NavLeftJumpsBackHere)) {
+      if (!filter.empty() && ContainsTerm(compound->fTag, filter, s.fFilterMode, s.fFilterCaseSensitive)) {
+        SetNextItemOpen(true);
+      }
+      if (TreeNodeEx(compound->name().c_str(), ImGuiTreeNodeFlags_NavLeftJumpsBackHere)) {
         VisitNbtCompound(s, *compound, *compound->fTag, path, filter);
         TreePop();
       }
