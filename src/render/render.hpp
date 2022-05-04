@@ -402,7 +402,7 @@ static void VisitNbtNonScalar(State &s,
   } else {
     SetNextItemOpen(false, ImGuiCond_Once);
   }
-  ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_DefaultOpen;
+  ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_NavLeftJumpsBackHere;
   if (matchedNode) {
     flags = flags | ImGuiTreeNodeFlags_Selected;
   }
@@ -522,7 +522,7 @@ static void Visit(State &s,
     PushID(path + "/" + compound->name());
     if (node->hasParent()) {
       SetNextItemOpen(false, ImGuiCond_Once);
-      if (TreeNodeEx(compound->name().c_str())) {
+      if (TreeNodeEx(compound->name().c_str(), ImGuiTreeNodeFlags_NavLeftJumpsBackHere)) {
         VisitNbtCompound(s, *compound, *compound->fTag, path, filter);
         TreePop();
       }
@@ -541,7 +541,7 @@ static void Visit(State &s,
     PushID(path + "/" + name);
     if (node->hasParent()) {
       SetNextItemOpen(false, ImGuiCond_Once);
-      if (TreeNodeEx(label.c_str())) {
+      if (TreeNodeEx(label.c_str(), ImGuiTreeNodeFlags_NavLeftJumpsBackHere)) {
         for (auto const &it : contents->fValue) {
           Visit(s, it, path + "/" + name, filter);
         }
@@ -559,7 +559,7 @@ static void Visit(State &s,
     if (node->hasParent()) {
       bool ready = region->wait();
       SetNextItemOpen(true, ready ? ImGuiCond_Once : ImGuiCond_Always);
-      if (TreeNodeEx(name.c_str())) {
+      if (TreeNodeEx(name.c_str(), ImGuiTreeNodeFlags_NavLeftJumpsBackHere)) {
         if (ready) {
           for (auto const &it : std::get<0>(region->fValue)) {
             Visit(s, it, path + "/" + name, filter);
@@ -597,7 +597,7 @@ static void Visit(State &s,
     Unindent(GetTreeNodeToLabelSpacing());
   } else if (auto unopenedDirectory = node->directoryUnopened(); unopenedDirectory) {
     PushID(path + "/" + unopenedDirectory->filename().string());
-    if (TreeNodeEx(unopenedDirectory->filename().string().c_str())) {
+    if (TreeNodeEx(unopenedDirectory->filename().string().c_str(), ImGuiTreeNodeFlags_NavLeftJumpsBackHere)) {
       node->load(*s.fPool);
       Indent(GetTreeNodeToLabelSpacing());
       TextUnformatted("loading...");
@@ -735,7 +735,7 @@ static void Render(State &s) {
   RenderErrorPopup(s);
   RenderFilterBar(s);
 
-  BeginChild("editor");
+  BeginChild("editor", ImVec2(0, 0), false, ImGuiWindowFlags_NavFlattened);
   RenderNode(s);
   EndChild();
 
