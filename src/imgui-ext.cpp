@@ -2,14 +2,16 @@
 #include "imgui_internal.h"
 #include <optional>
 #include <string>
+#include <algorithm>
 #include "texture.hpp"
 #include "texture-set.hpp"
+#include "string.hpp"
 
 using namespace ImGui;
 
 namespace nbte {
 
-bool TreeNode(std::string const &label, ImGuiTreeNodeFlags flags, std::optional<Texture> icon) {
+bool TreeNode(std::string const &label, ImGuiTreeNodeFlags flags, std::optional<Texture> icon, std::string const &filter, bool caseSensitive) {
   ImGuiContext &g = *GImGui;
   ImGuiWindow *window = g.CurrentWindow;
   ImGuiStyle const &style = g.Style;
@@ -45,15 +47,38 @@ bool TreeNode(std::string const &label, ImGuiTreeNodeFlags flags, std::optional<
 
   ImU32 const textCol = GetColorU32(ImGuiCol_Text);
   RenderArrow(window->DrawList, ImVec2(pos.x + padding.x, pos.y + padding.y), textCol, opened ? ImGuiDir_Down : ImGuiDir_Right, 1.0f);
+
+  float const labelSpacing = GetTreeNodeToLabelSpacing();
+  ImVec2 textPos;
+
   if (icon) {
     ImVec2 iconSize(icon->fWidth, icon->fHeight);
-    ImVec2 p(pos.x + GetTreeNodeToLabelSpacing(), pos.y + frameHeight * 0.5f - iconSize.y * 0.5f);
+    ImVec2 p(pos.x + labelSpacing, pos.y + frameHeight * 0.5f - iconSize.y * 0.5f);
     window->DrawList->AddImage((ImTextureID)(intptr_t)icon->fTexture, p, p + iconSize);
     window->DC.CursorPos = ImVec2(pos.x + iconSize.x + style.FramePadding.x, pos.y);
-    RenderText(ImVec2(pos.x + frameHeight + frameHeight + 1.0f, pos.y + padding.y), label.c_str());
+    textPos = ImVec2(pos.x + frameHeight + frameHeight, pos.y + padding.y);
   } else {
-    RenderText(ImVec2(pos.x + frameHeight + style.ItemInnerSpacing.x, pos.y + padding.y), label.c_str());
+    textPos = ImVec2(pos.x + frameHeight + style.ItemInnerSpacing.x, pos.y + padding.y);
   }
+
+  if (!filter.empty()) {
+    std::string search = caseSensitive ? filter : ToLower(filter);
+    auto cursor = window->DC.CursorPos;
+    auto color = GetColorU32(ImGuiCol_Button);
+    size_t pivot = 0;
+    while (true) {
+      size_t found = (caseSensitive ? label : ToLower(label)).find(search, pivot);
+      if (found == std::string::npos) {
+        break;
+      } else {
+        auto leading = CalcTextSize(label.substr(0, found).c_str());
+        auto trailing = CalcTextSize(label.substr(0, found + search.size()).c_str());
+        window->DrawList->AddRectFilled(ImVec2(textPos.x + leading.x, textPos.y + style.FramePadding.y), ImVec2(textPos.x + trailing.x, textPos.y + style.FramePadding.y + trailing.y), color, 2.0f);
+        pivot = found + search.size();
+      }
+    }
+  }
+  RenderText(textPos, label.c_str());
 
   ItemSize(bb, 0);
   ItemAdd(bb, id);

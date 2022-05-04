@@ -2,7 +2,7 @@
 
 namespace nbte {
 
-bool TreeNode(std::string const &label, ImGuiTreeNodeFlags, std::optional<Texture> icon);
+bool TreeNode(std::string const &label, ImGuiTreeNodeFlags flags, std::optional<Texture> icon, std::string const &filter, bool caseSensitive);
 
 bool IconButton(std::string const &label, std::optional<Texture> icon);
 

@@ -414,7 +414,7 @@ static void VisitNbtNonScalar(State &s,
   if (matchedNode) {
     flags = flags | ImGuiTreeNodeFlags_Selected;
   }
-  if (TreeNode(label, flags, icon)) {
+  if (TreeNode(label, flags, icon, s.filterTerm(), s.fFilterCaseSensitive)) {
     Indent(kIndent);
 
     switch (tag->type()) {
@@ -540,7 +540,7 @@ static void Visit(State &s,
       if (node->fParent.lock()->region()) {
         flags |= ImGuiTreeNodeFlags_DefaultOpen;
       }
-      if (TreeNode(compound->name(), flags, s.fTextures.fIconBox)) {
+      if (TreeNode(compound->name(), flags, s.fTextures.fIconBox, s.filterTerm(), s.fFilterCaseSensitive)) {
         VisitNbtCompound(s, *compound, *compound->fTag, path, filter);
         TreePop();
       }
@@ -558,7 +558,7 @@ static void Visit(State &s,
     }
     PushID(path + "/" + name);
     if (node->hasParent()) {
-      if (TreeNode(label, ImGuiTreeNodeFlags_NavLeftJumpsBackHere, s.fTextures.fIconFolder)) {
+      if (TreeNode(label, ImGuiTreeNodeFlags_NavLeftJumpsBackHere, s.fTextures.fIconFolder, s.filterTerm(), s.fFilterCaseSensitive)) {
         for (auto const &it : contents->fValue) {
           Visit(s, it, path + "/" + name, filter);
         }
@@ -575,7 +575,7 @@ static void Visit(State &s,
     PushID(path + "/" + name);
     if (node->hasParent()) {
       bool ready = region->wait();
-      if (TreeNode(name, ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_NavLeftJumpsBackHere, s.fTextures.fIconBlock)) {
+      if (TreeNode(name, ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_NavLeftJumpsBackHere, s.fTextures.fIconBlock, s.filterTerm(), s.fFilterCaseSensitive)) {
         if (ready) {
           for (auto const &it : std::get<0>(region->fValue)) {
             Visit(s, it, path + "/" + name, filter);
@@ -623,7 +623,7 @@ static void Visit(State &s,
     Unindent(GetTreeNodeToLabelSpacing());
   } else if (auto unopenedDirectory = node->directoryUnopened(); unopenedDirectory) {
     PushID(path + "/" + unopenedDirectory->filename().string());
-    if (TreeNode(unopenedDirectory->filename().string(), ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_NavLeftJumpsBackHere, s.fTextures.fIconFolder)) {
+    if (TreeNode(unopenedDirectory->filename().string(), ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_NavLeftJumpsBackHere, s.fTextures.fIconFolder, s.filterTerm(), s.fFilterCaseSensitive)) {
       node->load(*s.fPool);
       Indent(GetTreeNodeToLabelSpacing());
       TextUnformatted("loading...");
