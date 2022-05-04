@@ -280,31 +280,31 @@ static void VisitNbtScalar(State &s,
   switch (tag->type()) {
   case Tag::Type::Int:
     if (auto v = dynamic_pointer_cast<IntTag>(tag); v) {
-      PushScalarInput(name, path, filter, s.fFilterCaseSensitive, s.fIconDocumentAttributeI);
+      PushScalarInput(name, path, filter, s.fFilterCaseSensitive, s.fTextures.fIconDocumentAttributeI);
       InputScalar<int>(v->fValue, root);
     }
     break;
   case Tag::Type::Byte:
     if (auto v = dynamic_pointer_cast<ByteTag>(tag); v) {
-      PushScalarInput(name, path, filter, s.fFilterCaseSensitive, s.fIconDocumentAttributeB);
+      PushScalarInput(name, path, filter, s.fFilterCaseSensitive, s.fTextures.fIconDocumentAttributeB);
       InputScalar<uint8_t>(v->fValue, root);
     }
     break;
   case Tag::Type::Short:
     if (auto v = dynamic_pointer_cast<ShortTag>(tag); v) {
-      PushScalarInput(name, path, filter, s.fFilterCaseSensitive, s.fIconDocumentAttributeS);
+      PushScalarInput(name, path, filter, s.fFilterCaseSensitive, s.fTextures.fIconDocumentAttributeS);
       InputScalar<int16_t>(v->fValue, root);
     }
     break;
   case Tag::Type::Long:
     if (auto v = dynamic_pointer_cast<LongTag>(tag); v) {
-      PushScalarInput(name, path, filter, s.fFilterCaseSensitive, s.fIconDocumentAttributeL);
+      PushScalarInput(name, path, filter, s.fFilterCaseSensitive, s.fTextures.fIconDocumentAttributeL);
       InputScalar(v->fValue, root);
     }
     break;
   case Tag::Type::String:
     if (auto v = dynamic_pointer_cast<StringTag>(tag); v) {
-      PushScalarInput(name, path, filter, s.fFilterCaseSensitive, s.fIconEditSmallCaps);
+      PushScalarInput(name, path, filter, s.fFilterCaseSensitive, s.fTextures.fIconEditSmallCaps);
       if (InputText("", &v->fValue)) {
         root.fEdited = true;
       }
@@ -312,7 +312,7 @@ static void VisitNbtScalar(State &s,
     break;
   case mcfile::nbt::Tag::Type::Float:
     if (auto v = dynamic_pointer_cast<FloatTag>(tag); v) {
-      PushScalarInput(name, path, filter, s.fFilterCaseSensitive, s.fIconDocumentAttributeF);
+      PushScalarInput(name, path, filter, s.fFilterCaseSensitive, s.fTextures.fIconDocumentAttributeF);
       if (InputFloat("", &v->fValue)) {
         root.fEdited = true;
       }
@@ -320,7 +320,7 @@ static void VisitNbtScalar(State &s,
     break;
   case mcfile::nbt::Tag::Type::Double:
     if (auto v = dynamic_pointer_cast<DoubleTag>(tag); v) {
-      PushScalarInput(name, path, filter, s.fFilterCaseSensitive, s.fIconDocumentAttributeD);
+      PushScalarInput(name, path, filter, s.fFilterCaseSensitive, s.fTextures.fIconDocumentAttributeD);
       if (InputDouble("", &v->fValue)) {
         root.fEdited = true;
       }
@@ -404,7 +404,7 @@ static void VisitNbtNonScalar(State &s,
   if (matchedNode) {
     flags = flags | ImGuiTreeNodeFlags_Selected;
   }
-  if (MyTreeNode(label.c_str(), flags)) {
+  if (MyTreeNode(label.c_str(), flags, s.fTextures.fIconBox)) {
     Indent(kIndent);
 
     switch (tag->type()) {
@@ -426,7 +426,7 @@ static void VisitNbtNonScalar(State &s,
       if (auto v = dynamic_pointer_cast<ByteArrayTag>(tag); v) {
         for (size_t i = 0; i < v->fValue.size(); i++) {
           auto label = "#" + to_string(i);
-          PushScalarInput(label, nextPath, filter, s.fFilterCaseSensitive, s.fIconDocumentAttributeB);
+          PushScalarInput(label, nextPath, filter, s.fFilterCaseSensitive, s.fTextures.fIconDocumentAttributeB);
           InputScalar<uint8_t>(v->fValue[i], root);
           PopScalarInput();
         }
@@ -436,7 +436,7 @@ static void VisitNbtNonScalar(State &s,
       if (auto v = dynamic_pointer_cast<IntArrayTag>(tag); v) {
         for (size_t i = 0; i < v->fValue.size(); i++) {
           auto label = "#" + to_string(i);
-          PushScalarInput(label, nextPath, filter, s.fFilterCaseSensitive, s.fIconDocumentAttributeI);
+          PushScalarInput(label, nextPath, filter, s.fFilterCaseSensitive, s.fTextures.fIconDocumentAttributeI);
           InputScalar<int>(v->fValue[i], root);
           PopScalarInput();
         }
@@ -446,7 +446,7 @@ static void VisitNbtNonScalar(State &s,
       if (auto v = dynamic_pointer_cast<LongArrayTag>(tag); v) {
         for (size_t i = 0; i < v->fValue.size(); i++) {
           auto label = "#" + to_string(i);
-          PushScalarInput(label, nextPath, filter, s.fFilterCaseSensitive, s.fIconDocumentAttributeL);
+          PushScalarInput(label, nextPath, filter, s.fFilterCaseSensitive, s.fTextures.fIconDocumentAttributeL);
           InputScalar<int64_t>(v->fValue[i], root);
           PopScalarInput();
         }
@@ -527,7 +527,7 @@ static void Visit(State &s,
       if (node->fParent.lock()->region()) {
         flags |= ImGuiTreeNodeFlags_DefaultOpen;
       }
-      if (MyTreeNode(compound->name().c_str(), flags)) {
+      if (MyTreeNode(compound->name().c_str(), flags, s.fTextures.fIconBox)) {
         VisitNbtCompound(s, *compound, *compound->fTag, path, filter);
         TreePop();
       }

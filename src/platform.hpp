@@ -94,12 +94,6 @@ static std::string UuidString() {
   return ret;
 }
 
-struct Texture {
-  ImTextureID fTexture;
-  int fWidth;
-  int fHeight;
-};
-
 struct Resource {
   Resource(void *data, size_t size, bool systemOwned) : fData(data), fSize(size), fSystemOwned(free) {}
 
@@ -161,7 +155,7 @@ static std::optional<Resource> LoadNamedResource(char const *name) {
 #endif
 }
 
-static std::optional<Texture> LoadTexture(char const *name, void *devicePtr) {
+std::optional<Texture> LoadTexture(char const *name, void *devicePtr) {
 #if defined(_MSC_VER)
   auto resource = LoadNamedResource(name);
   if (!resource) {

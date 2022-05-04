@@ -73,6 +73,8 @@ list(APPEND nbte_files
   src/temporary-directory.hpp
   src/imgui-ext.hpp
   src/imgui-ext.cpp
+  src/texture.hpp
+  src/texture-set.hpp
   resource/appicon.rc.in
   resource/UDEVGothic35_Regular.ttf
   resource/document_attribute_b.png
@@ -82,6 +84,7 @@ list(APPEND nbte_files
   resource/document_attribute_l.png
   resource/document_attribute_s.png
   resource/edit_small_caps.png
+  resource/box.png
   resource/nbte32.png
   deps/imgui/imgui.cpp
   deps/imgui/imgui_draw.cpp

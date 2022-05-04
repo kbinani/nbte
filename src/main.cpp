@@ -30,7 +30,9 @@ extern "C" {
 
 #include "version.hpp"
 #include "string.hpp"
+#include "texture.hpp"
 #include "platform.hpp"
+#include "texture-set.hpp"
 #include "temporary-directory.hpp"
 #include "model/node.hpp"
 #include "model/node.impl.hpp"
