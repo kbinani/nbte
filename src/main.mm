@@ -138,8 +138,6 @@ extern "C" {
 
   ImGui::NewFrame();
 
-  static ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
-
   state.fDisplaySize = io.DisplaySize;
   nbte::Render(state);
 
@@ -147,7 +145,13 @@ extern "C" {
   ImGui::Render();
   ImDrawData *draw_data = ImGui::GetDrawData();
 
-  renderPassDescriptor.colorAttachments[0].clearColor = MTLClearColorMake(clear_color.x * clear_color.w, clear_color.y * clear_color.w, clear_color.z * clear_color.w, clear_color.w);
+  ImGuiStyle const &style = ImGui::GetStyle();
+  ImVec4 clearColor = style.Colors[ImGuiCol_WindowBg];
+
+  renderPassDescriptor.colorAttachments[0].clearColor = MTLClearColorMake(clearColor.x * clearColor.w,
+                                                                          clearColor.y * clearColor.w,
+                                                                          clearColor.z * clearColor.w,
+                                                                          clearColor.w);
   id<MTLRenderCommandEncoder> renderEncoder = [commandBuffer renderCommandEncoderWithDescriptor:renderPassDescriptor];
   [renderEncoder pushDebugGroup:@"Dear ImGui rendering"];
   ImGui_ImplMetal_RenderDrawData(draw_data, commandBuffer, renderEncoder);

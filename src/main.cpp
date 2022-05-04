@@ -175,9 +175,12 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR pCmdLine
     ImGui::Render();
 
     glViewport(0, 0, display_w, display_h);
-    ImVec4 clear_color(0.45f, 0.55f, 0.60f, 1.00f);
-    glClearColor(clear_color.x * clear_color.w, clear_color.y * clear_color.w, clear_color.z * clear_color.w, clear_color.w);
+
+    ImGuiStyle const &style = ImGui::GetStyle();
+    ImVec4 clearColor = style.Colors[ImGuiCol_WindowBg];
+    glClearColor(clearColor.x * clearColor.w, clearColor.y * clearColor.w, clearColor.z * clearColor.w, clearColor.w);
     glClear(GL_COLOR_BUFFER_BIT);
+
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
     glfwSwapBuffers(window);
