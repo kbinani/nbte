@@ -78,8 +78,30 @@ bool IconButton(std::string const &label, std::optional<Texture> icon) {
   ImVec2 const frameSize(frameHeight, frameHeight);
   ImVec2 const padding = style.FramePadding;
   ImVec2 const availableSize = GetContentRegionAvail();
-  ImRect bounds(pos, pos + ImVec2(availableSize.x, frameHeight));
   ImGuiID const id = window->GetID(label.c_str());
+
+  ImVec2 textSize = CalcTextSize(label.c_str());
+  ImRect bounds;
+  if (icon) {
+    bounds = ImRect(pos, pos + ImVec2(icon->fWidth + style.FramePadding.x + textSize.x + style.FramePadding.x, frameHeight));
+  } else {
+    bounds = ImRect(pos, pos + ImVec2(style.FramePadding.x + textSize.x + style.FramePadding.x, frameHeight));
+  }
+
+  bool hovered = false;
+  bool held = false;
+  bool pressed = ButtonBehavior(bounds, id, &hovered, &held);
+
+  if (hovered || held) {
+    ImGuiCol col = ImGuiCol_Header;
+    if (held && hovered) {
+      col = ImGuiCol_HeaderActive;
+    } else if (hovered) {
+      col = ImGuiCol_HeaderHovered;
+    }
+    ImU32 background = GetColorU32(col);
+    window->DrawList->AddRectFilled(bounds.Min, bounds.Max, background);
+  }
 
   if (icon) {
     ImVec2 iconSize(icon->fWidth, icon->fHeight);
@@ -87,14 +109,8 @@ bool IconButton(std::string const &label, std::optional<Texture> icon) {
     window->DrawList->AddImage((ImTextureID)(intptr_t)icon->fTexture, p, p + iconSize);
     window->DC.CursorPos = ImVec2(pos.x + iconSize.x + style.FramePadding.x, pos.y);
   }
-  PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(0, style.FramePadding.y));
-  PushStyleColor(ImGuiCol_Button, ImVec4(0, 0, 0, 0));
   RenderText(window->DC.CursorPos + ImVec2(0, padding.y), label.c_str());
 
-  bool hovered, held;
-  bool pressed = ButtonBehavior(bounds, id, &hovered, &held);
-  PopStyleVar();
-  PopStyleColor();
   ItemSize(bounds.GetSize());
   ItemAdd(bounds, id);
   return pressed;
