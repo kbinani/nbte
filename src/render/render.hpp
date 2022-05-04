@@ -399,10 +399,8 @@ static void VisitNbtNonScalar(State &s,
 
   if (s.fFilterBarOpened && !filter.empty()) {
     SetNextItemOpen(true);
-  } else {
-    SetNextItemOpen(false, ImGuiCond_Once);
   }
-  ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_NavLeftJumpsBackHere;
+  ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_NavLeftJumpsBackHere;
   if (matchedNode) {
     flags = flags | ImGuiTreeNodeFlags_Selected;
   }
@@ -518,11 +516,11 @@ static void Visit(State &s,
                   std::string const &filter) {
   using namespace std;
   using namespace ImGui;
+
   if (auto compound = node->compound(); compound) {
     PushID(path + "/" + compound->name());
     if (node->hasParent()) {
-      SetNextItemOpen(false, ImGuiCond_Once);
-      if (TreeNodeEx(compound->name().c_str(), ImGuiTreeNodeFlags_NavLeftJumpsBackHere)) {
+      if (TreeNodeEx(compound->name().c_str(), ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_NavLeftJumpsBackHere)) {
         VisitNbtCompound(s, *compound, *compound->fTag, path, filter);
         TreePop();
       }
@@ -540,7 +538,6 @@ static void Visit(State &s,
     }
     PushID(path + "/" + name);
     if (node->hasParent()) {
-      SetNextItemOpen(false, ImGuiCond_Once);
       if (TreeNodeEx(label.c_str(), ImGuiTreeNodeFlags_NavLeftJumpsBackHere)) {
         for (auto const &it : contents->fValue) {
           Visit(s, it, path + "/" + name, filter);
@@ -558,8 +555,7 @@ static void Visit(State &s,
     PushID(path + "/" + name);
     if (node->hasParent()) {
       bool ready = region->wait();
-      SetNextItemOpen(true, ready ? ImGuiCond_Once : ImGuiCond_Always);
-      if (TreeNodeEx(name.c_str(), ImGuiTreeNodeFlags_NavLeftJumpsBackHere)) {
+      if (TreeNodeEx(name.c_str(), ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_NavLeftJumpsBackHere)) {
         if (ready) {
           for (auto const &it : std::get<0>(region->fValue)) {
             Visit(s, it, path + "/" + name, filter);
@@ -597,7 +593,7 @@ static void Visit(State &s,
     Unindent(GetTreeNodeToLabelSpacing());
   } else if (auto unopenedDirectory = node->directoryUnopened(); unopenedDirectory) {
     PushID(path + "/" + unopenedDirectory->filename().string());
-    if (TreeNodeEx(unopenedDirectory->filename().string().c_str(), ImGuiTreeNodeFlags_NavLeftJumpsBackHere)) {
+    if (TreeNodeEx(unopenedDirectory->filename().string().c_str(), ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_NavLeftJumpsBackHere)) {
       node->load(*s.fPool);
       Indent(GetTreeNodeToLabelSpacing());
       TextUnformatted("loading...");
