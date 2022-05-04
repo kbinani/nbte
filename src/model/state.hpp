@@ -126,17 +126,17 @@ struct State {
     }
   }
 
-  std::string winowTitle() const {
-    std::string title = "nbte";
+  std::u8string winowTitle() const {
+    std::u8string title = u8"nbte";
     if (!fOpened) {
       return title;
     }
     if (!fOpenedPath.has_filename()) {
       return title;
     }
-    title += " - " + fOpenedPath.filename().string();
+    title += u8" - " + fOpenedPath.filename().u8string();
     if (fOpened->isDirty()) {
-      title += " *";
+      title += u8" *";
     }
     return title;
   }
