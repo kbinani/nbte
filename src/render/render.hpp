@@ -407,7 +407,7 @@ static void VisitNbtNonScalar(State &s,
   if (matchedNode) {
     flags = flags | ImGuiTreeNodeFlags_Selected;
   }
-  if (MyTreeNode(label.c_str(), flags, icon)) {
+  if (TreeNode(label, flags, icon)) {
     Indent(kIndent);
 
     switch (tag->type()) {
@@ -521,6 +521,7 @@ static void Visit(State &s,
   using namespace ImGui;
 
   auto const &style = GetStyle();
+  float frameHeight = GetFrameHeight();
 
   if (auto compound = node->compound(); compound) {
     PushID(path + "/" + compound->name());
@@ -532,7 +533,7 @@ static void Visit(State &s,
       if (node->fParent.lock()->region()) {
         flags |= ImGuiTreeNodeFlags_DefaultOpen;
       }
-      if (MyTreeNode(compound->name().c_str(), flags, s.fTextures.fIconBox)) {
+      if (TreeNode(compound->name(), flags, s.fTextures.fIconBox)) {
         VisitNbtCompound(s, *compound, *compound->fTag, path, filter);
         TreePop();
       }
@@ -550,7 +551,7 @@ static void Visit(State &s,
     }
     PushID(path + "/" + name);
     if (node->hasParent()) {
-      if (MyTreeNode(label.c_str(), ImGuiTreeNodeFlags_NavLeftJumpsBackHere, s.fTextures.fIconFolder)) {
+      if (TreeNode(label, ImGuiTreeNodeFlags_NavLeftJumpsBackHere, s.fTextures.fIconFolder)) {
         for (auto const &it : contents->fValue) {
           Visit(s, it, path + "/" + name, filter);
         }
@@ -567,7 +568,7 @@ static void Visit(State &s,
     PushID(path + "/" + name);
     if (node->hasParent()) {
       bool ready = region->wait();
-      if (MyTreeNode(name.c_str(), ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_NavLeftJumpsBackHere, s.fTextures.fIconBlock)) {
+      if (TreeNode(name, ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_NavLeftJumpsBackHere, s.fTextures.fIconBlock)) {
         if (ready) {
           for (auto const &it : std::get<0>(region->fValue)) {
             Visit(s, it, path + "/" + name, filter);
@@ -594,41 +595,28 @@ static void Visit(State &s,
   } else if (auto unopenedFile = node->fileUnopened(); unopenedFile) {
     Indent(GetTreeNodeToLabelSpacing());
     PushID(path + "/" + unopenedFile->filename().string());
-    PushStyleColor(ImGuiCol_Button, ImVec4(0, 0, 0, 0));
     auto icon = s.fTextures.fIconDocument;
     if (auto pos = mcfile::je::Region::RegionXZFromFile(*unopenedFile); pos) {
       icon = s.fTextures.fIconBlock;
     }
-    if (icon) {
-      Image((ImTextureID)(intptr_t)icon->fTexture, ImVec2(icon->fWidth, icon->fHeight));
-      SameLine();
-      auto cursor = GetCursorPos();
-      SetCursorPos(ImVec2(cursor.x - style.FramePadding.x, cursor.y));
-    }
-    PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(0, style.FramePadding.y));
-    if (Button(unopenedFile->filename().string().c_str())) {
+    if (IconButton(unopenedFile->filename().string(), icon)) {
       node->load(*s.fPool);
     }
-    PopStyleVar();
-    PopStyleColor();
     PopID();
     Unindent(GetTreeNodeToLabelSpacing());
   } else if (auto unopenedChunk = node->unopenedChunk(); unopenedChunk) {
     Indent(GetTreeNodeToLabelSpacing());
     string name = unopenedChunk->name();
     PushID(path + "/" + name);
-    PushStyleColor(ImGuiCol_Button, ImVec4(0, 0, 0, 0));
-    PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(0, 0));
-    if (Button(name.c_str())) {
+    auto icon = s.fTextures.fIconBox;
+    if (IconButton(name.c_str(), icon)) {
       node->load(*s.fPool);
     }
-    PopStyleVar();
-    PopStyleColor();
     PopID();
     Unindent(GetTreeNodeToLabelSpacing());
   } else if (auto unopenedDirectory = node->directoryUnopened(); unopenedDirectory) {
     PushID(path + "/" + unopenedDirectory->filename().string());
-    if (MyTreeNode(unopenedDirectory->filename().string().c_str(), ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_NavLeftJumpsBackHere, s.fTextures.fIconFolder)) {
+    if (TreeNode(unopenedDirectory->filename().string(), ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_NavLeftJumpsBackHere, s.fTextures.fIconFolder)) {
       node->load(*s.fPool);
       Indent(GetTreeNodeToLabelSpacing());
       TextUnformatted("loading...");
