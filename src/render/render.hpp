@@ -229,14 +229,14 @@ static void PushScalarInput(std::string const &name,
                             std::optional<Texture> const &icon) {
   using namespace std;
   using namespace ImGui;
+  auto const &style = GetStyle();
   PushItemWidth(-FLT_EPSILON);
   Indent(GetTreeNodeToLabelSpacing());
   if (icon) {
-    ImGui::Image((ImTextureID)(intptr_t)icon->fTexture, ImVec2(icon->fWidth, icon->fHeight));
-    SameLine();
-    auto cursor = GetCursorScreenPos();
+    InlineImage(*icon);
+    auto cursor = GetCursorPos();
     auto style = GetStyle();
-    SetCursorScreenPos(ImVec2(cursor.x - style.FramePadding.x, cursor.y));
+    SetCursorPos(ImVec2(cursor.x + style.FramePadding.x, cursor.y));
   }
   PushID(path + "/" + name);
   if (!filter.empty()) {
@@ -251,12 +251,16 @@ static void PushScalarInput(std::string const &name,
       } else {
         auto leading = CalcTextSize(name.substr(0, found).c_str());
         auto trailing = CalcTextSize(name.substr(0, found + filter.size()).c_str());
-        list->AddRectFilled(ImVec2(cursor.x + leading.x, cursor.y), ImVec2(cursor.x + trailing.x, cursor.y + trailing.y), color, 2.0f);
+        list->AddRectFilled(ImVec2(cursor.x + leading.x, cursor.y + style.FramePadding.y), ImVec2(cursor.x + trailing.x, cursor.y + style.FramePadding.y + trailing.y), color, 2.0f);
         pos = found + filter.size();
       }
     }
   }
-  TextUnformatted(name.c_str());
+  {
+    auto cursor = GetCursorPos();
+    SetCursorPos(ImVec2(cursor.x, cursor.y + style.FramePadding.y));
+    TextUnformatted(name.c_str());
+  }
   SameLine();
 }
 

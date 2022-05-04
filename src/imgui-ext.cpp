@@ -100,4 +100,19 @@ bool IconButton(std::string const &label, std::optional<Texture> icon) {
   return pressed;
 }
 
+void InlineImage(Texture const &image) {
+  using namespace ImGui;
+  ImGuiWindow *window = GetCurrentWindow();
+  if (window->SkipItems) {
+    return;
+  }
+  ImVec2 const pos = window->DC.CursorPos;
+  ImGuiStyle const &style = GetStyle();
+  float const frameHeight = GetFrameHeight();
+  ImVec2 imagePos(pos.x, pos.y + frameHeight * 0.5f - image.fHeight * 0.5f);
+  ImVec2 imageSize(image.fWidth, image.fHeight);
+  window->DrawList->AddImage((ImTextureID)(intptr_t)image.fTexture, imagePos, imagePos + imageSize);
+  window->DC.CursorPos = ImVec2(pos.x + image.fWidth, pos.y);
+}
+
 } // namespace nbte

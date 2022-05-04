@@ -6,4 +6,6 @@ bool TreeNode(std::string const &label, ImGuiTreeNodeFlags, std::optional<Textur
 
 bool IconButton(std::string const &label, std::optional<Texture> icon);
 
+void InlineImage(Texture const &image);
+
 } // namespace nbte
