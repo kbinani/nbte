@@ -153,9 +153,7 @@ if ("${CMAKE_SYSTEM_NAME}" STREQUAL "Darwin")
     "-framework Metal"
     "-framework AppKit")
 elseif("${CMAKE_SYSTEM_NAME}" STREQUAL "Windows")
-  list(APPEND nbte_link_libraries
-    glfw
-    opengl32.lib)
+  list(APPEND nbte_link_libraries glfw)
 endif()
 target_link_libraries(nbte PRIVATE ${nbte_link_libraries})
 

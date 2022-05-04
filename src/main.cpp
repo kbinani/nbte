@@ -48,6 +48,8 @@ extern "C" {
 #pragma comment(lib, "legacy_stdio_definitions")
 #endif
 
+#pragma comment(lib, "opengl32.lib")
+
 static void glfw_error_callback(int error, const char *description) {
   fprintf(stderr, "Glfw Error %d: %s\n", error, description);
 }
