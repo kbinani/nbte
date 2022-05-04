@@ -523,7 +523,11 @@ static void Visit(State &s,
       if (!filter.empty() && ContainsTerm(compound->fTag, filter, s.fFilterMode, s.fFilterCaseSensitive)) {
         SetNextItemOpen(true);
       }
-      if (TreeNodeEx(compound->name().c_str(), ImGuiTreeNodeFlags_NavLeftJumpsBackHere)) {
+      ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_NavLeftJumpsBackHere;
+      if (node->fParent.lock()->region()) {
+        flags |= ImGuiTreeNodeFlags_DefaultOpen;
+      }
+      if (TreeNodeEx(compound->name().c_str(), flags)) {
         VisitNbtCompound(s, *compound, *compound->fTag, path, filter);
         TreePop();
       }
@@ -588,6 +592,19 @@ static void Visit(State &s,
     PushStyleColor(ImGuiCol_Button, ImVec4(0, 0, 0, 0));
     PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(0, 0));
     if (Button(unopenedFile->filename().string().c_str())) {
+      node->load(*s.fPool);
+    }
+    PopStyleVar();
+    PopStyleColor();
+    PopID();
+    Unindent(GetTreeNodeToLabelSpacing());
+  } else if (auto unopenedChunk = node->unopenedChunk(); unopenedChunk) {
+    Indent(GetTreeNodeToLabelSpacing());
+    string name = unopenedChunk->name();
+    PushID(path + "/" + name);
+    PushStyleColor(ImGuiCol_Button, ImVec4(0, 0, 0, 0));
+    PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(0, 0));
+    if (Button(name.c_str())) {
       node->load(*s.fPool);
     }
     PopStyleVar();

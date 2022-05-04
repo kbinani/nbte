@@ -19,6 +19,24 @@ public:
   std::variant<ValueType, std::shared_ptr<std::future<std::optional<ValueType>>>> fValue;
 };
 
+class UnopenedChunk {
+public:
+  UnopenedChunk(Path file, uint64_t offset, uint64_t size, int cx, int cz, int localX, int localZ) : fFile(file), fOffset(offset), fSize(size), fChunkX(cx), fChunkZ(cz), fLocalChunkX(localX), fLocalChunkZ(localZ) {}
+
+  std::string name() const {
+    using namespace std;
+    return "chunk " + to_string(fChunkX) + " " + to_string(fChunkZ) + " [" + to_string(fLocalChunkX) + " " + to_string(fLocalChunkZ) + " in region]";
+  }
+
+  Path fFile;
+  uint64_t fOffset;
+  uint64_t fSize;
+  int fChunkX;
+  int fChunkZ;
+  int fLocalChunkX;
+  int fLocalChunkZ;
+};
+
 class DirectoryContents {
 public:
   DirectoryContents(Path const &dir, std::shared_ptr<Node> parent);
@@ -62,6 +80,7 @@ public:
     TypeDirectoryUnopened,
     TypeUnsupportedFile,
     TypeRegion,
+    TypeUnopenedChunk,
     TypeCompound,
   };
   using Value = std::variant<DirectoryContents, // DirectoryContents
@@ -69,7 +88,8 @@ public:
                              Path,              // DirectoryUnopened
                              Path,              // UnsupportedFile
                              Region,            // Region
-                             Compound           // Compound
+                             UnopenedChunk,
+                             Compound // Compound
                              >;
 
   Node(Value &&value, std::shared_ptr<Node> parent);
@@ -86,6 +106,7 @@ public:
   Path const *unsupportedFile() const;
   Region *region();
   Region const *region() const;
+  UnopenedChunk const *unopenedChunk() const;
 
   std::string description() const;
   bool hasParent() const;
