@@ -85,6 +85,9 @@ list(APPEND nbte_files
   resource/document_attribute_s.png
   resource/edit_small_caps.png
   resource/box.png
+  resource/block.png
+  resource/edit_list.png
+  resource/folder.png
   resource/nbte32.png
   deps/imgui/imgui.cpp
   deps/imgui/imgui_draw.cpp

@@ -349,6 +349,7 @@ static void VisitNbtNonScalar(State &s,
     filter = "";
   }
 
+  optional<Texture> icon = nullopt;
   int size = 0;
   switch (tag->type()) {
   case Tag::Type::Compound:
@@ -360,6 +361,7 @@ static void VisitNbtNonScalar(State &s,
     if (auto v = dynamic_pointer_cast<CompoundTag>(tag); v) {
       size = v->size();
     }
+    icon = s.fTextures.fIconBox;
     break;
   case Tag::Type::List:
     if (!filter.empty()) {
@@ -370,6 +372,7 @@ static void VisitNbtNonScalar(State &s,
     if (auto v = dynamic_pointer_cast<ListTag>(tag); v) {
       size = v->size();
     }
+    icon = s.fTextures.fIconEditList;
     break;
   case Tag::Type::ByteArray:
     if (auto v = dynamic_pointer_cast<ByteArrayTag>(tag); v) {
@@ -404,7 +407,7 @@ static void VisitNbtNonScalar(State &s,
   if (matchedNode) {
     flags = flags | ImGuiTreeNodeFlags_Selected;
   }
-  if (MyTreeNode(label.c_str(), flags, s.fTextures.fIconBox)) {
+  if (MyTreeNode(label.c_str(), flags, icon)) {
     Indent(kIndent);
 
     switch (tag->type()) {
@@ -545,7 +548,7 @@ static void Visit(State &s,
     }
     PushID(path + "/" + name);
     if (node->hasParent()) {
-      if (TreeNodeEx(label.c_str(), ImGuiTreeNodeFlags_NavLeftJumpsBackHere)) {
+      if (MyTreeNode(label.c_str(), ImGuiTreeNodeFlags_NavLeftJumpsBackHere, s.fTextures.fIconFolder)) {
         for (auto const &it : contents->fValue) {
           Visit(s, it, path + "/" + name, filter);
         }
@@ -562,7 +565,7 @@ static void Visit(State &s,
     PushID(path + "/" + name);
     if (node->hasParent()) {
       bool ready = region->wait();
-      if (TreeNodeEx(name.c_str(), ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_NavLeftJumpsBackHere)) {
+      if (MyTreeNode(name.c_str(), ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_NavLeftJumpsBackHere, s.fTextures.fIconBlock)) {
         if (ready) {
           for (auto const &it : std::get<0>(region->fValue)) {
             Visit(s, it, path + "/" + name, filter);
@@ -613,7 +616,7 @@ static void Visit(State &s,
     Unindent(GetTreeNodeToLabelSpacing());
   } else if (auto unopenedDirectory = node->directoryUnopened(); unopenedDirectory) {
     PushID(path + "/" + unopenedDirectory->filename().string());
-    if (TreeNodeEx(unopenedDirectory->filename().string().c_str(), ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_NavLeftJumpsBackHere)) {
+    if (MyTreeNode(unopenedDirectory->filename().string().c_str(), ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_NavLeftJumpsBackHere, s.fTextures.fIconFolder)) {
       node->load(*s.fPool);
       Indent(GetTreeNodeToLabelSpacing());
       TextUnformatted("loading...");
