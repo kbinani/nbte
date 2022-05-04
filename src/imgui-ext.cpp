@@ -47,7 +47,7 @@ bool TreeNode(std::string const &label, ImGuiTreeNodeFlags flags, std::optional<
   RenderArrow(window->DrawList, ImVec2(pos.x + padding.x, pos.y + padding.y), textCol, opened ? ImGuiDir_Down : ImGuiDir_Right, 1.0f);
   if (icon) {
     ImVec2 iconSize(icon->fWidth, icon->fHeight);
-    ImVec2 p(pos.x + frameHeight, pos.y + frameHeight * 0.5f - iconSize.y * 0.5f);
+    ImVec2 p(pos.x + GetTreeNodeToLabelSpacing(), pos.y + frameHeight * 0.5f - iconSize.y * 0.5f);
     window->DrawList->AddImage((ImTextureID)(intptr_t)icon->fTexture, p, p + iconSize);
     window->DC.CursorPos = ImVec2(pos.x + iconSize.x + style.FramePadding.x, pos.y);
     RenderText(ImVec2(pos.x + frameHeight + frameHeight + 1.0f, pos.y + padding.y), label.c_str());
