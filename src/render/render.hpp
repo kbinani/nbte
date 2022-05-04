@@ -520,6 +520,8 @@ static void Visit(State &s,
   using namespace std;
   using namespace ImGui;
 
+  auto const &style = GetStyle();
+
   if (auto compound = node->compound(); compound) {
     PushID(path + "/" + compound->name());
     if (node->hasParent()) {
@@ -593,7 +595,17 @@ static void Visit(State &s,
     Indent(GetTreeNodeToLabelSpacing());
     PushID(path + "/" + unopenedFile->filename().string());
     PushStyleColor(ImGuiCol_Button, ImVec4(0, 0, 0, 0));
-    PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(0, 0));
+    auto icon = s.fTextures.fIconDocument;
+    if (auto pos = mcfile::je::Region::RegionXZFromFile(*unopenedFile); pos) {
+      icon = s.fTextures.fIconBlock;
+    }
+    if (icon) {
+      Image((ImTextureID)(intptr_t)icon->fTexture, ImVec2(icon->fWidth, icon->fHeight));
+      SameLine();
+      auto cursor = GetCursorPos();
+      SetCursorPos(ImVec2(cursor.x - style.FramePadding.x, cursor.y));
+    }
+    PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(0, style.FramePadding.y));
     if (Button(unopenedFile->filename().string().c_str())) {
       node->load(*s.fPool);
     }

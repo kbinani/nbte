@@ -89,6 +89,8 @@ list(APPEND nbte_files
   resource/edit_list.png
   resource/folder.png
   resource/nbte32.png
+  resource/document.png
+  resource/document_exclamation.png
   deps/imgui/imgui.cpp
   deps/imgui/imgui_draw.cpp
   deps/imgui/imgui_tables.cpp

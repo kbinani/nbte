@@ -14,6 +14,8 @@ struct TextureSet {
   std::optional<Texture> fIconEditList;
   std::optional<Texture> fIconFolder;
   std::optional<Texture> fIconBlock;
+  std::optional<Texture> fIconDocument;
+  std::optional<Texture> fIconDocumentExclamation;
 
   void loadTextures(void *device) {
     fIconDocumentAttributeB = LoadTexture("document_attribute_b.png", device);
@@ -27,6 +29,8 @@ struct TextureSet {
     fIconEditList = LoadTexture("edit_list.png", device);
     fIconFolder = LoadTexture("folder.png", device);
     fIconBlock = LoadTexture("block.png", device);
+    fIconDocument = LoadTexture("document.png", device);
+    fIconDocumentExclamation = LoadTexture("document_exclamation.png", device);
   }
 };
 
