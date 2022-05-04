@@ -59,9 +59,9 @@ bool TreeNode(std::string const &label, ImGuiTreeNodeFlags flags, std::optional<
     ImVec2 p(pos.x + labelSpacing, pos.y + frameHeight * 0.5f - iconSize.y * 0.5f);
     window->DrawList->AddImage((ImTextureID)(intptr_t)icon->fTexture, p, p + iconSize);
     window->DC.CursorPos = ImVec2(pos.x + iconSize.x + style.FramePadding.x, pos.y);
-    textPos = ImVec2(pos.x + frameHeight + frameHeight, pos.y + padding.y);
+    textPos = ImVec2(pos.x + labelSpacing + iconSize.x + padding.x, pos.y + padding.y);
   } else {
-    textPos = ImVec2(pos.x + frameHeight + style.ItemInnerSpacing.x, pos.y + padding.y);
+    textPos = ImVec2(pos.x + labelSpacing + padding.x, pos.y + padding.y);
   }
 
   if (!filter.empty()) {
