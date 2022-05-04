@@ -45,8 +45,11 @@ bool TreeNode(std::string const &label, ImGuiTreeNodeFlags flags, std::optional<
     window->DrawList->AddRectFilled(bb.Min, bb.Max, bg_col);
   }
 
-  ImU32 const textCol = GetColorU32(ImGuiCol_Text);
-  RenderArrow(window->DrawList, ImVec2(pos.x + padding.x, pos.y + padding.y), textCol, opened ? ImGuiDir_Down : ImGuiDir_Right, 1.0f);
+  ImColor arrowColor = style.Colors[ImGuiCol_Text];
+  ImVec2 defaultSize(frameHeight - 2 * padding.x, frameHeight - 2 * padding.y);
+  float const arrowScale = 0.7f;
+  ImVec2 arrowOffset = padding + defaultSize * (0.5f - 0.5f * arrowScale);
+  RenderArrow(window->DrawList, pos + arrowOffset, arrowColor, opened ? ImGuiDir_Down : ImGuiDir_Right, arrowScale);
 
   float const labelSpacing = GetTreeNodeToLabelSpacing();
   ImVec2 textPos;
