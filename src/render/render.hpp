@@ -536,10 +536,7 @@ static void Visit(State &s,
       if (!filter.empty() && ContainsTerm(compound->fTag, filter, s.fFilterMode, s.fFilterCaseSensitive)) {
         SetNextItemOpen(true);
       }
-      ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_NavLeftJumpsBackHere;
-      if (node->fParent.lock()->region()) {
-        flags |= ImGuiTreeNodeFlags_DefaultOpen;
-      }
+      ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_NavLeftJumpsBackHere;
       if (TreeNode(compound->name(), flags, s.fTextures.fIconBox, s.filterTerm(), s.fFilterCaseSensitive)) {
         VisitNbtCompound(s, *compound, *compound->fTag, path, filter);
         TreePop();
