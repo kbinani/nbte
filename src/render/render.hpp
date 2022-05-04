@@ -382,16 +382,19 @@ static void VisitNbtNonScalar(State &s,
     if (auto v = dynamic_pointer_cast<ByteArrayTag>(tag); v) {
       size = v->fValue.size();
     }
+    icon = s.fTextures.fIconEditCode;
     break;
   case Tag::Type::IntArray:
     if (auto v = dynamic_pointer_cast<IntArrayTag>(tag); v) {
       size = v->fValue.size();
     }
+    icon = s.fTextures.fIconEditCode;
     break;
   case Tag::Type::LongArray:
     if (auto v = dynamic_pointer_cast<LongArrayTag>(tag); v) {
       size = v->fValue.size();
     }
+    icon = s.fTextures.fIconEditCode;
     break;
   }
   string label = name + ": ";
