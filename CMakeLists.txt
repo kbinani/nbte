@@ -33,9 +33,6 @@ add_subdirectory(deps/libminecraft-file EXCLUDE_FROM_ALL)
 
 configure_file(src/version.hpp.in ${CMAKE_CURRENT_SOURCE_DIR}/src/version.hpp)
 
-string(REPLACE "." "," NBTE_FILE_VERSION ${CMAKE_PROJECT_VERSION})
-configure_file(resource/appicon.rc.in ${CMAKE_CURRENT_SOURCE_DIR}/resource/appicon.rc)
-
 file(READ deps/libminecraft-file/LICENSE NBTE_LEGAL_LIBMINECRAFT_FILE)
 string(STRIP "${NBTE_LEGAL_LIBMINECRAFT_FILE}" NBTE_LEGAL_LIBMINECRAFT_FILE)
 file(READ deps/nativefiledialog/LICENSE NBTE_LEGAL_NATIVEFILEDIALOG)
@@ -78,6 +75,7 @@ list(APPEND nbte_files
   src/texture-set.hpp
   resource/appicon.rc.in
   resource/UDEVGothic35_Regular.ttf
+  resource/nbte32.png
   deps/imgui/imgui.cpp
   deps/imgui/imgui_draw.cpp
   deps/imgui/imgui_tables.cpp
@@ -115,10 +113,17 @@ list(APPEND nbte_icon_files
   resource/block.png
   resource/edit_list.png
   resource/folder.png
-  resource/nbte32.png
   resource/document.png
   resource/document_exclamation.png
   resource/edit_code.png)
+
+string(REPLACE "." "," NBTE_FILE_VERSION ${CMAKE_PROJECT_VERSION})
+set(NBTE_ICON_FILES "")
+foreach (icon_file IN LISTS nbte_icon_files)
+  get_filename_component(basename ${icon_file} NAME)
+  set(NBTE_ICON_FILES "${NBTE_ICON_FILES}${basename} DATA \"${basename}\"\n")
+endforeach()
+configure_file(resource/appicon.rc.in ${CMAKE_CURRENT_SOURCE_DIR}/resource/appicon.rc)
 
 if ("${CMAKE_SYSTEM_NAME}" STREQUAL "Darwin")
   add_executable(nbte MACOSX_BUNDLE ${nbte_files} ${nbte_icon_files})
