@@ -750,6 +750,14 @@ static void CaptureShortcutKey(State &s) {
 static void Render(State &s) {
   using namespace ImGui;
 
+  ImGuiStyle const &style = GetStyle();
+  ImVec4 bg = style.Colors[ImGuiCol_WindowBg];
+  if (s.fFilterBarOpened && !s.fFilter.empty()) {
+    float v = 230.0f / 255.0f;
+    bg = ImVec4(v, v, v, 1.0f);
+  }
+  PushStyleColor(ImGuiCol_WindowBg, GetColorU32(bg));
+
   ImGuiWindowFlags flags = ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoBringToFrontOnFocus;
   Begin("main", nullptr, flags);
   SetWindowPos(ImVec2(0, 0));
@@ -770,6 +778,7 @@ static void Render(State &s) {
   RenderAboutDialog(s);
   RenderLegal(s);
 
+  PopStyleColor();
   End();
 
   RenderFooter(s);
