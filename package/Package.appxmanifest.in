@@ -39,6 +39,17 @@
         <uap:DefaultTile Wide310x150Logo="Images\Wide310x150Logo.png" />
         <uap:SplashScreen Image="Images\SplashScreen.png" />
       </uap:VisualElements>
+      <Extensions>
+        <uap:Extension Category="windows.fileTypeAssociation">
+          <uap:FileTypeAssociation Name="minecraft_related_files">
+            <uap:SupportedFileTypes>
+              <uap:FileType>.dat</uap:FileType>
+              <uap:FileType>.mca</uap:FileType>
+            </uap:SupportedFileTypes>
+            <uap:DisplayName>Minecraft related files</uap:DisplayName>
+          </uap:FileTypeAssociation>
+        </uap:Extension>
+      </Extensions>
     </Application>
   </Applications>
 
