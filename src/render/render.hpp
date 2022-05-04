@@ -428,7 +428,7 @@ static void VisitNbtNonScalar(State &s,
       if (auto v = dynamic_pointer_cast<ByteArrayTag>(tag); v) {
         for (size_t i = 0; i < v->fValue.size(); i++) {
           auto label = "#" + to_string(i);
-          PushScalarInput(label, nextPath, filter, s.fFilterCaseSensitive, nullopt);
+          PushScalarInput(label, nextPath, filter, s.fFilterCaseSensitive, s.fIconDocumentAttributeB);
           InputScalar<uint8_t>(v->fValue[i], root);
           PopScalarInput();
         }
@@ -438,7 +438,7 @@ static void VisitNbtNonScalar(State &s,
       if (auto v = dynamic_pointer_cast<IntArrayTag>(tag); v) {
         for (size_t i = 0; i < v->fValue.size(); i++) {
           auto label = "#" + to_string(i);
-          PushScalarInput(label, nextPath, filter, s.fFilterCaseSensitive, nullopt);
+          PushScalarInput(label, nextPath, filter, s.fFilterCaseSensitive, s.fIconDocumentAttributeI);
           InputScalar<int>(v->fValue[i], root);
           PopScalarInput();
         }
@@ -448,7 +448,7 @@ static void VisitNbtNonScalar(State &s,
       if (auto v = dynamic_pointer_cast<LongArrayTag>(tag); v) {
         for (size_t i = 0; i < v->fValue.size(); i++) {
           auto label = "#" + to_string(i);
-          PushScalarInput(label, nextPath, filter, s.fFilterCaseSensitive, nullopt);
+          PushScalarInput(label, nextPath, filter, s.fFilterCaseSensitive, s.fIconDocumentAttributeL);
           InputScalar<int64_t>(v->fValue[i], root);
           PopScalarInput();
         }
