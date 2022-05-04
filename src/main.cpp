@@ -38,6 +38,7 @@ extern "C" {
 #include "model/region.impl.hpp"
 #include "model/compound.impl.hpp"
 #include "model/state.hpp"
+#include "imgui-ext.hpp"
 #include "render/legal.hpp"
 #include "render/render.hpp"
 

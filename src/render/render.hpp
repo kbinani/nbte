@@ -404,7 +404,7 @@ static void VisitNbtNonScalar(State &s,
   if (matchedNode) {
     flags = flags | ImGuiTreeNodeFlags_Selected;
   }
-  if (TreeNodeEx(label.c_str(), flags)) {
+  if (MyTreeNode(label.c_str(), flags)) {
     Indent(kIndent);
 
     switch (tag->type()) {
@@ -527,7 +527,7 @@ static void Visit(State &s,
       if (node->fParent.lock()->region()) {
         flags |= ImGuiTreeNodeFlags_DefaultOpen;
       }
-      if (TreeNodeEx(compound->name().c_str(), flags)) {
+      if (MyTreeNode(compound->name().c_str(), flags)) {
         VisitNbtCompound(s, *compound, *compound->fTag, path, filter);
         TreePop();
       }

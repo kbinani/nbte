@@ -71,6 +71,8 @@ list(APPEND nbte_files
   src/model/region.impl.hpp
   src/model/compound.impl.hpp
   src/temporary-directory.hpp
+  src/imgui-ext.hpp
+  src/imgui-ext.cpp
   resource/appicon.rc.in
   resource/UDEVGothic35_Regular.ttf
   resource/document_attribute_b.png
