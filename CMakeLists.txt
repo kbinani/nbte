@@ -78,20 +78,6 @@ list(APPEND nbte_files
   src/texture-set.hpp
   resource/appicon.rc.in
   resource/UDEVGothic35_Regular.ttf
-  resource/document_attribute_b.png
-  resource/document_attribute_d.png
-  resource/document_attribute_f.png
-  resource/document_attribute_i.png
-  resource/document_attribute_l.png
-  resource/document_attribute_s.png
-  resource/edit_small_caps.png
-  resource/box.png
-  resource/block.png
-  resource/edit_list.png
-  resource/folder.png
-  resource/nbte32.png
-  resource/document.png
-  resource/document_exclamation.png
   deps/imgui/imgui.cpp
   deps/imgui/imgui_draw.cpp
   deps/imgui/imgui_tables.cpp
@@ -117,9 +103,25 @@ elseif ("${CMAKE_SYSTEM_NAME}" STREQUAL "Windows")
     resource/appicon.rc
     deps/nativefiledialog/src/nfd_win.cpp)
 endif()
+list(APPEND nbte_icon_files
+  resource/document_attribute_b.png
+  resource/document_attribute_d.png
+  resource/document_attribute_f.png
+  resource/document_attribute_i.png
+  resource/document_attribute_l.png
+  resource/document_attribute_s.png
+  resource/edit_small_caps.png
+  resource/box.png
+  resource/block.png
+  resource/edit_list.png
+  resource/folder.png
+  resource/nbte32.png
+  resource/document.png
+  resource/document_exclamation.png
+  resource/edit_code.png)
 
 if ("${CMAKE_SYSTEM_NAME}" STREQUAL "Darwin")
-  add_executable(nbte MACOSX_BUNDLE ${nbte_files})
+  add_executable(nbte MACOSX_BUNDLE ${nbte_files} ${nbte_icon_files})
   set_target_properties(nbte PROPERTIES
     MACOSX_BUNDLE_INFO_PLIST "${CMAKE_CURRENT_SOURCE_DIR}/resource/Info.plist"
     XCODE_ATTRIBUTE_PRODUCT_BUNDLE_IDENTIFIER "${nbte_product_bundle_identifier}"
@@ -130,18 +132,12 @@ if ("${CMAKE_SYSTEM_NAME}" STREQUAL "Darwin")
     XCODE_ATTRIBUTE_INSTALL_PATH "$(LOCAL_APPS_DIR)")
   set_source_files_properties(resource/assets.xcassets PROPERTIES MACOSX_PACKAGE_LOCATION Resources)
   set_source_files_properties(resource/MainMenu.xib PROPERTIES MACOSX_PACKAGE_LOCATION Resources)
-  set_source_files_properties(resource/MainMenu.xib PROPERTIES MACOSX_PACKAGE_LOCATION Resources)
   set_source_files_properties(resource/UDEVGothic35_Regular.ttf PROPERTIES MACOSX_PACKAGE_LOCATION Resources)
-  set_source_files_properties(resource/document_attribute_b.png PROPERTIES MACOSX_PACKAGE_LOCATION Resources)
-  set_source_files_properties(resource/document_attribute_d.png PROPERTIES MACOSX_PACKAGE_LOCATION Resources)
-  set_source_files_properties(resource/document_attribute_f.png PROPERTIES MACOSX_PACKAGE_LOCATION Resources)
-  set_source_files_properties(resource/document_attribute_i.png PROPERTIES MACOSX_PACKAGE_LOCATION Resources)
-  set_source_files_properties(resource/document_attribute_l.png PROPERTIES MACOSX_PACKAGE_LOCATION Resources)
-  set_source_files_properties(resource/document_attribute_s.png PROPERTIES MACOSX_PACKAGE_LOCATION Resources)
-  set_source_files_properties(resource/edit_small_caps.png PROPERTIES MACOSX_PACKAGE_LOCATION Resources)
-  set_source_files_properties(resource/nbte32.png PROPERTIES MACOSX_PACKAGE_LOCATION Resources)
+  foreach(icon_file IN LISTS nbte_icon_files)
+    set_source_files_properties(${icon_file} PROPERTIES MACOSX_PACKAGE_LOCATION Resources)
+  endforeach()
 else()
-  add_executable(nbte WIN32 ${nbte_files})
+  add_executable(nbte WIN32 ${nbte_files} ${nbte_icon_files})
 endif()
 
 target_include_directories(nbte

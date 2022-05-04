@@ -29,7 +29,9 @@ extern "C" {
 
 #include "version.hpp"
 #include "string.hpp"
+#include "texture.hpp"
 #include "platform.hpp"
+#include "texture-set.hpp"
 #include "temporary-directory.hpp"
 #include "model/node.hpp"
 #include "model/node.impl.hpp"
@@ -164,7 +166,7 @@ extern "C" {
   [commandBuffer commit];
 
   NSWindow *window = [[NSApplication sharedApplication] keyWindow];
-  NSString *title = [[NSString alloc] initWithUTF8String:state.winowTitle().c_str()];
+  NSString *title = [[NSString alloc] initWithUTF8String:(char const *)state.winowTitle().c_str()];
   if (window && window.title != title) {
     window.title = title;
   }
