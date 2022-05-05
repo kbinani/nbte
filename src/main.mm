@@ -67,7 +67,7 @@ extern "C" {
     abort();
   }
 
-  state.loadTextures(_device);
+  state.loadTextures((__bridge void*)_device);
 
   // Setup Dear ImGui context
   // FIXME: This example doesn't have proper cleanup...

@@ -195,7 +195,7 @@ std::optional<Texture> LoadTexture(char const *name, void *devicePtr) {
   return ret;
 #else
   @autoreleasepool {
-    id<MTLDevice> device = (id<MTLDevice>)devicePtr;
+    id<MTLDevice> device = (__bridge id<MTLDevice>)devicePtr;
     NSImage *image = [NSImage imageNamed:[NSString stringWithUTF8String:name]];
     NSSize size = image.size;
     NSRect rect = NSMakeRect(0, 0, size.width, size.height);
@@ -234,7 +234,7 @@ std::optional<Texture> LoadTexture(char const *name, void *devicePtr) {
     [texture replaceRegion:region mipmapLevel:0 withBytes:data bytesPerRow:bytesPerRow];
 
     Texture ret;
-    ret.fTexture = texture;
+    ret.fTexture = (__bridge void*)texture;
     ret.fWidth = width;
     ret.fHeight = height;
     return ret;
