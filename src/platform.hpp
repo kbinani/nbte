@@ -97,6 +97,9 @@ static String UuidString() {
 struct Resource {
   Resource(void *data, size_t size, bool systemOwned) : fData(data), fSize(size), fSystemOwned(systemOwned) {}
 
+  Resource(Resource const&) = delete;
+  Resource &operator=(Resource const&) = delete;
+  
   ~Resource() {
     if (!fSystemOwned) {
       free(fData);
@@ -108,29 +111,28 @@ struct Resource {
   bool const fSystemOwned;
 };
 
-static std::optional<Resource> LoadNamedResource(char const *name) {
+static std::unique_ptr<Resource> LoadNamedResource(char const *name) {
   using namespace std;
   namespace fs = std::filesystem;
 #if defined(_MSC_VER)
   HINSTANCE self = GetModuleHandle(nullptr);
   HRSRC info = FindResourceA(self, name, "DATA");
   if (!info) {
-    return nullopt;
+    return nullptr;
   }
   HANDLE rc = LoadResource(self, info);
   if (!rc) {
-    return nullopt;
+    return nullptr;
   }
   void *address = LockResource(rc);
   if (!address) {
-    return nullopt;
+    return nullptr;
   }
   int size = SizeofResource(self, info);
   if (size == 0) {
-    return nullopt;
+    return nullptr;
   }
-  Resource resource(address, size, true);
-  return resource;
+  return make_unique<Resource>(address, size, true);
 #else
   @autoreleasepool {
     NSString *fileName = [NSString stringWithUTF8String:name];
@@ -138,19 +140,18 @@ static std::optional<Resource> LoadNamedResource(char const *name) {
     NSString *extension = [fileName pathExtension];
     NSURL *url = [[NSBundle mainBundle] URLForResource:baseName withExtension:extension];
     if (!url) {
-      return nullopt;
+      return nullptr;
     }
     fs::path path([[url path] cStringUsingEncoding:NSUTF8StringEncoding]);
     auto stream = make_shared<mcfile::stream::FileInputStream>(path);
     vector<uint8_t> buffer;
     mcfile::stream::InputStream::ReadUntilEos(*stream, buffer);
     if (buffer.empty()) {
-      return nullopt;
+      return nullptr;
     }
     void *copy = malloc(buffer.size());
     memcpy(copy, buffer.data(), buffer.size());
-    Resource resource(copy, buffer.size(), false);
-    return resource;
+    return std::make_unique<Resource>(copy, buffer.size(), false);
   }
 #endif
 }
