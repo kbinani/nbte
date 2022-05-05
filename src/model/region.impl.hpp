@@ -52,8 +52,34 @@ static std::optional<Region::ValueType> ReadRegion(int rx, int rz, Path path, st
         // chunk not saved yet
         continue;
       }
+#if 1
       UnopenedChunk uc(path, sectorOffset * kSectorSize, chunkSize, rx * 32 + x, rz * 32 + z, x, z);
       auto node = shared_ptr<Node>(new Node(Node::Value(in_place_index<Node::TypeUnopenedChunk>, uc), parent));
+#else
+      //NOTE: Code for debug: Loading all chunks immediately
+      if (!sr.seek(sectorOffset * kSectorSize + sizeof(uint32_t))) {
+        return nullopt;
+      }
+      uint8_t compressionType;
+      if (!sr.read(&compressionType)) {
+        return nullopt;
+      }
+      if (compressionType != 2) {
+        return nullopt;
+      }
+      vector<uint8_t> buffer(chunkSize - 1);
+      if (!sr.read(buffer)) {
+        return nullopt;
+      }
+      auto tag = mcfile::nbt::CompoundTag::ReadCompressed(buffer, mcfile::Endian::Big);
+      if (!tag) {
+        return nullopt;
+      }
+      int cx = rx * 32 + x;
+      int cz = rz * 32 + z;
+      String name(u8"Chunk " + ToString(cx) + u8" " + ToString(cz) + u8" [" + ToString(x) + u8" " + ToString(z) + u8" in region]");
+      auto node = shared_ptr<Node>(new Node(Node::Value(in_place_index<Node::TypeCompound>, Compound(name, cx, cz, tag, Compound::Format::DeflatedBigEndian)), parent));
+#endif
       ret.push_back(node);
     }
   }
