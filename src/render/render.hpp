@@ -597,27 +597,30 @@ static void Visit(State &s,
     }
     PopID();
   } else if (auto unopenedFile = node->fileUnopened(); unopenedFile) {
-    Indent(GetTreeNodeToLabelSpacing());
-    PushID(path + "/" + unopenedFile->filename().string());
-    auto icon = s.fTextures.fIconDocument;
+    string name = unopenedFile->filename().string();
+    PushID(path + "/" + name);
     if (auto pos = mcfile::je::Region::RegionXZFromFile(*unopenedFile); pos) {
-      icon = s.fTextures.fIconBlock;
-    }
-    if (IconButton(unopenedFile->filename().string(), icon)) {
-      node->load(*s.fPool);
+      if (TreeNode(name, 0, s.fTextures.fIconBlock, s.filterTerm(), s.fFilterCaseSensitive)) {
+        node->load(*s.fPool);
+        TreePop();
+      }
+    } else {
+      Indent(GetTreeNodeToLabelSpacing());
+      if (IconButton(name, s.fTextures.fIconDocument)) {
+        node->load(*s.fPool);
+      }
+      Unindent(GetTreeNodeToLabelSpacing());
     }
     PopID();
-    Unindent(GetTreeNodeToLabelSpacing());
   } else if (auto unopenedChunk = node->unopenedChunk(); unopenedChunk) {
-    Indent(GetTreeNodeToLabelSpacing());
     string name = unopenedChunk->name();
     PushID(path + "/" + name);
     auto icon = s.fTextures.fIconBox;
-    if (IconButton(name.c_str(), icon)) {
+    if (TreeNode(name, 0, icon, s.filterTerm(), s.fFilterCaseSensitive)) {
       node->load(*s.fPool);
+      TreePop();
     }
     PopID();
-    Unindent(GetTreeNodeToLabelSpacing());
   } else if (auto unopenedDirectory = node->directoryUnopened(); unopenedDirectory) {
     PushID(path + "/" + unopenedDirectory->filename().string());
     if (TreeNode(unopenedDirectory->filename().string(), ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_NavLeftJumpsBackHere, s.fTextures.fIconFolder, s.filterTerm(), s.fFilterCaseSensitive)) {
@@ -783,6 +786,10 @@ static void Render(State &s) {
   if (!s.fSaveTask) {
     CaptureShortcutKey(s);
   }
+
+#if !defined(NDEBUG)
+  ImGui::ShowMetricsWindow();
+#endif
 
   ImGui::Render();
 
