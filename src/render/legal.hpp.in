@@ -10,9 +10,11 @@ static void RenderLegal(State &s) {
   im::SetNextWindowSize(ImVec2(s.fDisplaySize.x * 0.75f, s.fDisplaySize.y * 0.75f), ImGuiCond_Once);
   if (BeginPopupModal(u8"Legal", &s.fMainMenuBarHelpOpenSourceLicensesOpened, ImGuiWindowFlags_NoSavedSettings)) {
     TextWrapped(String(u8"Dear ImGui: https://github.com/ocornut/imgui\n\n") + u8R"(${NBTE_LEGAL_DEARIMGUI})");
+
     TextUnformatted(u8"");
     im::Separator();
     TextWrapped(String(u8"GLFW: https://github.com/glfw/glfw\n\n") + u8R"(${NBTE_LEGAL_GLFW})");
+
     TextUnformatted(u8"");
     im::Separator();
     TextWrapped(u8R"(stb: https://github.com/nothings/stb
@@ -34,9 +36,9 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.)");
+
     TextUnformatted(u8"");
     im::Separator();
-
     TextWrapped(u8R"(UDEV Gothic: https://github.com/yuru7/udev-gothic
 
 Copyright (c) 2022 Yuko OTAWARA. with Reserved Font Name "UDEV Gothic"
@@ -132,21 +134,21 @@ INCLUDING ANY GENERAL, SPECIAL, INDIRECT, INCIDENTAL, OR CONSEQUENTIAL
 DAMAGES, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF THE USE OR INABILITY TO USE THE FONT SOFTWARE OR FROM
 OTHER DEALINGS IN THE FONT SOFTWARE.)");
+
     TextUnformatted(u8"");
     im::Separator();
-
     TextWrapped(String(u8"nativefiledialog: https://github.com/mlabbe/nativefiledialog\n\n") + u8R"(${NBTE_LEGAL_NATIVEFILEDIALOG})");
+
     TextUnformatted(u8"");
     im::Separator();
-
     TextWrapped(String(u8"libminecraft-file: https://github.com/kbinani/libminecraft-file\n\n") + u8R"(${NBTE_LEGAL_LIBMINECRAFT_FILE})");
+
     TextUnformatted(u8"");
     im::Separator();
-
     TextWrapped(String(u8"zlib-ng: https://github.com/zlib-ng/zlib-ng\n\n") + u8R"(${NBTE_LEGAL_ZLIB_NG})");
+
     TextUnformatted(u8"");
     im::Separator();
-
     TextWrapped(u8R"(Fugue Icons: https://p.yusukekamiyamane.com/
 
 (C) 2013 Yusuke Kamiyamane. All rights reserved.
@@ -154,10 +156,17 @@ OTHER DEALINGS IN THE FONT SOFTWARE.)");
 These icons are licensed under a Creative Commons
 Attribution 3.0 License.
 <http://creativecommons.org/licenses/by/3.0/>)");
+
     TextUnformatted(u8"");
     im::Separator();
-
     TextWrapped(String(u8"uuid4: https://github.com/rxi/uuid4\n\n") + u8R"(${NBTE_LEGAL_UUID4})");
+
+#if defined(__APPLE__)
+    TextUnformatted(u8"");
+    im::Separator();
+    TextWrapped(String(u8"bugsnag-cocoa: https://github.com/bugsnag/bugsnag-cocoa\n\n") + u8R"(${NBTE_LEGAL_BUGSNAG_COCOA})");
+#endif
+
     if (im::IsKeyDown(im::GetKeyIndex(ImGuiKey_Escape))) {
       s.fMainMenuBarHelpOpenSourceLicensesOpened = false;
       im::CloseCurrentPopup();

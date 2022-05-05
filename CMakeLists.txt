@@ -37,6 +37,14 @@ endif()
 add_subdirectory(deps/glfw EXCLUDE_FROM_ALL)
 add_subdirectory(deps/libminecraft-file EXCLUDE_FROM_ALL)
 
+fetchcontent_populate(bugsnag-cocoa
+  GIT_REPOSITORY https://github.com/bugsnag/bugsnag-cocoa
+  GIT_TAG v6.16.8)
+if ("${CMAKE_SYSTEM_NAME}" STREQUAL "Darwin" AND NOT nbte_busgnag_ready)
+  execute_process(COMMAND xcodebuild -project Bugsnag.xcodeproj -target BugsnagStatic -sdk macosx -arch x86_64,arm64 WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/_deps/bugsnag-cocoa-src)
+  set(nbte_busgnag_ready ON CACHE INTERNAL "")
+endif()
+
 configure_file(src/version.hpp.in ${CMAKE_CURRENT_SOURCE_DIR}/src/version.hpp)
 
 file(READ deps/libminecraft-file/LICENSE NBTE_LEGAL_LIBMINECRAFT_FILE)
@@ -53,20 +61,14 @@ file(READ deps/libminecraft-file/deps/zlib-ng/LICENSE.md NBTE_LEGAL_ZLIB_NG)
 string(STRIP "${NBTE_LEGAL_ZLIB_NG}" NBTE_LEGAL_ZLIB_NG)
 file(READ deps/uuid4/LICENSE NBTE_LEGAL_UUID4)
 string(STRIP "${NBTE_LEGAL_UUID4}" NBTE_LEGAL_UUID4)
+file(READ build/bugsnag-cocoa-src/LICENSE.txt NBTE_LEGAL_BUGSNAG_COCOA)
+string(STRIP "${NBTE_LEGAL_BUGSNAG_COCOA}" NBTE_LEGAL_BUGSNAG_COCOA)
 configure_file(src/render/legal.hpp.in ${CMAKE_CURRENT_SOURCE_DIR}/src/render/legal.hpp)
 
 configure_file(package/Package.appxmanifest.in ${CMAKE_CURRENT_SOURCE_DIR}/package/Package.appxmanifest)
 
 if ("${CMAKE_SYSTEM_NAME}" STREQUAL "Darwin")
   configure_file(resource/Info.plist.in ${CMAKE_CURRENT_SOURCE_DIR}/resource/Info.plist)
-
-  fetchcontent_declare(bugsnag-cocoa
-    GIT_REPOSITORY https://github.com/bugsnag/bugsnag-cocoa
-    GIT_TAG v6.16.8)
-  if (NOT nbte_busgnag_ready)
-    execute_process(COMMAND xcodebuild -project Bugsnag.xcodeproj -target BugsnagStatic -sdk macosx -arch x86_64,arm64 WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/_deps/bugsnag-cocoa-src)
-    set(nbte_busgnag_ready ON CACHE INTERNAL "")
-  endif()
 endif()
 
 list(APPEND nbte_files
