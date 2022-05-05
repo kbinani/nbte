@@ -3,10 +3,11 @@
 // Read online: https://github.com/ocornut/imgui/tree/master/docs
 
 #import <Foundation/Foundation.h>
+
 #import <Cocoa/Cocoa.h>
+
 #import <Metal/Metal.h>
 #import <MetalKit/MetalKit.h>
-#import <Bugsnag.h>
 
 #include "imgui.h"
 #include "imgui_impl_metal.h"
