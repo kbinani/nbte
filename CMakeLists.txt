@@ -17,6 +17,7 @@ elseif ("${CMAKE_SYSTEM_NAME}" STREQUAL "Windows")
   add_definitions(
     /DUNICODE
     /D_UNICODE
+    /source-charset:utf-8
     /we4828
     /wd4100 # Suppress "unreferenced formal parameter" warnings
     /wd26812 # Suppress "Prefer 'enum class' over 'enum'" warnings

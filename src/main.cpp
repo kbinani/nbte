@@ -135,7 +135,20 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR pCmdLine
     ImFontConfig cfg;
     cfg.FontDataOwnedByAtlas = false;
     assert(udevFont->fSystemOwned);
-    io.Fonts->AddFontFromMemoryTTF(udevFont->fData, udevFont->fSize, 15.0f, &cfg);
+
+    ImVector<ImWchar> ranges;
+    ImFontGlyphRangesBuilder builder;
+    builder.AddRanges(io.Fonts->GetGlyphRangesKorean());
+    builder.AddRanges(io.Fonts->GetGlyphRangesJapanese());
+    builder.AddRanges(io.Fonts->GetGlyphRangesChineseFull());
+    builder.AddRanges(io.Fonts->GetGlyphRangesChineseSimplifiedCommon());
+    builder.AddRanges(io.Fonts->GetGlyphRangesCyrillic());
+    builder.AddRanges(io.Fonts->GetGlyphRangesThai());
+    builder.AddRanges(io.Fonts->GetGlyphRangesVietnamese());
+    builder.BuildRanges(&ranges);
+
+    ImFont *font = io.Fonts->AddFontFromMemoryTTF(udevFont->fData, udevFont->fSize, 15.0f, &cfg, ranges.Data);
+    io.Fonts->Build();
   }
 
   uuid4_init();

@@ -84,7 +84,20 @@ extern "C" {
   if (auto udevFont = nbte::LoadNamedResource("UDEVGothic35_Regular.ttf"); udevFont) {
     void *data = malloc(udevFont->fSize);
     memcpy(data, udevFont->fData, udevFont->fSize);
-    io.Fonts->AddFontFromMemoryTTF(data, udevFont->fSize, 15.0f);
+
+    ImVector<ImWchar> ranges;
+    ImFontGlyphRangesBuilder builder;
+    builder.AddRanges(io.Fonts->GetGlyphRangesKorean());
+    builder.AddRanges(io.Fonts->GetGlyphRangesJapanese());
+    builder.AddRanges(io.Fonts->GetGlyphRangesChineseFull());
+    builder.AddRanges(io.Fonts->GetGlyphRangesChineseSimplifiedCommon());
+    builder.AddRanges(io.Fonts->GetGlyphRangesCyrillic());
+    builder.AddRanges(io.Fonts->GetGlyphRangesThai());
+    builder.AddRanges(io.Fonts->GetGlyphRangesVietnamese());
+    builder.BuildRanges(&ranges);
+
+    ImFont *font = io.Fonts->AddFontFromMemoryTTF(udevFont->fData, udevFont->fSize, 15.0f, &cfg, ranges.Data);
+    io.Fonts->Build();
   }
 
   // Setup Renderer backend
