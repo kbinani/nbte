@@ -9,7 +9,7 @@ public:
   Region(hwm::task_queue &queue, int x, int z, Path const &path, std::shared_ptr<Node> const &parent);
 
   bool wait();
-  std::string save(TemporaryDirectory &temp);
+  String save(TemporaryDirectory &temp);
 
   using ValueType = std::vector<std::shared_ptr<Node>>;
 
@@ -23,9 +23,9 @@ class UnopenedChunk {
 public:
   UnopenedChunk(Path file, uint64_t offset, uint64_t size, int cx, int cz, int localX, int localZ) : fFile(file), fOffset(offset), fSize(size), fChunkX(cx), fChunkZ(cz), fLocalChunkX(localX), fLocalChunkZ(localZ) {}
 
-  std::string name() const {
+  String name() const {
     using namespace std;
-    return "chunk " + to_string(fChunkX) + " " + to_string(fChunkZ) + " [" + to_string(fLocalChunkX) + " " + to_string(fLocalChunkZ) + " in region]";
+    return u8"chunk " + ToString(fChunkX) + u8" " + ToString(fChunkZ) + u8" [" + ToString(fLocalChunkX) + u8" " + ToString(fLocalChunkZ) + u8" in region]";
   }
 
   Path fFile;
@@ -40,7 +40,7 @@ public:
 class DirectoryContents {
 public:
   DirectoryContents(Path const &dir, std::shared_ptr<Node> parent);
-  std::string save(TemporaryDirectory &temp);
+  String save(TemporaryDirectory &temp);
 
   Path fDir;
   std::vector<std::shared_ptr<Node>> fValue;
@@ -58,13 +58,13 @@ public:
   };
 
   Compound(Path const &name, std::shared_ptr<mcfile::nbt::CompoundTag> const &tag, Format format) : fName(name), fTag(tag), fFormat(format) {}
-  Compound(std::string const &name, int cx, int cz, std::shared_ptr<mcfile::nbt::CompoundTag> const &tag, Format format) : fName(name), fTag(tag), fFormat(format), fChunkX(cx), fChunkZ(cz) {}
+  Compound(String const &name, int cx, int cz, std::shared_ptr<mcfile::nbt::CompoundTag> const &tag, Format format) : fName(name), fTag(tag), fFormat(format), fChunkX(cx), fChunkZ(cz) {}
 
-  std::string save(Path const &file);
-  std::string save();
-  std::string name() const;
+  String save(Path const &file);
+  String save();
+  String name() const;
 
-  std::variant<std::string, Path> fName;
+  std::variant<String, Path> fName;
   std::shared_ptr<mcfile::nbt::CompoundTag> fTag;
   Format fFormat;
   bool fEdited = false;
@@ -95,7 +95,7 @@ public:
   Node(Value &&value, std::shared_ptr<Node> parent);
 
   void load(hwm::task_queue &queue);
-  std::string save(TemporaryDirectory &temp);
+  String save(TemporaryDirectory &temp);
 
   DirectoryContents const *directoryContents() const;
   DirectoryContents *directoryContents();
@@ -108,7 +108,7 @@ public:
   Region const *region() const;
   UnopenedChunk const *unopenedChunk() const;
 
-  std::string description() const;
+  String description() const;
   bool hasParent() const;
   bool isDirty() const;
   void clearDirty();

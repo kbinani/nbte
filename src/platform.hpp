@@ -10,7 +10,7 @@ static std::optional<std::filesystem::path> OpenFileDialog() {
 
   nfdchar_t *outPath = nullptr;
   if (NFD_OpenDialog(nullptr, nullptr, &outPath) == NFD_OKAY) {
-    u8string selected;
+    String selected;
     selected.assign((char8_t const *)outPath);
     free(outPath);
     return fs::path(selected);
@@ -25,7 +25,7 @@ static std::optional<std::filesystem::path> OpenDirectoryDialog() {
 
   nfdchar_t *outPath = nullptr;
   if (NFD_PickFolder(nullptr, &outPath) == NFD_OKAY) {
-    u8string selected;
+    String selected;
     selected.assign((char8_t const *)outPath);
     free(outPath);
     return fs::path(selected);
@@ -42,19 +42,19 @@ static int GetModCtrlKeyIndex() {
 #endif
 }
 
-static std::string DecorateModCtrl(std::string const &pair) {
+static String DecorateModCtrl(String const &pair) {
 #if defined(__APPLE__)
-  return "Cmd+" + pair;
+  return u8"Cmd+" + pair;
 #else
-  return "Ctrl+" + pair;
+  return u8"Ctrl+" + pair;
 #endif
 }
 
-static std::string QuitMenuShortcut() {
+static String QuitMenuShortcut() {
 #if defined(__APPLE__)
-  return "Cmd+Q";
+  return u8"Cmd+Q";
 #else
-  return "Alt+F4";
+  return u8"Alt+F4";
 #endif
 }
 
@@ -86,10 +86,10 @@ static Path TemporaryDirectoryRoot() {
 #endif
 }
 
-static std::string UuidString() {
+static String UuidString() {
   char data[37] = {0};
   uuid4_generate(data);
-  std::string ret;
+  String ret;
   ret.assign(data, data + 36);
   return ret;
 }

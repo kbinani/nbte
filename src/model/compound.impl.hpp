@@ -2,25 +2,25 @@
 
 namespace nbte {
 
-std::string Compound::name() const {
+String Compound::name() const {
   if (fName.index() == 0) {
     return std::get<0>(fName);
   } else {
     assert(fName.index() == 1);
     Path const &path = std::get<1>(fName);
-    return path.filename().string();
+    return path.filename().u8string();
   }
 }
 
-std::string Compound::save() {
+String Compound::save() {
   if (fName.index() != 1) {
-    return "";
+    return u8"";
   }
   Path const &path = std::get<1>(fName);
   return save(path);
 }
 
-std::string Compound::save(Path const &file) {
+String Compound::save(Path const &file) {
   using namespace std;
   using namespace mcfile;
   using namespace mcfile::stream;
@@ -36,7 +36,7 @@ std::string Compound::save(Path const &file) {
     auto stream = make_shared<FileOutputStream>(file);
     OutputStreamWriter writer(stream, endian);
     if (!fTag->writeAsRoot(writer)) {
-      return "IO Error";
+      return u8"IO Error";
     }
     break;
   }
@@ -46,7 +46,7 @@ std::string Compound::save(Path const &file) {
   case Compound::Format::DeflatedBigEndian: {
     auto stream = make_shared<FileOutputStream>(file);
     if (!CompoundTag::WriteCompressed(*fTag, *stream, endian)) {
-      return "IO Error";
+      return u8"IO Error";
     }
     break;
   }
@@ -57,14 +57,14 @@ std::string Compound::save(Path const &file) {
     auto stream = make_shared<GzFileOutputStream>(file);
     OutputStreamWriter writer(stream, endian);
     if (!fTag->writeAsRoot(writer)) {
-      return "IO Error";
+      return u8"IO Error";
     }
     break;
   }
   default:
-    return "Unknown compound tag format";
+    return u8"Unknown compound tag format";
   }
-  return "";
+  return u8"";
 }
 
 } // namespace nbte

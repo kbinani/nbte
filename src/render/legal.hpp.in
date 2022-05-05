@@ -3,25 +3,19 @@
 namespace nbte {
 
 static void RenderLegal(State &s) {
-  using namespace ImGui;
-
   if (!s.fMainMenuBarHelpOpenSourceLicensesOpened) {
     return;
   }
-  OpenPopup("Legal");
-  SetNextWindowSize(ImVec2(s.fDisplaySize.x * 0.75f, s.fDisplaySize.y * 0.75f), ImGuiCond_Once);
-  if (BeginPopupModal("Legal", &s.fMainMenuBarHelpOpenSourceLicensesOpened, ImGuiWindowFlags_NoSavedSettings)) {
-    TextWrapped("%s", R"(Dear ImGui: https://github.com/ocornut/imgui
-
-${NBTE_LEGAL_DEARIMGUI})");
-    TextUnformatted("");
-    Separator();
-    TextWrapped("%s", R"(GLFW: https://github.com/glfw/glfw
-
-${NBTE_LEGAL_GLFW})");
-    TextUnformatted("");
-    Separator();
-    TextWrapped("%s", R"(stb: https://github.com/nothings/stb
+  OpenPopup(u8"Legal");
+  im::SetNextWindowSize(ImVec2(s.fDisplaySize.x * 0.75f, s.fDisplaySize.y * 0.75f), ImGuiCond_Once);
+  if (BeginPopupModal(u8"Legal", &s.fMainMenuBarHelpOpenSourceLicensesOpened, ImGuiWindowFlags_NoSavedSettings)) {
+    TextWrapped(String(u8"Dear ImGui: https://github.com/ocornut/imgui\n\n") + u8R"(${NBTE_LEGAL_DEARIMGUI})");
+    TextUnformatted(u8"");
+    im::Separator();
+    TextWrapped(String(u8"GLFW: https://github.com/glfw/glfw\n\n") + u8R"(${NBTE_LEGAL_GLFW})");
+    TextUnformatted(u8"");
+    im::Separator();
+    TextWrapped(u8R"(stb: https://github.com/nothings/stb
 
 MIT License
 Copyright (c) 2017 Sean Barrett
@@ -40,10 +34,10 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.)");
-    TextUnformatted("");
-    Separator();
+    TextUnformatted(u8"");
+    im::Separator();
 
-    TextWrapped("%s", R"(UDEV Gothic: https://github.com/yuru7/udev-gothic
+    TextWrapped(u8R"(UDEV Gothic: https://github.com/yuru7/udev-gothic
 
 Copyright (c) 2022 Yuko OTAWARA. with Reserved Font Name "UDEV Gothic"
 
@@ -138,45 +132,37 @@ INCLUDING ANY GENERAL, SPECIAL, INDIRECT, INCIDENTAL, OR CONSEQUENTIAL
 DAMAGES, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF THE USE OR INABILITY TO USE THE FONT SOFTWARE OR FROM
 OTHER DEALINGS IN THE FONT SOFTWARE.)");
-    TextUnformatted("");
-    Separator();
+    TextUnformatted(u8"");
+    im::Separator();
 
-    TextWrapped("%s", R"(nativefiledialog: https://github.com/mlabbe/nativefiledialog
+    TextWrapped(String(u8"nativefiledialog: https://github.com/mlabbe/nativefiledialog\n\n") + u8R"(${NBTE_LEGAL_NATIVEFILEDIALOG})");
+    TextUnformatted(u8"");
+    im::Separator();
 
-${NBTE_LEGAL_NATIVEFILEDIALOG})");
-    TextUnformatted("");
-    Separator();
+    TextWrapped(String(u8"libminecraft-file: https://github.com/kbinani/libminecraft-file\n\n") + u8R"(${NBTE_LEGAL_LIBMINECRAFT_FILE})");
+    TextUnformatted(u8"");
+    im::Separator();
 
-    TextWrapped("%s", R"(libminecraft-file: https://github.com/kbinani/libminecraft-file
+    TextWrapped(String(u8"zlib-ng: https://github.com/zlib-ng/zlib-ng\n\n") + u8R"(${NBTE_LEGAL_ZLIB_NG})");
+    TextUnformatted(u8"");
+    im::Separator();
 
-${NBTE_LEGAL_LIBMINECRAFT_FILE})");
-    TextUnformatted("");
-    Separator();
-
-    TextWrapped("%s", R"(zlib-ng: https://github.com/zlib-ng/zlib-ng
-
-${NBTE_LEGAL_ZLIB_NG})");
-    TextUnformatted("");
-    Separator();
-
-    TextWrapped("%s", R"(Fugue Icons: https://p.yusukekamiyamane.com/
+    TextWrapped(u8R"(Fugue Icons: https://p.yusukekamiyamane.com/
 
 (C) 2013 Yusuke Kamiyamane. All rights reserved.
 
 These icons are licensed under a Creative Commons
 Attribution 3.0 License.
 <http://creativecommons.org/licenses/by/3.0/>)");
-    TextUnformatted("");
-    Separator();
+    TextUnformatted(u8"");
+    im::Separator();
 
-    TextWrapped("%s", R"(uuid4: https://github.com/rxi/uuid4
-
-${NBTE_LEGAL_UUID4})");
-    if (IsKeyDown(GetKeyIndex(ImGuiKey_Escape))) {
+    TextWrapped(String(u8"uuid4: https://github.com/rxi/uuid4\n\n") + u8R"(${NBTE_LEGAL_UUID4})");
+    if (im::IsKeyDown(im::GetKeyIndex(ImGuiKey_Escape))) {
       s.fMainMenuBarHelpOpenSourceLicensesOpened = false;
-      CloseCurrentPopup();
+      im::CloseCurrentPopup();
     }
-    EndPopup();
+    im::EndPopup();
   }
 }
 

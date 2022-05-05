@@ -21,12 +21,12 @@ struct State {
 
   std::shared_ptr<Node> fOpened;
   Path fOpenedPath;
-  std::shared_ptr<std::future<std::string>> fSaveTask;
+  std::shared_ptr<std::future<String>> fSaveTask;
 
-  std::string fError;
+  String fError;
 
   bool fFilterBarOpened = false;
-  std::string fFilter;
+  String fFilter;
   FilterMode fFilterMode = FilterMode::Key;
   bool fFilterCaseSensitive = false;
   bool fFilterBarGotFocus = false;
@@ -52,7 +52,7 @@ struct State {
       fOpenedPath = selected;
       return;
     }
-    fError = "Can't open file";
+    fError = u8"Can't open file";
   }
 
   void openDirectory(Path const &path) {
@@ -62,7 +62,7 @@ struct State {
       fOpenedPath = path;
       return;
     }
-    fError = "Can't open directory";
+    fError = u8"Can't open directory";
   }
 
   bool canSave() const {
@@ -82,7 +82,7 @@ struct State {
     if (!fOpened) {
       return;
     }
-    fSaveTask = make_shared<future<string>>(fSaveQueue->enqueue([](Node &node, TemporaryDirectory &temp) { return node.save(temp); }, *fOpened, ref(fTempRoot)));
+    fSaveTask = make_shared<future<String>>(fSaveQueue->enqueue([](Node &node, TemporaryDirectory &temp) { return node.save(temp); }, *fOpened, ref(fTempRoot)));
   }
 
   void retrieveSaveTask() {
@@ -102,7 +102,7 @@ struct State {
     fSaveTask.reset();
   }
 
-  std::string filterTerm() const {
+  String filterTerm() const {
     if (!fFilterBarOpened) {
       return {};
     }
@@ -113,8 +113,8 @@ struct State {
     }
   }
 
-  std::u8string winowTitle() const {
-    std::u8string title = u8"nbte";
+  String winowTitle() const {
+    String title = u8"nbte";
     if (!fOpened) {
       return title;
     }

@@ -84,11 +84,11 @@ bool Region::wait() {
   return true;
 }
 
-std::string Region::save(TemporaryDirectory &tempRoot) {
+String Region::save(TemporaryDirectory &tempRoot) {
   using namespace std;
   namespace fs = std::filesystem;
   if (fValue.index() != 0) {
-    return "";
+    return u8"";
   }
   bool dirty = false;
   auto &r = get<0>(fValue);
@@ -103,7 +103,7 @@ std::string Region::save(TemporaryDirectory &tempRoot) {
     }
   }
   if (!dirty) {
-    return "";
+    return u8"";
   }
 
   Path temp = tempRoot.createTempChildDirectory();
@@ -113,14 +113,14 @@ std::string Region::save(TemporaryDirectory &tempRoot) {
   if (ec) {
     ec.clear();
     fs::remove_all(temp, ec);
-    return "IO Error";
+    return u8"IO Error";
   }
   ec.clear();
 
   auto out = make_shared<mcfile::stream::FileOutputStream>(fFile);
   auto region = mcfile::je::Region::MakeRegion(backup);
   if (!region) {
-    return "IO Error";
+    return u8"IO Error";
   }
   bool ok = mcfile::je::Region::SquashChunksAsMca(*out, [this, &r, region](int x, int z, mcfile::stream::OutputStream &output, bool &stop) {
     for (auto const &it : r) {
@@ -147,14 +147,14 @@ std::string Region::save(TemporaryDirectory &tempRoot) {
 
   if (ok) {
     fs::remove_all(temp, ec);
-    return "";
+    return u8"";
   } else {
     fs::remove(fFile, ec);
     ec.clear();
     fs::rename(backup, fFile, ec);
     ec.clear();
     fs::remove_all(temp, ec);
-    return "IO error";
+    return u8"IO error";
   }
 }
 

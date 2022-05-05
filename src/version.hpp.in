@@ -2,6 +2,6 @@
 
 namespace nbte {
 
-static char const* kAppVersion = "${CMAKE_PROJECT_VERSION}";
+static char8_t const* kAppVersion = u8"${CMAKE_PROJECT_VERSION}";
 
 }

@@ -133,26 +133,26 @@ UnopenedChunk const *Node::unopenedChunk() const {
   return &std::get<TypeUnopenedChunk>(fValue);
 }
 
-std::string Node::description() const {
+String Node::description() const {
   if (auto compound = this->compound(); compound) {
     switch (compound->fFormat) {
     case Compound::Format::RawLittleEndian:
-      return "Raw NBT (LittleEndian)";
+      return u8"Raw NBT (LittleEndian)";
     case Compound::Format::RawBigEndian:
-      return "Raw NBT (BigEndian)";
+      return u8"Raw NBT (BigEndian)";
     case Compound::Format::DeflatedLittleEndian:
-      return "Deflated NBT (LittleEndian)";
+      return u8"Deflated NBT (LittleEndian)";
     case Compound::Format::DeflatedBigEndian:
-      return "Deflated NBT (BigEndian)";
+      return u8"Deflated NBT (BigEndian)";
     case Compound::Format::GzippedBigEndian:
-      return "Gzipped NBT (BigEndian)";
+      return u8"Gzipped NBT (BigEndian)";
     case Compound::Format::GzippedLittleEndian:
-      return "Gzipped NBT (LittleEndian)";
+      return u8"Gzipped NBT (LittleEndian)";
     default:
-      return "Unknown";
+      return u8"Unknown";
     }
   }
-  return "";
+  return u8"";
 }
 
 bool Node::hasParent() const {
@@ -245,7 +245,7 @@ void Node::load(hwm::task_queue &queue) {
   }
 }
 
-std::string Node::save(TemporaryDirectory &temp) {
+String Node::save(TemporaryDirectory &temp) {
   if (auto r = region(); r) {
     return r->save(temp);
   } else if (auto contents = directoryContents(); contents) {
@@ -254,7 +254,7 @@ std::string Node::save(TemporaryDirectory &temp) {
     return c->save();
   }
 
-  return "";
+  return u8"";
 }
 
 } // namespace nbte
