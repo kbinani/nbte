@@ -1,0 +1,19 @@
+#!/usr/bin/env ruby
+
+platform :osx, '${nbte_macos_deployment_target}'
+
+workspace 'nbte'
+project 'nbte'
+
+target 'nbte' do
+  use_frameworks!
+  pod 'Bugsnag'
+end
+
+post_install do |installer|
+  installer.pods_project.targets.each do |target|
+    target.build_configurations.each do |configuration|
+      configuration.build_settings["MACOSX_DEPLOYMENT_TARGET"] = "${nbte_macos_deployment_target}"
+    end
+  end
+end

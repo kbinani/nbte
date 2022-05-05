@@ -54,6 +54,7 @@ configure_file(package/Package.appxmanifest.in ${CMAKE_CURRENT_SOURCE_DIR}/packa
 
 if ("${CMAKE_SYSTEM_NAME}" STREQUAL "Darwin")
   configure_file(resource/Info.plist.in ${CMAKE_CURRENT_SOURCE_DIR}/resource/Info.plist)
+  configure_file(build/Podfile.in ${CMAKE_CURRENT_SOURCE_DIR}/build/Podfile)
 endif()
 
 list(APPEND nbte_files
@@ -136,7 +137,11 @@ if ("${CMAKE_SYSTEM_NAME}" STREQUAL "Darwin")
     XCODE_ATTRIBUTE_CLANG_ENABLE_OBJC_ARC NO
     XCODE_ATTRIBUTE_ENABLE_APP_SANDBOX YES
     XCODE_ATTRIBUTE_CODE_SIGN_ENTITLEMENTS "${CMAKE_CURRENT_SOURCE_DIR}/resource/codesign.entitlements"
-    XCODE_ATTRIBUTE_INSTALL_PATH "$(LOCAL_APPS_DIR)")
+    XCODE_ATTRIBUTE_INSTALL_PATH "$(LOCAL_APPS_DIR)"
+    XCODE_ATTRIBUTE_ONLY_ACTIVE_ARCH $<$<CONFIG:Debug>:YES>
+    XCODE_ATTRIBUTE_ONLY_ACTIVE_ARCH $<$<CONFIG:Release>:NO>
+    XCODE_ATTRIBUTE_ONLY_ACTIVE_ARCH $<$<CONFIG:MinSizeRel>:NO>
+    XCODE_ATTRIBUTE_ONLY_ACTIVE_ARCH $<$<CONFIG:RelWithDebuInfo>:NO>)
   set_source_files_properties(resource/assets.xcassets PROPERTIES MACOSX_PACKAGE_LOCATION Resources)
   set_source_files_properties(resource/MainMenu.xib PROPERTIES MACOSX_PACKAGE_LOCATION Resources)
   set_source_files_properties(resource/UDEVGothic35_Regular.ttf PROPERTIES MACOSX_PACKAGE_LOCATION Resources)
@@ -147,8 +152,7 @@ else()
   add_executable(nbte WIN32 ${nbte_files} ${nbte_icon_files})
 endif()
 
-target_include_directories(nbte
-  PRIVATE
+list(APPEND nbte_include_directories
     deps/imgui
     deps/imgui/backends
     deps/imgui/misc/cpp
@@ -157,6 +161,10 @@ target_include_directories(nbte
     deps/stb
     deps/hwm.task
     deps/uuid4/src)
+if ("${CMAKE_SYSTEM_NAME}" STREQUAL "Darwin")
+  list(APPEND nbte_include_directories ${CMAKE_CURRENT_BINARY_DIR}/Pods/Bugsnag/bugsnag)
+endif()
+target_include_directories(nbte PRIVATE ${nbte_include_directories})
 
 list(APPEND nbte_link_libraries
   mcfile)

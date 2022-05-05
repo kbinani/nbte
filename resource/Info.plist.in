@@ -2,28 +2,28 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-	<key>CFBundleDevelopmentRegion</key>
-	<string>$(DEVELOPMENT_LANGUAGE)</string>
-	<key>CFBundleExecutable</key>
-	<string>$(EXECUTABLE_NAME)</string>
-	<key>CFBundleIdentifier</key>
-	<string>${nbte_product_bundle_identifier}</string>
-	<key>CFBundleInfoDictionaryVersion</key>
-	<string>6.0</string>
-	<key>CFBundleName</key>
-	<string>nbte</string>
-	<key>CFBundlePackageType</key>
-	<string>APPL</string>
+    <key>CFBundleDevelopmentRegion</key>
+    <string>$(DEVELOPMENT_LANGUAGE)</string>
+    <key>CFBundleExecutable</key>
+    <string>$(EXECUTABLE_NAME)</string>
+    <key>CFBundleIdentifier</key>
+    <string>${nbte_product_bundle_identifier}</string>
+    <key>CFBundleInfoDictionaryVersion</key>
+    <string>6.0</string>
+    <key>CFBundleName</key>
+    <string>nbte</string>
+    <key>CFBundlePackageType</key>
+    <string>APPL</string>
     <key>CFBundleSignature</key>
     <string>????</string>
-	<key>CFBundleShortVersionString</key>
-	<string>${CMAKE_PROJECT_VERSION}</string>
-	<key>CFBundleVersion</key>
-	<string>${CMAKE_PROJECT_VERSION}</string>
-	<key>LSMinimumSystemVersion</key>
-	<string>$(MACOSX_DEPLOYMENT_TARGET)</string>
+    <key>CFBundleShortVersionString</key>
+    <string>${CMAKE_PROJECT_VERSION}</string>
+    <key>CFBundleVersion</key>
+    <string>${CMAKE_PROJECT_VERSION}</string>
+    <key>LSMinimumSystemVersion</key>
+    <string>$(MACOSX_DEPLOYMENT_TARGET)</string>
     <key>LSApplicationCategoryType</key>
-	<string>public.app-category.developer-tools</string>
+    <string>public.app-category.developer-tools</string>
     <key>ITSAppUsesNonExemptEncryption</key>
     <false/>
     <key>LSMinimumSystemVersion</key>
@@ -34,5 +34,10 @@
     <string>Copyright &#169; 2022 kbinani</string>
     <key>NSHighResolutionCapable</key>
     <true/>
-</dict>
+    <key>bugsnag</key>
+    <dict>
+        <key>apiKey</key>
+        <string>e67c5561bc1a181d49ddbeaff1e2111b</string>
+    </dict>
+    </dict>
 </plist>
