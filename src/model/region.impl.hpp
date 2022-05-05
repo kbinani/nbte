@@ -107,7 +107,7 @@ std::string Region::save(TemporaryDirectory &tempRoot) {
   }
 
   Path temp = tempRoot.createTempChildDirectory();
-  Path backup = temp / "backup.mca";
+  Path backup = temp / fFile.filename();
   error_code ec;
   fs::rename(fFile, backup, ec);
   if (ec) {
@@ -118,7 +118,11 @@ std::string Region::save(TemporaryDirectory &tempRoot) {
   ec.clear();
 
   auto out = make_shared<mcfile::stream::FileOutputStream>(fFile);
-  bool ok = mcfile::je::Region::SquashChunksAsMca(*out, [this, &r](int x, int z, bool &stop) -> shared_ptr<mcfile::nbt::CompoundTag> {
+  auto region = mcfile::je::Region::MakeRegion(backup);
+  if (!region) {
+    return "IO Error";
+  }
+  bool ok = mcfile::je::Region::SquashChunksAsMca(*out, [this, &r, region](int x, int z, mcfile::stream::OutputStream &output, bool &stop) {
     for (auto const &it : r) {
       auto c = it->compound();
       if (!c) {
@@ -130,9 +134,14 @@ std::string Region::save(TemporaryDirectory &tempRoot) {
       if (z != c->fChunkZ - fZ * 32) {
         continue;
       }
-      return c->fTag;
+      if (!mcfile::nbt::CompoundTag::WriteCompressed(*c->fTag, output, mcfile::Endian::Big)) {
+        stop = true;
+        return;
+      }
     }
-    return nullptr;
+    if (!region->exportToCompressedNbt(fX * 32 + x, fZ * 32 + z, output)) {
+      stop = true;
+    }
   });
   out.reset();
 
