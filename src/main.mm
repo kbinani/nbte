@@ -96,7 +96,7 @@ extern "C" {
     builder.AddRanges(io.Fonts->GetGlyphRangesVietnamese());
     builder.BuildRanges(&ranges);
 
-    ImFont *font = io.Fonts->AddFontFromMemoryTTF(udevFont->fData, udevFont->fSize, 15.0f, &cfg, ranges.Data);
+    ImFont *font = io.Fonts->AddFontFromMemoryTTF(udevFont->fData, udevFont->fSize, 15.0f, nullptr, ranges.Data);
     io.Fonts->Build();
   }
 
