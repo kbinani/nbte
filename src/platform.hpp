@@ -95,7 +95,7 @@ static String UuidString() {
 }
 
 struct Resource {
-  Resource(void *data, size_t size, bool systemOwned) : fData(data), fSize(size), fSystemOwned(free) {}
+  Resource(void *data, size_t size, bool systemOwned) : fData(data), fSize(size), fSystemOwned(systemOwned) {}
 
   ~Resource() {
     if (!fSystemOwned) {
