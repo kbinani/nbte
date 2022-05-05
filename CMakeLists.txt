@@ -84,7 +84,6 @@ list(APPEND nbte_files
   src/model/compound.impl.hpp
   src/temporary-directory.hpp
   src/imgui-ext.hpp
-  src/imgui-ext.cpp
   src/texture.hpp
   src/texture-set.hpp
   resource/resource.rc.in
@@ -102,6 +101,7 @@ list(APPEND nbte_files
 if ("${CMAKE_SYSTEM_NAME}" STREQUAL "Darwin")
   list(APPEND nbte_files
     src/main.mm
+    src/imgui-ext.mm
     resource/assets.xcassets
     resource/MainMenu.xib
     deps/imgui/backends/imgui_impl_metal.mm
@@ -110,6 +110,7 @@ if ("${CMAKE_SYSTEM_NAME}" STREQUAL "Darwin")
 elseif ("${CMAKE_SYSTEM_NAME}" STREQUAL "Windows")
   list(APPEND nbte_files
     src/main.cpp
+    src/imgui-ext.cpp
     deps/imgui/backends/imgui_impl_glfw.cpp
     deps/imgui/backends/imgui_impl_opengl3.cpp
     resource/resource.rc

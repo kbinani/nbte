@@ -97,9 +97,9 @@ static String UuidString() {
 struct Resource {
   Resource(void *data, size_t size, bool systemOwned) : fData(data), fSize(size), fSystemOwned(systemOwned) {}
 
-  Resource(Resource const&) = delete;
-  Resource &operator=(Resource const&) = delete;
-  
+  Resource(Resource const &) = delete;
+  Resource &operator=(Resource const &) = delete;
+
   ~Resource() {
     if (!fSystemOwned) {
       free(fData);
@@ -234,7 +234,7 @@ std::optional<Texture> LoadTexture(char const *name, void *devicePtr) {
     [texture replaceRegion:region mipmapLevel:0 withBytes:data bytesPerRow:bytesPerRow];
 
     Texture ret;
-    ret.fTexture = (__bridge void*)texture;
+    ret.fTexture = texture;
     ret.fWidth = width;
     ret.fHeight = height;
     return ret;

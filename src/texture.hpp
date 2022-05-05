@@ -3,7 +3,11 @@
 namespace nbte {
 
 struct Texture {
+#if defined(__APPLE__)
+  id<MTLTexture> fTexture;
+#else
   ImTextureID fTexture;
+#endif
   int fWidth;
   int fHeight;
 };

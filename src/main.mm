@@ -67,7 +67,7 @@ extern "C" {
     abort();
   }
 
-  state.loadTextures((__bridge void*)_device);
+  state.loadTextures((__bridge void *)_device);
 
   // Setup Dear ImGui context
   // FIXME: This example doesn't have proper cleanup...
@@ -101,7 +101,7 @@ extern "C" {
 
   // Setup Renderer backend
   ImGui_ImplMetal_Init(_device);
-  
+
   return self;
 }
 
@@ -307,19 +307,18 @@ extern "C" {
 
 @end
 
-@interface NbteApplication: NSApplication
+@interface NbteApplication : NSApplication
 @end
-
 
 @implementation NbteApplication
 
 - (void)reportException:(NSException *)theException {
-    [Bugsnag notify:theException];
-    [super reportException:theException];
+  [Bugsnag notify:theException];
+  [super reportException:theException];
 }
 
 - (void)terminate:(nullable id)sender {
-  [super terminate: sender];
+  [super terminate:sender];
 }
 @end
 
