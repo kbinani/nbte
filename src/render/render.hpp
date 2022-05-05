@@ -177,6 +177,7 @@ static T Clamp(U u) {
   return (T)std::min<U>(std::max<U>(u, (U)std::numeric_limits<T>::lowest()), (U)std::numeric_limits<T>::max());
 }
 
+#if 0
 static bool ContainsTerm(std::shared_ptr<mcfile::nbt::Tag> const &tag,
                          String const &filter,
                          FilterMode mode,
@@ -239,6 +240,7 @@ static bool ContainsTerm(std::shared_ptr<mcfile::nbt::Tag> const &tag,
   }
   return false;
 }
+#endif
 
 template <class T>
 static ImGuiDataType DataType() {
@@ -386,7 +388,7 @@ static void VisitNbtNonScalar(State &s,
   switch (tag->type()) {
   case Tag::Type::Compound:
     if (!filter.empty()) {
-      if (!ContainsTerm(tag, filter, s.fFilterMode, s.fFilterCaseSensitive)) {
+      if (!s.containsTerm(tag, filter, s.fFilterMode, s.fFilterCaseSensitive)) {
         return;
       }
     }
@@ -397,7 +399,7 @@ static void VisitNbtNonScalar(State &s,
     break;
   case Tag::Type::List:
     if (!filter.empty()) {
-      if (!ContainsTerm(tag, filter, s.fFilterMode, s.fFilterCaseSensitive)) {
+      if (!s.containsTerm(tag, filter, s.fFilterMode, s.fFilterCaseSensitive)) {
         return;
       }
     }
@@ -539,11 +541,11 @@ static void VisitNbtCompound(State &s,
     }
     if (!filter.empty()) {
       if (s.fFilterMode == FilterMode::Key) {
-        if ((s.fFilterCaseSensitive ? name : ToLower(name)).find(filter) == String::npos && !ContainsTerm(it.second, filter, s.fFilterMode, s.fFilterCaseSensitive)) {
+        if ((s.fFilterCaseSensitive ? name : ToLower(name)).find(filter) == String::npos && !s.containsTerm(it.second, filter, s.fFilterMode, s.fFilterCaseSensitive)) {
           continue;
         }
       } else {
-        if (!ContainsTerm(it.second, filter, s.fFilterMode, s.fFilterCaseSensitive)) {
+        if (!s.containsTerm(it.second, filter, s.fFilterMode, s.fFilterCaseSensitive)) {
           continue;
         }
       }
@@ -565,7 +567,7 @@ static void Visit(State &s,
     PushID(path + u8"/" + compound->name());
     if (node->hasParent()) {
       TreeNodeOptions opt;
-      if (!filter.empty() && ContainsTerm(compound->fTag, filter, s.fFilterMode, s.fFilterCaseSensitive)) {
+      if (!filter.empty() && s.containsTerm(compound->fTag, filter, s.fFilterMode, s.fFilterCaseSensitive)) {
         opt.openIgnoringStorage = true;
       }
       ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_NavLeftJumpsBackHere;

@@ -2,11 +2,6 @@
 
 namespace nbte {
 
-enum class FilterMode {
-  Key,
-  Value,
-};
-
 struct State {
   ImVec2 fDisplaySize;
   bool fMainMenuBarFileSelected = false;
@@ -41,7 +36,16 @@ struct State {
   std::unique_ptr<hwm::task_queue> fSaveQueue;
   TextureSet fTextures;
 
+  FilterCacheSelector<64> fCacheSelector;
+
   State() : fPool(new hwm::task_queue(std::thread::hardware_concurrency())), fSaveQueue(new hwm::task_queue(1)) {
+  }
+
+  bool containsTerm(std::shared_ptr<mcfile::nbt::Tag> const &tag,
+                    String const &filter,
+                    FilterMode mode,
+                    bool caseSensitive) {
+    return fCacheSelector.containsTerm(tag, filter, mode, caseSensitive);
   }
 
   void loadTextures(void *device) {

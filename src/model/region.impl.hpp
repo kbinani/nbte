@@ -178,8 +178,8 @@ bool Region::isDirty() const {
   if (fValue.index() != 0) {
     return false;
   }
-  auto const&r = get<0>(fValue);
-  for (auto const&it : r) {
+  auto const &r = get<0>(fValue);
+  for (auto const &it : r) {
     if (auto c = it->compound(); c) {
       if (c->fEdited) {
         return true;

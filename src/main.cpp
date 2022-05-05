@@ -34,6 +34,7 @@ extern "C" {
 #include "platform.hpp"
 #include "texture-set.hpp"
 #include "temporary-directory.hpp"
+#include "filter-cache.hpp"
 #include "model/node.hpp"
 #include "model/node.impl.hpp"
 #include "model/directory-contents.impl.hpp"

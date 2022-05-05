@@ -92,6 +92,7 @@ list(APPEND nbte_files
   src/imgui-ext.hpp
   src/texture.hpp
   src/texture-set.hpp
+  src/filter-cache.hpp
   resource/resource.rc.in
   resource/UDEVGothic35_Regular.ttf
   resource/nbte32.png
