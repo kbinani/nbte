@@ -9,6 +9,9 @@ set(nbte_product_bundle_identifier com.github.kbinani.nbte)
 set(nbte_macos_deployment_target "10.15")
 set(nbte_apple_development_team_id "XM695N4A7T")
 
+execute_process(COMMAND git rev-list --all --count OUTPUT_VARIABLE nbte_build_number)
+string(STRIP "${nbte_build_number}" nbte_build_number)
+
 include(FetchContent)
 
 if ("${CMAKE_SYSTEM_NAME}" STREQUAL "Darwin")
