@@ -10,7 +10,7 @@ static String ToLower(String const &s) {
   return ret;
 }
 
-template <class T, class = std::enable_if_t<std::is_integral_v<T>, std::true_type>>
+template <std::integral T>
 static String ToString(T v) {
   auto s = std::to_string(v);
   String ret((char8_t const *)s.c_str());
