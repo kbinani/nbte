@@ -19,3 +19,6 @@
 [submodule "deps/uuid4"]
 	path = deps/uuid4
 	url = https://github.com/rxi/uuid4.git
+[submodule "deps/bugsnag-cocoa"]
+	path = deps/bugsnag-cocoa
+	url = https://github.com/bugsnag/bugsnag-cocoa
