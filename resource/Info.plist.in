@@ -34,5 +34,12 @@
     <string>Copyright &#169; 2022 kbinani</string>
     <key>NSHighResolutionCapable</key>
     <true/>
+    <key>bugsnag</key>
+    <dict>
+        <key>apiKey</key>
+        <string>e67c5561bc1a181d49ddbeaff1e2111b</string>
+    </dict>
+    <key>NSPrincipalClass</key>
+	<string>NbteApplication</string>
 </dict>
 </plist>

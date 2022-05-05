@@ -101,7 +101,7 @@ extern "C" {
 
   // Setup Renderer backend
   ImGui_ImplMetal_Init(_device);
-
+  
   return self;
 }
 
@@ -284,6 +284,8 @@ extern "C" {
 }
 
 - (void)applicationDidFinishLaunching:(NSNotification *)notification {
+  [Bugsnag start];
+
   _windowController = [[NSWindowController alloc] initWithWindowNibName:@"MainMenu"];
   [_windowController showWindow:self];
 
@@ -305,15 +307,31 @@ extern "C" {
 
 @end
 
+@interface NbteApplication: NSApplication
+@end
+
+
+@implementation NbteApplication
+
+- (void)reportException:(NSException *)theException {
+    [Bugsnag notify:theException];
+    [super reportException:theException];
+}
+
+- (void)terminate:(nullable id)sender {
+  [super terminate: sender];
+}
+@end
+
 //-----------------------------------------------------------------------------------
 // Application main() function
 //-----------------------------------------------------------------------------------
 
 int main(int argc, const char *argv[]) {
   @autoreleasepool {
-    NSApp = [NSApplication sharedApplication];
+    NSApp = [NbteApplication sharedApplication];
     AppDelegate *delegate = [[AppDelegate alloc] init];
-    [[NSApplication sharedApplication] setDelegate:delegate];
+    [[NbteApplication sharedApplication] setDelegate:delegate];
     [NSApp run];
   }
   return NSApplicationMain(argc, argv);

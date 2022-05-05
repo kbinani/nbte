@@ -9,6 +9,8 @@ set(nbte_product_bundle_identifier com.github.kbinani.nbte)
 set(nbte_macos_deployment_target "10.15")
 set(nbte_apple_development_team_id "XM695N4A7T")
 
+include(FetchContent)
+
 if ("${CMAKE_SYSTEM_NAME}" STREQUAL "Darwin")
   set(CMAKE_OSX_ARCHITECTURES "arm64;x86_64")
   set(CMAKE_XCODE_ATTRIBUTE_DEVELOPMENT_TEAM "${nbte_apple_development_team_id}")
@@ -54,6 +56,14 @@ configure_file(package/Package.appxmanifest.in ${CMAKE_CURRENT_SOURCE_DIR}/packa
 
 if ("${CMAKE_SYSTEM_NAME}" STREQUAL "Darwin")
   configure_file(resource/Info.plist.in ${CMAKE_CURRENT_SOURCE_DIR}/resource/Info.plist)
+
+  fetchcontent_declare(bugsnag-cocoa
+    GIT_REPOSITORY https://github.com/bugsnag/bugsnag-cocoa
+    GIT_TAG v6.16.8)
+  if (NOT nbte_busgnag_ready)
+    execute_process(COMMAND xcodebuild -project Bugsnag.xcodeproj -target BugsnagStatic -sdk macosx -arch x86_64,arm64 WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/_deps/bugsnag-cocoa-src)
+    set(nbte_busgnag_ready ON CACHE INTERNAL "")
+  endif()
 endif()
 
 list(APPEND nbte_files
@@ -144,20 +154,24 @@ if ("${CMAKE_SYSTEM_NAME}" STREQUAL "Darwin")
   foreach(icon_file IN LISTS nbte_icon_files)
     set_source_files_properties(${icon_file} PROPERTIES MACOSX_PACKAGE_LOCATION Resources)
   endforeach()
+target_link_directories(nbte PRIVATE "${CMAKE_CURRENT_BINARY_DIR}/_deps/bugsnag-cocoa-src/build/Release")
 else()
   add_executable(nbte WIN32 ${nbte_files} ${nbte_icon_files})
 endif()
 
-target_include_directories(nbte
-  PRIVATE
-    deps/imgui
-    deps/imgui/backends
-    deps/imgui/misc/cpp
-    deps/glfw/include
-    deps/nativefiledialog/src/include
-    deps/stb
-    deps/hwm.task
-    deps/uuid4/src)
+list(APPEND nbte_include_directories
+  deps/imgui
+  deps/imgui/backends
+  deps/imgui/misc/cpp
+  deps/glfw/include
+  deps/nativefiledialog/src/include
+  deps/stb
+  deps/hwm.task
+  deps/uuid4/src)
+if ("${CMAKE_SYSTEM_NAME}" STREQUAL "Darwin")
+  list(APPEND nbte_include_directories "${CMAKE_CURRENT_BINARY_DIR}/_deps/bugsnag-cocoa-src/Bugsnag/include")
+endif()
+target_include_directories(nbte PRIVATE ${nbte_include_directories})
 
 list(APPEND nbte_link_libraries
   mcfile)
@@ -166,7 +180,8 @@ if ("${CMAKE_SYSTEM_NAME}" STREQUAL "Darwin")
     "-framework MetalKit"
     "-framework GameController"
     "-framework Metal"
-    "-framework AppKit")
+    "-framework AppKit"
+    BugsnagStatic)
 elseif("${CMAKE_SYSTEM_NAME}" STREQUAL "Windows")
   list(APPEND nbte_link_libraries glfw)
 endif()
