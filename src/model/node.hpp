@@ -24,8 +24,7 @@ public:
   UnopenedChunk(Path file, uint64_t offset, uint64_t size, int cx, int cz, int localX, int localZ) : fFile(file), fOffset(offset), fSize(size), fChunkX(cx), fChunkZ(cz), fLocalChunkX(localX), fLocalChunkZ(localZ) {}
 
   String name() const {
-    using namespace std;
-    return u8"chunk " + ToString(fChunkX) + u8" " + ToString(fChunkZ) + u8" [" + ToString(fLocalChunkX) + u8" " + ToString(fLocalChunkZ) + u8" in region]";
+    return u8"Chunk " + ToString(fChunkX) + u8" " + ToString(fChunkZ) + u8" [" + ToString(fLocalChunkX) + u8" " + ToString(fLocalChunkZ) + u8" in region]";
   }
 
   Path fFile;
