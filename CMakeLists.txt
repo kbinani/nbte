@@ -61,6 +61,7 @@ list(APPEND nbte_files
   src/model/state.hpp
   src/string.hpp
   src/version.hpp
+  src/version.hpp.in
   src/render/legal.hpp
   src/render/legal.hpp.in
   src/platform.hpp
