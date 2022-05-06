@@ -159,29 +159,6 @@ bool Node::hasParent() const {
   return fParent.use_count() != 0;
 }
 
-bool Node::isDirty() const {
-  if (auto contents = directoryContents(); contents) {
-    for (auto const &it : contents->fValue) {
-      if (it->isDirty()) {
-        return true;
-      }
-    }
-  } else if (auto r = region(); r) {
-    if (r->fValue.index() == 0) {
-      for (auto const &it : std::get<0>(r->fValue)) {
-        if (it->isDirty()) {
-          return true;
-        }
-      }
-    }
-  } else if (auto c = compound(); c) {
-    if (c->fEdited) {
-      return true;
-    }
-  }
-  return false;
-}
-
 void Node::clearDirty() {
   if (auto contents = directoryContents(); contents) {
     for (auto const &it : contents->fValue) {
@@ -255,6 +232,29 @@ String Node::save(TemporaryDirectory &temp) {
   }
 
   return u8"";
+}
+
+bool Node::dirtyFiles(std::vector<Path> *buffer) const {
+  if (auto r = region(); r) {
+    if (r->isDirty()) {
+      if (buffer) {
+        buffer->push_back(r->fFile);
+      }
+      return true;
+    }
+  } else if (auto contents = directoryContents(); contents) {
+    return contents->dirtyFiles(buffer);
+  } else if (auto c = compound(); c) {
+    if (auto editedFile = c->filePathIfEdited(); editedFile) {
+      if (buffer) {
+        buffer->push_back(*editedFile);
+      }
+      return true;
+    } else {
+      return false;
+    }
+  }
+  return false;
 }
 
 } // namespace nbte

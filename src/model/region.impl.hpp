@@ -116,18 +116,8 @@ String Region::save(TemporaryDirectory &tempRoot) {
   if (fValue.index() != 0) {
     return u8"";
   }
-  bool dirty = false;
-  auto &r = get<0>(fValue);
-  for (auto &it : r) {
-    if (auto c = it->compound(); c) {
-      if (c->fEdited) {
-        dirty = true;
-        break;
-      }
-    } else {
-      continue;
-    }
-  }
+  auto const &r = get<0>(fValue);
+  bool dirty = isDirty();
   if (!dirty) {
     return u8"";
   }
@@ -182,6 +172,21 @@ String Region::save(TemporaryDirectory &tempRoot) {
     fs::remove_all(temp, ec);
     return u8"IO error";
   }
+}
+
+bool Region::isDirty() const {
+  if (fValue.index() != 0) {
+    return false;
+  }
+  auto const&r = get<0>(fValue);
+  for (auto const&it : r) {
+    if (auto c = it->compound(); c) {
+      if (c->fEdited) {
+        return true;
+      }
+    }
+  }
+  return false;
 }
 
 } // namespace nbte

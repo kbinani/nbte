@@ -67,4 +67,14 @@ String Compound::save(Path const &file) {
   return u8"";
 }
 
+std::optional<Path> Compound::filePathIfEdited() const {
+  if (fName.index() != 1) {
+    return std::nullopt;
+  }
+  if (!fEdited) {
+    return std::nullopt;
+  }
+  return std::get<1>(fName);
+}
+
 } // namespace nbte

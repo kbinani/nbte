@@ -38,4 +38,14 @@ String DirectoryContents::save(TemporaryDirectory &temp) {
   return u8"";
 }
 
+bool DirectoryContents::dirtyFiles(std::vector<Path> *buffer) const {
+  for (auto &it : fValue) {
+    bool dirty = it->dirtyFiles(buffer);
+    if (dirty && !buffer) {
+      return true;
+    }
+  }
+  return false;
+}
+
 } // namespace nbte

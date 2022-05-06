@@ -10,6 +10,7 @@ public:
 
   bool wait();
   String save(TemporaryDirectory &temp);
+  bool isDirty() const;
 
   using ValueType = std::vector<std::shared_ptr<Node>>;
 
@@ -40,6 +41,7 @@ class DirectoryContents {
 public:
   DirectoryContents(Path const &dir, std::shared_ptr<Node> parent);
   String save(TemporaryDirectory &temp);
+  bool dirtyFiles(std::vector<Path> *buffer = nullptr) const;
 
   Path fDir;
   std::vector<std::shared_ptr<Node>> fValue;
@@ -62,6 +64,7 @@ public:
   String save(Path const &file);
   String save();
   String name() const;
+  std::optional<Path> filePathIfEdited() const;
 
   std::variant<String, Path> fName;
   std::shared_ptr<mcfile::nbt::CompoundTag> fTag;
@@ -109,8 +112,8 @@ public:
 
   String description() const;
   bool hasParent() const;
-  bool isDirty() const;
   void clearDirty();
+  bool dirtyFiles(std::vector<Path> *buffer = nullptr) const;
 
   static std::shared_ptr<Node> OpenDirectory(Path const &path, hwm::task_queue &queue);
   static std::shared_ptr<Node> OpenFile(Path const &path, hwm::task_queue &queue);

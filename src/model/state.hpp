@@ -122,10 +122,18 @@ struct State {
       return title;
     }
     title += u8" - " + fOpenedPath.filename().u8string();
-    if (fOpened->isDirty()) {
+    if (fOpened->dirtyFiles()) {
       title += u8" *";
     }
     return title;
+  }
+
+  void dirtyFiles(std::vector<Path> &buffer) {
+    buffer.clear();
+    if (!fOpened) {
+      return;
+    }
+    fOpened->dirtyFiles(&buffer);
   }
 };
 
