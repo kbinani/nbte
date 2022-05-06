@@ -10,11 +10,17 @@ static String ToLower(String const &s) {
   return ret;
 }
 
+static std::u8string ReinterpretAsU8String(std::string const &s) {
+  return std::u8string((char8_t const *)s.c_str());
+}
+
+static std::string ReinterpretAsStdString(std::u8string const &s) {
+  return std::string((char const *)s.c_str());
+}
+
 template <std::integral T>
 static String ToString(T v) {
-  auto s = std::to_string(v);
-  String ret((char8_t const *)s.c_str());
-  return ret;
+  return ReinterpretAsU8String(std::to_string(v));
 }
 
 } // namespace nbte

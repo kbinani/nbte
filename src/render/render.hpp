@@ -71,12 +71,10 @@ static void RenderMainMenu(State &s) {
       im::EndMenu();
     }
     if (BeginMenu(u8"Help", &s.fMainMenuBarHelpSelected)) {
-      if (MenuItem(
-              u8"About nbte", {}, nullptr)) {
+      if (MenuItem(u8"About nbte", {}, nullptr)) {
         s.fMainMenuBarHelpAboutOpened = true;
       }
-      if (MenuItem(
-              u8"Legal", {}, nullptr)) {
+      if (MenuItem(u8"Legal", {}, nullptr)) {
         s.fMainMenuBarHelpOpenSourceLicensesOpened = true;
       }
       im::EndMenu();
@@ -154,7 +152,7 @@ static bool ContainsTerm(std::shared_ptr<mcfile::nbt::Tag> const &tag,
     if (auto v = dynamic_pointer_cast<CompoundTag>(tag); v) {
       for (auto const &it : *v) {
         if (mode == FilterMode::Key) {
-          String key((char8_t const *)it.first.c_str());
+          String key = ReinterpretAsU8String(it.first);
           if ((caseSensitive ? key : ToLower(key)).find(filter) != String::npos) {
             return true;
           }
@@ -179,7 +177,7 @@ static bool ContainsTerm(std::shared_ptr<mcfile::nbt::Tag> const &tag,
       return false;
     } else {
       if (auto v = dynamic_pointer_cast<StringTag>(tag); v) {
-        String value((char8_t const *)v->fValue.c_str());
+        String value = ReinterpretAsU8String(v->fValue);
         return value.find(filter) != String::npos;
       }
     }
@@ -299,9 +297,9 @@ static void VisitNbtScalar(State &s,
   case Tag::Type::String:
     if (auto v = dynamic_pointer_cast<StringTag>(tag); v) {
       PushScalarInput(name, path, filter, s.fFilterCaseSensitive, s.fTextures.fIconEditSmallCaps);
-      String value((char8_t const *)v->fValue.c_str());
+      String value = ReinterpretAsU8String(v->fValue);
       if (InputText(u8"", &value)) {
-        v->fValue = (char const *)value.c_str();
+        v->fValue = ReinterpretAsStdString(value);
         root.fEdited = true;
       }
     }
@@ -492,7 +490,7 @@ static void VisitNbtCompound(State &s,
   using namespace mcfile::nbt;
 
   for (auto &it : tag) {
-    String name((char8_t const *)it.first.c_str());
+    String name = ReinterpretAsU8String(it.first);
     if (!it.second) {
       continue;
     }
@@ -559,7 +557,7 @@ static void Visit(State &s,
     im::PopID();
   } else if (auto region = node->region(); region) {
     std::string rawName = mcfile::je::Region::GetDefaultRegionFileName(region->fX, region->fZ);
-    String name((char8_t const *)rawName.c_str());
+    String name = ReinterpretAsU8String(rawName);
     PushID(path + u8"/" + name);
     if (node->hasParent()) {
       bool ready = region->wait();
