@@ -158,10 +158,6 @@ static std::unique_ptr<Resource> LoadNamedResource(char const *name) {
 
 std::optional<Texture> LoadTexture(char const *name, void *devicePtr) {
 #if defined(_MSC_VER)
-#if 1
-  //TODO:
-  return std::nullopt;
-#else
   auto resource = LoadNamedResource(name);
   if (!resource) {
     return std::nullopt;
@@ -197,7 +193,6 @@ std::optional<Texture> LoadTexture(char const *name, void *devicePtr) {
   ret.fWidth = width;
   ret.fHeight = height;
   return ret;
-#endif
 #else
   @autoreleasepool {
     id<MTLDevice> device = (__bridge id<MTLDevice>)devicePtr;

@@ -26,7 +26,6 @@ elseif ("${CMAKE_SYSTEM_NAME}" STREQUAL "Windows")
     /we4828
     /wd4100 # Suppress "unreferenced formal parameter" warnings
     /wd26812 # Suppress "Prefer 'enum class' over 'enum'" warnings
-    /DNOMINMAX
   )
   add_compile_options(
     $<$<CONFIG:Debug>:/MTd>
