@@ -396,14 +396,15 @@ static void VisitNbtNonScalar(State &s,
   auto nextPath = path + u8"/" + name;
   PushID(nextPath);
 
+  TreeNodeOptions opt;
   if (!filter.empty()) {
-    im::SetNextItemOpen(true);
+    opt.openIgnoringStorage = true;
   }
   ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_NavLeftJumpsBackHere;
   if (matchedNode) {
     flags = flags | ImGuiTreeNodeFlags_Selected;
   }
-  if (TreeNode(label, flags, icon, s.filterTerm(), s.fFilterCaseSensitive)) {
+  if (TreeNode(label, flags, icon, s.filterTerm(), s.fFilterCaseSensitive, opt)) {
     im::Indent(kIndent);
 
     switch (tag->type()) {
@@ -521,11 +522,12 @@ static void Visit(State &s,
   if (auto compound = node->compound(); compound) {
     PushID(path + u8"/" + compound->name());
     if (node->hasParent()) {
+      TreeNodeOptions opt;
       if (!filter.empty() && ContainsTerm(compound->fTag, filter, s.fFilterMode, s.fFilterCaseSensitive)) {
-        im::SetNextItemOpen(true);
+        opt.openIgnoringStorage = true;
       }
       ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_NavLeftJumpsBackHere;
-      if (TreeNode(compound->name(), flags, s.fTextures.fIconBox, s.filterTerm(), s.fFilterCaseSensitive)) {
+      if (TreeNode(compound->name(), flags, s.fTextures.fIconBox, s.filterTerm(), s.fFilterCaseSensitive, opt)) {
         VisitNbtCompound(s, *compound, *compound->fTag, path, filter);
         im::TreePop();
       }

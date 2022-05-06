@@ -6,7 +6,11 @@ using namespace ImGui;
 
 namespace nbte {
 
-bool TreeNode(String const &label, ImGuiTreeNodeFlags flags, std::optional<Texture> icon, String const &filter, bool caseSensitive);
+struct TreeNodeOptions {
+  bool openIgnoringStorage = false;
+};
+
+bool TreeNode(String const &label, ImGuiTreeNodeFlags flags, std::optional<Texture> icon, String const &filter, bool caseSensitive, TreeNodeOptions options = {});
 
 bool IconButton(String const &label, std::optional<Texture> icon);
 

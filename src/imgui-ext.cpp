@@ -10,7 +10,7 @@
 
 namespace nbte {
 
-bool TreeNode(String const &label, ImGuiTreeNodeFlags flags, std::optional<Texture> icon, String const &filter, bool caseSensitive) {
+bool TreeNode(String const &label, ImGuiTreeNodeFlags flags, std::optional<Texture> icon, String const &filter, bool caseSensitive, TreeNodeOptions opt) {
   ImGuiContext &g = *GImGui;
   ImGuiWindow *window = g.CurrentWindow;
   ImGuiStyle const &style = g.Style;
@@ -21,7 +21,7 @@ bool TreeNode(String const &label, ImGuiTreeNodeFlags flags, std::optional<Textu
   ImVec2 padding = style.FramePadding;
 
   ImRect bb(pos, ImVec2(pos.x + im::GetContentRegionAvail().x, pos.y + frameHeight));
-  bool opened = im::TreeNodeBehaviorIsOpen(id, flags);
+  bool opened = opt.openIgnoringStorage ? true : im::TreeNodeBehaviorIsOpen(id, flags);
   bool hovered, held;
 
   if (opened && !g.NavIdIsAlive && (flags & ImGuiTreeNodeFlags_NavLeftJumpsBackHere) && !(flags & ImGuiTreeNodeFlags_NoTreePushOnOpen)) {
@@ -29,7 +29,7 @@ bool TreeNode(String const &label, ImGuiTreeNodeFlags flags, std::optional<Textu
   }
 
   bool pressed = im::ButtonBehavior(bb, id, &hovered, &held, true);
-  if (pressed) {
+  if (pressed && !opt.openIgnoringStorage) {
     window->DC.StateStorage->SetInt(id, opened ? 0 : 1);
   }
 
