@@ -538,7 +538,7 @@ static void Visit(State &s,
       if (!filter.empty() && ContainsTerm(compound->fTag, filter, s.fFilterMode, s.fFilterCaseSensitive)) {
         opt.openIgnoringStorage = true;
       }
-      ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_NavLeftJumpsBackHere;
+      ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_NavLeftJumpsBackHere;
       if (TreeNode(compound->name(), flags, s.fTextures.fIconBox, s.filterTerm(), s.fFilterCaseSensitive, opt)) {
         VisitNbtCompound(s, *compound, *compound->fTag, path, filter);
         im::TreePop();
