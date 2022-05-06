@@ -22,15 +22,26 @@ bool TreeNode(String const &label, ImGuiTreeNodeFlags flags, std::optional<Textu
 
   ImRect bb(pos, ImVec2(pos.x + im::GetContentRegionAvail().x, pos.y + frameHeight));
   bool opened = opt.openIgnoringStorage ? true : im::TreeNodeBehaviorIsOpen(id, flags);
-  bool hovered, held;
-
-  if (opened && !g.NavIdIsAlive && (flags & ImGuiTreeNodeFlags_NavLeftJumpsBackHere) && !(flags & ImGuiTreeNodeFlags_NoTreePushOnOpen)) {
-    window->DC.TreeJumpToParentOnPopMask |= (1 << window->DC.TreeDepth);
+  if (opened && !g.NavIdIsAlive && !(flags & ImGuiTreeNodeFlags_NoTreePushOnOpen)) {
+    if (flags & ImGuiTreeNodeFlags_NavLeftJumpsBackHere) {
+      window->DC.TreeJumpToParentOnPopMask |= (1 << window->DC.TreeDepth);
+    }
   }
 
+  bool hovered, held;
   bool pressed = im::ButtonBehavior(bb, id, &hovered, &held, true);
-  if (pressed && !opt.openIgnoringStorage) {
-    window->DC.StateStorage->SetInt(id, opened ? 0 : 1);
+  bool toggled = false;
+  if (g.NavId == id && g.NavMoveDir == ImGuiDir_Left && opened) {
+    toggled = true;
+    im::NavMoveRequestCancel();
+  }
+  if (g.NavId == id && g.NavMoveDir == ImGuiDir_Right && !opened) {
+    toggled = true;
+    im::NavMoveRequestCancel();
+  }
+  if ((pressed || toggled) && !opt.openIgnoringStorage) {
+    opened = !opened;
+    window->DC.StateStorage->SetInt(id, opened ? 1 : 0);
   }
 
   if (hovered || held) {
@@ -88,6 +99,7 @@ bool TreeNode(String const &label, ImGuiTreeNodeFlags flags, std::optional<Textu
   if (opened) {
     TreePush(label);
   }
+
   return opened;
 }
 
