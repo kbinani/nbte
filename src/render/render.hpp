@@ -754,7 +754,7 @@ static void Render(State &s) {
   ImGuiStyle const &style = im::GetStyle();
   ImVec4 bg = style.Colors[ImGuiCol_WindowBg];
   if (s.fFilterBarOpened && !s.fFilter.empty()) {
-    float v = 230.0f / 255.0f;
+    float v = 220.0f / 255.0f;
     bg = ImVec4(v, v, v, 1.0f);
   }
   im::PushStyleColor(ImGuiCol_WindowBg, im::GetColorU32(bg));
