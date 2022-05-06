@@ -90,4 +90,8 @@ inline bool BeginChild(String const &label, ImVec2 size = ImVec2(0, 0), bool bor
   return im::BeginChild((char const *)label.c_str(), size, border, flags);
 }
 
+inline void BulletText(String const &text) {
+  im::BulletText("%s", (char const *)text.c_str());
+}
+
 } // namespace nbte

@@ -15,7 +15,9 @@ struct State {
   bool fMainMenuBarHelpSelected = false;
   bool fMainMenuBarHelpAboutOpened = false;
   bool fMainMenuBarHelpOpenSourceLicensesOpened = false;
-  bool fMainMenuBarQuitSelected = false;
+
+  bool fQuitRequested = false;
+  bool fQuitAccepted = false;
 
   TemporaryDirectory fTempRoot;
 
@@ -128,12 +130,11 @@ struct State {
     return title;
   }
 
-  void dirtyFiles(std::vector<Path> &buffer) {
-    buffer.clear();
+  bool dirtyFiles(std::vector<Path> &buffer) const {
     if (!fOpened) {
-      return;
+      return false;
     }
-    fOpened->dirtyFiles(&buffer);
+    return fOpened->dirtyFiles(&buffer);
   }
 };
 

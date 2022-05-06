@@ -168,7 +168,7 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR pCmdLine
 
   // Main loop
   bool done = false;
-  while (!glfwWindowShouldClose(window) && !done) {
+  while (!done) {
     // Poll and handle events (inputs, window resize, etc.)
     // You can read the io.WantCaptureMouse, io.WantCaptureKeyboard flags to tell if dear imgui wants to use your inputs.
     // - When io.WantCaptureMouse is true, do not dispatch mouse input data to your main application, or clear/overwrite your copy of the mouse data.
@@ -186,9 +186,13 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR pCmdLine
     glfwGetFramebufferSize(window, &display_w, &display_h);
 
     state.fDisplaySize = io.DisplaySize;
+    bool shouldClose = glfwWindowShouldClose(window) != 0;
+    state.fQuitRequested = state.fQuitRequested || shouldClose;
     nbte::Render(state);
-    if (state.fMainMenuBarQuitSelected) {
+    if (state.fQuitAccepted) {
       done = true;
+    } else {
+      glfwSetWindowShouldClose(window, 0);
     }
 
     ImGui::Render();

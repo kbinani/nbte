@@ -60,7 +60,7 @@ static void RenderMainMenu(State &s) {
       }
       im::Separator();
       if (MenuItem(u8"Quit", QuitMenuShortcut(), nullptr)) {
-        s.fMainMenuBarQuitSelected = true;
+        s.fQuitRequested = true;
       }
       im::EndMenu();
     }
@@ -115,6 +115,54 @@ static void RenderAboutDialog(State &s) {
 This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.)");
     if (im::IsKeyDown(im::GetKeyIndex(ImGuiKey_Escape))) {
       s.fMainMenuBarHelpAboutOpened = false;
+      im::CloseCurrentPopup();
+    }
+    im::EndPopup();
+  }
+}
+
+void RenderQuitDialog(State &s) {
+  if (!s.fQuitRequested) {
+    return;
+  }
+  std::vector<Path> dirtyFiles;
+  if (!s.dirtyFiles(dirtyFiles)) {
+    s.fQuitAccepted = true;
+    return;
+  }
+  OpenPopup(u8"Save Changes?");
+  im::SetNextWindowSize(ImVec2(512, 0), ImGuiCond_Once);
+  if (BeginPopupModal(u8"Save Changes?", nullptr)) {
+    if (dirtyFiles.size() > 1) {
+      TextUnformatted(u8"These files have been modified, save changes?");
+    } else {
+      TextUnformatted(u8"This file has been modified, save changes?");
+    }
+    for (auto const &file : dirtyFiles) {
+      BulletText(file.filename().u8string());
+    }
+    im::NewLine();
+    if (Button(u8"Yes", ImVec2(64, 0))) {
+      Save(s);
+      s.fQuitAccepted = true;
+      s.fQuitRequested = false;
+      im::CloseCurrentPopup();
+    }
+    im::SameLine(0, 50);
+    im::PushStyleColor(ImGuiCol_Button, im::GetColorU32(ImVec4(255.0f / 255.0f, 59.0f / 255.0f, 48.0f / 255.0f, 1.0f)));
+    if (Button(u8"No", ImVec2(64, 0))) {
+      s.fQuitAccepted = true;
+      s.fQuitRequested = false;
+      im::CloseCurrentPopup();
+    }
+    im::PopStyleColor();
+    im::SameLine(0, 50);
+    if (Button(u8"Cancel", ImVec2(64, 0))) {
+      s.fQuitRequested = false;
+      im::CloseCurrentPopup();
+    }
+    if (im::IsKeyDown(im::GetKeyIndex(ImGuiKey_Escape))) {
+      s.fQuitRequested = false;
       im::CloseCurrentPopup();
     }
     im::EndPopup();
@@ -778,6 +826,7 @@ static void Render(State &s) {
 
   RenderAboutDialog(s);
   RenderLegal(s);
+  RenderQuitDialog(s);
 
   im::PopStyleColor();
   im::End();
