@@ -11,8 +11,6 @@
 #include "imgui.h"
 #include "imgui_impl_metal.h"
 #include "imgui_impl_osx.h"
-@interface AppViewController : NSViewController
-@end
 #include "imgui_stdlib.h"
 
 #define STB_IMAGE_IMPLEMENTATION
@@ -42,15 +40,13 @@ extern "C" {
 #include "render/legal.hpp"
 #include "render/render.hpp"
 
-@interface AppViewController () <MTKViewDelegate>
+//MARK: -
+
+@interface AppViewController : NSViewController <MTKViewDelegate, NSWindowDelegate>
 @property(nonatomic, readonly) MTKView *mtkView;
 @property(nonatomic, strong) id<MTLDevice> device;
 @property(nonatomic, strong) id<MTLCommandQueue> commandQueue;
 @end
-
-//-----------------------------------------------------------------------------------
-// AppViewController
-//-----------------------------------------------------------------------------------
 
 @implementation AppViewController {
   nbte::State state;
@@ -183,7 +179,7 @@ extern "C" {
     window.title = title;
   }
 
-  if (state.fMainMenuBarQuitSelected) {
+  if (state.fQuitAccepted) {
     [[NSApplication sharedApplication] terminate:self];
   }
 }
@@ -191,47 +187,54 @@ extern "C" {
 - (void)mtkView:(MTKView *)view drawableSizeWillChange:(CGSize)size {
 }
 
-//-----------------------------------------------------------------------------------
-// Input processing
-//-----------------------------------------------------------------------------------
-
-// Forward Mouse events to Dear ImGui OSX backend.
 - (void)mouseDown:(NSEvent *)event {
   ImGui_ImplOSX_HandleEvent(event, self.view);
 }
+
 - (void)rightMouseDown:(NSEvent *)event {
   ImGui_ImplOSX_HandleEvent(event, self.view);
 }
+
 - (void)otherMouseDown:(NSEvent *)event {
   ImGui_ImplOSX_HandleEvent(event, self.view);
 }
+
 - (void)mouseUp:(NSEvent *)event {
   ImGui_ImplOSX_HandleEvent(event, self.view);
 }
+
 - (void)rightMouseUp:(NSEvent *)event {
   ImGui_ImplOSX_HandleEvent(event, self.view);
 }
+
 - (void)otherMouseUp:(NSEvent *)event {
   ImGui_ImplOSX_HandleEvent(event, self.view);
 }
+
 - (void)mouseMoved:(NSEvent *)event {
   ImGui_ImplOSX_HandleEvent(event, self.view);
 }
+
 - (void)mouseDragged:(NSEvent *)event {
   ImGui_ImplOSX_HandleEvent(event, self.view);
 }
+
 - (void)rightMouseMoved:(NSEvent *)event {
   ImGui_ImplOSX_HandleEvent(event, self.view);
 }
+
 - (void)rightMouseDragged:(NSEvent *)event {
   ImGui_ImplOSX_HandleEvent(event, self.view);
 }
+
 - (void)otherMouseMoved:(NSEvent *)event {
   ImGui_ImplOSX_HandleEvent(event, self.view);
 }
+
 - (void)otherMouseDragged:(NSEvent *)event {
   ImGui_ImplOSX_HandleEvent(event, self.view);
 }
+
 - (void)scrollWheel:(NSEvent *)event {
   ImGui_ImplOSX_HandleEvent(event, self.view);
 }
@@ -254,11 +257,16 @@ extern "C" {
   }
 }
 
+//MARK: NSWindowDelegate
+
+- (BOOL)windowShouldClose:(NSWindow *)sender {
+  state.fQuitRequested = true;
+  return NO;
+}
+
 @end
 
-//-----------------------------------------------------------------------------------
-// AppDelegate
-//-----------------------------------------------------------------------------------
+//MARK: -
 
 @interface AppDelegate : NSObject <NSApplicationDelegate>
 @property(nonatomic, strong) NSWindow *window;
@@ -277,6 +285,7 @@ extern "C" {
                                               styleMask:NSWindowStyleMaskTitled | NSWindowStyleMaskClosable | NSWindowStyleMaskResizable | NSWindowStyleMaskMiniaturizable
                                                 backing:NSBackingStoreBuffered
                                                   defer:NO];
+    self.window.delegate = appViewController;
     self.window.contentViewController = appViewController;
     self.appViewController = appViewController;
   }
@@ -294,10 +303,6 @@ extern "C" {
   [self.window becomeKeyWindow];
 }
 
-- (BOOL)applicationShouldTerminateAfterLastWindowClosed:(NSApplication *)sender {
-  return YES;
-}
-
 - (BOOL)application:(NSApplication *)sender openFile:(NSString *)filename {
   if (!self.appViewController) {
     return NO;
@@ -306,6 +311,8 @@ extern "C" {
 }
 
 @end
+
+//MARK: -
 
 @interface NbteApplication : NSApplication
 @end
@@ -317,14 +324,9 @@ extern "C" {
   [super reportException:theException];
 }
 
-- (void)terminate:(nullable id)sender {
-  [super terminate:sender];
-}
 @end
 
-//-----------------------------------------------------------------------------------
-// Application main() function
-//-----------------------------------------------------------------------------------
+//MARK: -
 
 int main(int argc, const char *argv[]) {
   @autoreleasepool {
