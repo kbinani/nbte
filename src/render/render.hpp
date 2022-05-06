@@ -400,6 +400,9 @@ static void VisitNbtNonScalar(State &s,
   if (!filter.empty()) {
     opt.openIgnoringStorage = true;
   }
+  if (size == 0) {
+    opt.disable = true;
+  }
   ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_NavLeftJumpsBackHere;
   if (matchedNode) {
     flags = flags | ImGuiTreeNodeFlags_Selected;
@@ -543,9 +546,13 @@ static void Visit(State &s,
     } else {
       label += u8" entries";
     }
+    TreeNodeOptions opt;
+    if (contents->fValue.empty()) {
+      opt.disable = true;
+    }
     PushID(path + u8"/" + name);
     if (node->hasParent()) {
-      if (TreeNode(label, ImGuiTreeNodeFlags_NavLeftJumpsBackHere, s.fTextures.fIconFolder, s.filterTerm(), s.fFilterCaseSensitive)) {
+      if (TreeNode(label, ImGuiTreeNodeFlags_NavLeftJumpsBackHere, s.fTextures.fIconFolder, s.filterTerm(), s.fFilterCaseSensitive, opt)) {
         for (auto const &it : contents->fValue) {
           Visit(s, it, path + u8"/" + name, filter);
         }

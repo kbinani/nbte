@@ -21,7 +21,14 @@ bool TreeNode(String const &label, ImGuiTreeNodeFlags flags, std::optional<Textu
   ImVec2 padding = style.FramePadding;
 
   ImRect bb(pos, ImVec2(pos.x + im::GetContentRegionAvail().x, pos.y + frameHeight));
-  bool opened = opt.openIgnoringStorage ? true : im::TreeNodeBehaviorIsOpen(id, flags);
+  bool opened = true;
+  if (opt.disable) {
+    opened = false;
+  } else if (opt.openIgnoringStorage) {
+    opened = true;
+  } else {
+    opened = im::TreeNodeBehaviorIsOpen(id, flags);
+  }
   if (opened && !g.NavIdIsAlive && !(flags & ImGuiTreeNodeFlags_NoTreePushOnOpen)) {
     if (flags & ImGuiTreeNodeFlags_NavLeftJumpsBackHere) {
       window->DC.TreeJumpToParentOnPopMask |= (1 << window->DC.TreeDepth);
@@ -29,8 +36,7 @@ bool TreeNode(String const &label, ImGuiTreeNodeFlags flags, std::optional<Textu
   }
 
   bool hovered, held;
-  bool pressed = im::ButtonBehavior(bb, id, &hovered, &held, true);
-  bool toggled = false;
+  bool toggled = im::ButtonBehavior(bb, id, &hovered, &held, true);
   if (g.NavId == id && g.NavMoveDir == ImGuiDir_Left && opened) {
     toggled = true;
     im::NavMoveRequestCancel();
@@ -39,7 +45,12 @@ bool TreeNode(String const &label, ImGuiTreeNodeFlags flags, std::optional<Textu
     toggled = true;
     im::NavMoveRequestCancel();
   }
-  if ((pressed || toggled) && !opt.openIgnoringStorage) {
+  if (opt.disable) {
+    toggled = false;
+    hovered = false;
+    held = false;
+  }
+  if (toggled && !opt.openIgnoringStorage) {
     opened = !opened;
     window->DC.StateStorage->SetInt(id, opened ? 1 : 0);
   }
@@ -55,7 +66,12 @@ bool TreeNode(String const &label, ImGuiTreeNodeFlags flags, std::optional<Textu
     window->DrawList->AddRectFilled(bb.Min, bb.Max, bg_col);
   }
 
-  ImColor arrowColor = style.Colors[ImGuiCol_Text];
+  ImColor arrowColor;
+  if (opt.disable) {
+    arrowColor = style.Colors[ImGuiCol_TextDisabled];
+  } else {
+    arrowColor = style.Colors[ImGuiCol_Text];
+  }
   ImVec2 defaultSize(frameHeight - 2 * padding.x, frameHeight - 2 * padding.y);
   float const arrowScale = 0.7f;
   ImVec2 arrowOffset = padding + defaultSize * (0.5f - 0.5f * arrowScale);
