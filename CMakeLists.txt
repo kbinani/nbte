@@ -28,10 +28,16 @@ elseif (WIN32)
     /wd26812 # Suppress "Prefer 'enum class' over 'enum'" warnings
   )
   add_compile_options(
-    $<$<CONFIG:Debug>:/MTd>
-    $<$<CONFIG:Release>:/MT>
-    $<$<CONFIG:RelWithDebInfo>:/MT>
-    $<$<CONFIG:MinSizeRel>:/MT>)
+    /Ot
+    /Oi
+    /Zi
+    $<IF:$<CONFIG:Debug>,/MTd,/MT>
+    $<IF:$<CONFIG:Debug>,,/GL> # Enable: Whole program optimization
+  )
+  add_link_options(
+    /DEBUG
+    $<IF:$<CONFIG:Debug>,,/LTCG> # Enable: Link-time code generation
+  )
 endif()
 
 add_subdirectory(deps/glfw EXCLUDE_FROM_ALL)
