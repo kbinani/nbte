@@ -787,9 +787,7 @@ static void Render(State &s) {
     CaptureShortcutKey(s);
   }
 
-#if !defined(NDEBUG)
-  ImGui::ShowMetricsWindow();
-#endif
+  //ImGui::ShowMetricsWindow();
 
   ImGui::Render();
 
