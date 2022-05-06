@@ -19,6 +19,12 @@ void InlineImage(Texture const &image);
 
 void IconLabel(String const &label, std::optional<Texture> icon);
 
+void RenderText(ImVec2 pos, String const &text, bool hide_text_after_hash = true);
+
+ImGuiID GetID(String const &label);
+
+bool InputText(String const &label, String *text, ImGuiInputTextFlags flags = 0);
+
 inline ImVec2 CalcTextSize(String const &t) {
   return im::CalcTextSize((char const *)t.c_str());
 }
@@ -82,11 +88,5 @@ inline bool Begin(String const &label, bool *p_open = 0, ImGuiWindowFlags flags 
 inline bool BeginChild(String const &label, ImVec2 size = ImVec2(0, 0), bool border = false, ImGuiWindowFlags flags = 0) {
   return im::BeginChild((char const *)label.c_str(), size, border, flags);
 }
-
-void RenderText(ImVec2 pos, String const &text, bool hide_text_after_hash = true);
-
-ImGuiID GetID(String const &label);
-
-bool InputText(String const &label, String *text, ImGuiInputTextFlags flags = 0);
 
 } // namespace nbte

@@ -190,26 +190,35 @@ static bool ContainsTerm(std::shared_ptr<mcfile::nbt::Tag> const &tag,
 }
 
 template <class T>
-static void InputScalar(T &v, Compound &root) {
-  int t = v;
-  if (InputInt(u8"", &t)) {
-    T n = Clamp<T, int>(t);
-    if (n != v) {
-      v = n;
-      root.fEdited = true;
-    }
+static ImGuiDataType DataType() {
+  if (std::is_same_v<T, uint8_t>) {
+    return ImGuiDataType_U8;
+  } else if (std::is_same_v<T, int8_t>) {
+    return ImGuiDataType_S8;
+  } else if (std::is_same_v<T, uint16_t>) {
+    return ImGuiDataType_S16;
+  } else if (std::is_same_v<T, int16_t>) {
+    return ImGuiDataType_U16;
+  } else if (std::is_same_v<T, uint32_t>) {
+    return ImGuiDataType_U32;
+  } else if (std::is_same_v<T, int32_t>) {
+    return ImGuiDataType_S32;
+  } else if (std::is_same_v<T, uint64_t>) {
+    return ImGuiDataType_U64;
+  } else if (std::is_same_v<T, int64_t>) {
+    return ImGuiDataType_S64;
+  } else {
+    assert(false);
+    return ImGuiDataType_S32;
   }
 }
 
-template <>
-void InputScalar(int64_t &v, Compound &root) {
-  String t = ToString(v);
-  if (InputText(u8"", &t, ImGuiInputTextFlags_CharsDecimal)) {
-    int64_t n = atoll((char const *)t.c_str());
-    if (v != n) {
-      v = n;
-      root.fEdited = true;
-    }
+template <std::integral T>
+static void InputScalar(T &v, Compound &root) {
+  ImGuiDataType type = DataType<T>();
+  T step = 1;
+  if (im::InputScalar("", type, &v, &step)) {
+    root.fEdited = true;
   }
 }
 
