@@ -55,6 +55,8 @@ bool TreeNode(String const &label, ImGuiTreeNodeFlags flags, std::optional<Textu
     window->DC.StateStorage->SetInt(id, opened ? 1 : 0);
   }
 
+  float const labelSpacing = im::GetTreeNodeToLabelSpacing();
+
   if (hovered || held) {
     ImGuiCol col = ImGuiCol_Header;
     if (held && hovered) {
@@ -62,22 +64,28 @@ bool TreeNode(String const &label, ImGuiTreeNodeFlags flags, std::optional<Textu
     } else if (hovered) {
       col = ImGuiCol_HeaderHovered;
     }
-    ImU32 bg_col = im::GetColorU32(col);
-    window->DrawList->AddRectFilled(bb.Min, bb.Max, bg_col);
+    ImU32 bgColor = im::GetColorU32(col);
+    ImVec2 topLeft = bb.Min;
+    ImVec2 bottomRight = bb.Max;
+    if (opt.noArrow) {
+      topLeft = ImVec2(bb.Min.x + labelSpacing, bb.Min.y);
+    }
+    window->DrawList->AddRectFilled(topLeft, bottomRight, bgColor);
   }
 
-  ImColor arrowColor;
-  if (opt.disable) {
-    arrowColor = style.Colors[ImGuiCol_TextDisabled];
-  } else {
-    arrowColor = style.Colors[ImGuiCol_Text];
+  if (!opt.noArrow) {
+    ImColor arrowColor;
+    if (opt.disable) {
+      arrowColor = style.Colors[ImGuiCol_TextDisabled];
+    } else {
+      arrowColor = style.Colors[ImGuiCol_Text];
+    }
+    ImVec2 defaultSize(frameHeight - 2 * padding.x, frameHeight - 2 * padding.y);
+    float const arrowScale = 0.7f;
+    ImVec2 arrowOffset = padding + defaultSize * (0.5f - 0.5f * arrowScale);
+    im::RenderArrow(window->DrawList, pos + arrowOffset, arrowColor, opened ? ImGuiDir_Down : ImGuiDir_Right, arrowScale);
   }
-  ImVec2 defaultSize(frameHeight - 2 * padding.x, frameHeight - 2 * padding.y);
-  float const arrowScale = 0.7f;
-  ImVec2 arrowOffset = padding + defaultSize * (0.5f - 0.5f * arrowScale);
-  im::RenderArrow(window->DrawList, pos + arrowOffset, arrowColor, opened ? ImGuiDir_Down : ImGuiDir_Right, arrowScale);
 
-  float const labelSpacing = im::GetTreeNodeToLabelSpacing();
   ImVec2 textPos;
 
   if (icon) {

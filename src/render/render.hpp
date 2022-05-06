@@ -612,11 +612,12 @@ static void Visit(State &s,
         im::TreePop();
       }
     } else {
-      im::Indent(im::GetTreeNodeToLabelSpacing());
-      if (IconButton(name, s.fTextures.fIconDocument)) {
+      TreeNodeOptions opt;
+      opt.noArrow = true;
+      if (TreeNode(name, 0, s.fTextures.fIconDocument, s.filterTerm(), s.fFilterCaseSensitive, opt)) {
         node->load(*s.fPool);
+        im::TreePop();
       }
-      im::Unindent(im::GetTreeNodeToLabelSpacing());
     }
     im::PopID();
   } else if (auto unopenedChunk = node->unopenedChunk(); unopenedChunk) {

@@ -9,6 +9,7 @@ namespace nbte {
 struct TreeNodeOptions {
   bool openIgnoringStorage = false;
   bool disable = false;
+  bool noArrow = false;
 };
 
 bool TreeNode(String const &label, ImGuiTreeNodeFlags flags, std::optional<Texture> icon, String const &filter, bool caseSensitive, TreeNodeOptions options = {});
