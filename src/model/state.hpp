@@ -33,6 +33,8 @@ struct State {
   bool fFilterCaseSensitive = false;
   bool fFilterBarGotFocus = false;
 
+  bool fNavigateBarOpened = false;
+
   std::optional<Path> fMinecraftSaveDirectory;
 
   std::unique_ptr<hwm::task_queue> fPool;

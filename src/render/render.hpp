@@ -66,7 +66,10 @@ static void RenderMainMenu(State &s) {
     }
     if (BeginMenu(u8"Find", &s.fMainMenuBarFindSelected)) {
       if (MenuItem(u8"Filter", DecorateModCtrl(u8"F"), nullptr)) {
-        s.fFilterBarOpened = true;
+        s.fFilterBarOpened = !s.fFilterBarOpened;
+      }
+      if (MenuItem(u8"Navigate", DecorateModCtrl(u8"N"), nullptr)) {
+        s.fNavigateBarOpened = !s.fNavigateBarOpened;
       }
       im::EndMenu();
     }
@@ -778,6 +781,20 @@ static void RenderFilterBar(State &s) {
   }
 }
 
+static void RenderNavigateBar(State &s) {
+  using namespace std;
+
+  auto const &style = im::GetStyle();
+  if (s.fNavigateBarOpened) {
+    BeginChild(u8"navigate_panel", ImVec2(s.fDisplaySize.x, im::GetFrameHeightWithSpacing()));
+
+    TextUnformatted(u8"Navigate: ");
+
+    im::EndChild();
+    im::Separator();
+  }
+}
+
 static void CaptureShortcutKey(State &s) {
   if (im::IsKeyDown(GetModCtrlKeyIndex())) {
     if (im::IsKeyDown(im::GetKeyIndex(ImGuiKey_F))) {
@@ -794,6 +811,8 @@ static void CaptureShortcutKey(State &s) {
           s.open(*selected);
         }
       }
+    } else if (im::IsKeyDown(im::GetKeyIndex(ImGuiKey_N))) {
+      s.fNavigateBarOpened = true;
     }
   }
 }
@@ -819,6 +838,7 @@ static void Render(State &s) {
   RenderMainMenu(s);
   RenderErrorPopup(s);
   RenderFilterBar(s);
+  RenderNavigateBar(s);
 
   BeginChild(u8"editor", ImVec2(0, 0), false, ImGuiWindowFlags_NavFlattened);
   RenderNode(s);
