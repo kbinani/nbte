@@ -90,6 +90,7 @@ list(APPEND nbte_files
   resource/UDEVGothic35_Regular.ttf
   resource/nbte32.png
   deps/imgui/imgui.cpp
+  deps/imgui/imgui_demo.cpp
   deps/imgui/imgui_draw.cpp
   deps/imgui/imgui_tables.cpp
   deps/imgui/imgui_widgets.cpp
@@ -111,8 +112,8 @@ elseif ("${CMAKE_SYSTEM_NAME}" STREQUAL "Windows")
   list(APPEND nbte_files
     src/main.cpp
     src/imgui-ext.cpp
-    deps/imgui/backends/imgui_impl_glfw.cpp
-    deps/imgui/backends/imgui_impl_opengl3.cpp
+    deps/imgui/backends/imgui_impl_dx12.cpp
+    deps/imgui/backends/imgui_impl_win32.cpp
     resource/resource.rc
     deps/nativefiledialog/src/nfd_win.cpp)
 endif()
@@ -177,8 +178,7 @@ if ("${CMAKE_SYSTEM_NAME}" STREQUAL "Darwin")
 endif()
 target_include_directories(nbte PRIVATE ${nbte_include_directories})
 
-list(APPEND nbte_link_libraries
-  mcfile)
+list(APPEND nbte_link_libraries mcfile)
 if ("${CMAKE_SYSTEM_NAME}" STREQUAL "Darwin")
   list(APPEND nbte_link_libraries
     "-framework MetalKit"
@@ -187,7 +187,7 @@ if ("${CMAKE_SYSTEM_NAME}" STREQUAL "Darwin")
     "-framework AppKit"
     BugsnagStatic)
 elseif("${CMAKE_SYSTEM_NAME}" STREQUAL "Windows")
-  list(APPEND nbte_link_libraries glfw)
+  list(APPEND nbte_link_libraries d3d12.lib d3dcompiler.lib dxgi.lib)
 endif()
 target_link_libraries(nbte PRIVATE ${nbte_link_libraries})
 
