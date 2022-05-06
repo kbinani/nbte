@@ -14,11 +14,11 @@ string(STRIP "${nbte_build_number}" nbte_build_number)
 
 include(FetchContent)
 
-if ("${CMAKE_SYSTEM_NAME}" STREQUAL "Darwin")
+if (APPLE)
   set(CMAKE_OSX_ARCHITECTURES "arm64;x86_64")
   set(CMAKE_XCODE_ATTRIBUTE_DEVELOPMENT_TEAM "${nbte_apple_development_team_id}")
   set(CMAKE_OSX_DEPLOYMENT_TARGET "${nbte_macos_deployment_target}")
-elseif ("${CMAKE_SYSTEM_NAME}" STREQUAL "Windows")
+elseif (WIN32)
   add_definitions(
     /DUNICODE
     /D_UNICODE
@@ -37,7 +37,7 @@ endif()
 add_subdirectory(deps/glfw EXCLUDE_FROM_ALL)
 add_subdirectory(deps/libminecraft-file EXCLUDE_FROM_ALL)
 
-if (NOT nbte_busgnag_ready AND "${CMAKE_SYSTEM_NAME}" STREQUAL "Darwin")
+if (NOT nbte_busgnag_ready AND APPLE)
   execute_process(COMMAND xcodebuild -project Bugsnag.xcodeproj -target BugsnagStatic -sdk macosx -arch "\$(ARCHS_STANDARD)" WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/deps/bugsnag-cocoa)
   set(nbte_busgnag_ready ON CACHE INTERNAL "")
 endif()
@@ -64,7 +64,7 @@ configure_file(src/render/legal.hpp.in ${CMAKE_CURRENT_SOURCE_DIR}/src/render/le
 
 configure_file(package/Package.appxmanifest.in ${CMAKE_CURRENT_SOURCE_DIR}/package/Package.appxmanifest)
 
-if ("${CMAKE_SYSTEM_NAME}" STREQUAL "Darwin")
+if (APPLE)
   configure_file(resource/Info.plist.in ${CMAKE_CURRENT_SOURCE_DIR}/resource/Info.plist)
 endif()
 
@@ -98,7 +98,7 @@ list(APPEND nbte_files
   deps/stb/stb_image.h
   deps/uuid4/src/uuid4.h
   deps/uuid4/src/uuid4.c)
-if ("${CMAKE_SYSTEM_NAME}" STREQUAL "Darwin")
+if (APPLE)
   list(APPEND nbte_files
     src/main.mm
     src/imgui-ext.mm
@@ -107,7 +107,7 @@ if ("${CMAKE_SYSTEM_NAME}" STREQUAL "Darwin")
     deps/imgui/backends/imgui_impl_metal.mm
     deps/imgui/backends/imgui_impl_osx.mm
     deps/nativefiledialog/src/nfd_cocoa.m)
-elseif ("${CMAKE_SYSTEM_NAME}" STREQUAL "Windows")
+elseif (WIN32)
   list(APPEND nbte_files
     src/main.cpp
     src/imgui-ext.cpp
@@ -140,7 +140,7 @@ foreach (icon_file IN LISTS nbte_icon_files)
 endforeach()
 configure_file(resource/resource.rc.in ${CMAKE_CURRENT_SOURCE_DIR}/resource/resource.rc)
 
-if ("${CMAKE_SYSTEM_NAME}" STREQUAL "Darwin")
+if (APPLE)
   add_executable(nbte MACOSX_BUNDLE ${nbte_files} ${nbte_icon_files})
   set_target_properties(nbte PROPERTIES
     MACOSX_BUNDLE_INFO_PLIST "${CMAKE_CURRENT_SOURCE_DIR}/resource/Info.plist"
@@ -172,21 +172,20 @@ list(APPEND nbte_include_directories
   deps/stb
   deps/hwm.task
   deps/uuid4/src)
-if ("${CMAKE_SYSTEM_NAME}" STREQUAL "Darwin")
+if (APPLE)
   list(APPEND nbte_include_directories "${CMAKE_CURRENT_SOURCE_DIR}/deps/bugsnag-cocoa/Bugsnag/include")
 endif()
 target_include_directories(nbte PRIVATE ${nbte_include_directories})
 
-list(APPEND nbte_link_libraries
-  mcfile)
-if ("${CMAKE_SYSTEM_NAME}" STREQUAL "Darwin")
+list(APPEND nbte_link_libraries mcfile)
+if (APPLE)
   list(APPEND nbte_link_libraries
     "-framework MetalKit"
     "-framework GameController"
     "-framework Metal"
     "-framework AppKit"
     BugsnagStatic)
-elseif("${CMAKE_SYSTEM_NAME}" STREQUAL "Windows")
+elseif(WIN32)
   list(APPEND nbte_link_libraries glfw)
 endif()
 target_link_libraries(nbte PRIVATE ${nbte_link_libraries})
