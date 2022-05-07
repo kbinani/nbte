@@ -119,6 +119,10 @@ struct FilterLruCache {
     return cache->containsSearchTerm(tag, key.fSearch, key.fCaseSensitive);
   }
 
+  void invalidate() {
+    fCache.clear();
+  }
+
 private:
   std::list<ValueType> fCache;
 };
@@ -140,6 +144,12 @@ struct FilterCacheSelector {
     }
   }
 
+  void invalidate() {
+    fKeyFilterCache.invalidate();
+    fValueFilterCache.invalidate();
+  }
+
+private:
   FilterLruCache<FilterMode::Key, Size> fKeyFilterCache;
   FilterLruCache<FilterMode::Value, Size> fValueFilterCache;
 };

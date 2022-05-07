@@ -59,17 +59,24 @@ struct State {
 
     if (auto node = Node::OpenFile(selected, *fPool); node) {
       fOpened = node;
+      if (fOpenedPath != selected) {
+        fCacheSelector.invalidate();
+      }
       fOpenedPath = selected;
       return;
     }
     fError = u8"Can't open file";
   }
 
-  void openDirectory(Path const &path) {
+  void openDirectory(Path const &selected) {
     fError.clear();
-    if (auto node = Node::OpenDirectory(path, *fPool); node) {
+
+    if (auto node = Node::OpenDirectory(selected, *fPool); node) {
       fOpened = node;
-      fOpenedPath = path;
+      if (fOpenedPath != selected) {
+        fCacheSelector.invalidate();
+      }
+      fOpenedPath = selected;
       return;
     }
     fError = u8"Can't open directory";
