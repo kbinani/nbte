@@ -9,6 +9,8 @@ set(nbte_product_bundle_identifier com.github.kbinani.nbte)
 set(nbte_macos_deployment_target "10.15")
 set(nbte_apple_development_team_id "XM695N4A7T")
 
+set_directory_properties(PROPERTIES VS_STARTUP_PROJECT nbte)
+
 execute_process(COMMAND git rev-list --all --count OUTPUT_VARIABLE nbte_build_number)
 string(STRIP "${nbte_build_number}" nbte_build_number)
 
@@ -203,4 +205,4 @@ add_executable(binary_to_compressed_c deps/imgui/misc/fonts/binary_to_compressed
 
 include_external_msproject(package ${CMAKE_CURRENT_SOURCE_DIR}/package/package.wapproj
   TYPE C7167F0D-BC9F-4E6E-AFE1-012C56B48DB5
-  GUID 03182add-54ab-4518-b6a3-cfd896bcd9a4)
+  GUID 03182ADD-54AB-4518-B6A3-CFD896BCD9A4)
