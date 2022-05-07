@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   width="2560"
+   height="1600"
+   viewBox="0 0 677.33332 423.33335"
+   version="1.1"
+   id="svg5"
+   inkscape:version="1.1 (c4e8f9e, 2021-05-24)"
+   sodipodi:docname="apple-store.svg"
+   inkscape:export-filename="/Users/kbinani/Dropbox/Documents/Projects/nbte/img/apple-store.png"
+   inkscape:export-xdpi="96"
+   inkscape:export-ydpi="96"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:xlink="http://www.w3.org/1999/xlink"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <sodipodi:namedview
+     id="namedview7"
+     pagecolor="#505050"
+     bordercolor="#eeeeee"
+     borderopacity="1"
+     inkscape:pageshadow="0"
+     inkscape:pageopacity="0"
+     inkscape:pagecheckerboard="0"
+     inkscape:document-units="mm"
+     showgrid="false"
+     units="px"
+     inkscape:zoom="0.4"
+     inkscape:cx="1298.75"
+     inkscape:cy="1138.75"
+     inkscape:window-width="2560"
+     inkscape:window-height="1305"
+     inkscape:window-x="0"
+     inkscape:window-y="25"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="layer1" />
+  <defs
+     id="defs2" />
+  <g
+     inkscape:label="レイヤー 1"
+     inkscape:groupmode="layer"
+     id="layer1">
+    <image
+       width="677.33331"
+       height="423.33334"
+       preserveAspectRatio="none"
+       xlink:href="apple-store-background.png"
+       id="image1008"
+       x="0"
+       y="0" />
+    <image
+       width="555.41333"
+       height="364.06668"
+       preserveAspectRatio="none"
+       xlink:href="apple-store-captured.png"
+       id="image1025"
+       x="60.959991"
+       y="29.633331" />
+  </g>
+</svg>
