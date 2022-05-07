@@ -52,7 +52,7 @@ static std::optional<Region::ValueType> ReadRegion(int rx, int rz, Path path, st
         // chunk not saved yet
         continue;
       }
-#if 1
+#if 0
       UnopenedChunk uc(path, sectorOffset * kSectorSize, chunkSize, rx * 32 + x, rz * 32 + z, x, z);
       auto node = shared_ptr<Node>(new Node(Node::Value(in_place_index<Node::TypeUnopenedChunk>, uc), parent));
 #else
