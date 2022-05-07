@@ -700,6 +700,7 @@ static void RenderFilterBar(State &s) {
 }
 
 static void RenderNavigateBar(State &s) {
+#if NBTE_NAVBAR
   using namespace std;
 
   auto const &style = im::GetStyle();
@@ -711,6 +712,7 @@ static void RenderNavigateBar(State &s) {
     im::EndChild();
     im::Separator();
   }
+#endif
 }
 
 static void CaptureShortcutKey(State &s) {
@@ -758,9 +760,7 @@ static void Render(State &s) {
   RenderMainMenu(s);
   RenderErrorPopup(s);
   RenderFilterBar(s);
-#if NBTE_NAVBAR
   RenderNavigateBar(s);
-#endif
 
   BeginChild(u8"editor", ImVec2(0, 0), false, ImGuiWindowFlags_NavFlattened);
   RenderNode(s);
