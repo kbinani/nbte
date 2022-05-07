@@ -43,11 +43,46 @@ struct State {
   State() : fPool(new hwm::task_queue(std::thread::hardware_concurrency())), fSaveQueue(new hwm::task_queue(1)) {
   }
 
-  bool containsTerm(std::shared_ptr<mcfile::nbt::Tag> const &tag,
-                    String const &filter,
-                    FilterMode mode,
-                    bool caseSensitive) {
-    return fCacheSelector.containsTerm(tag, filter, mode, caseSensitive);
+  bool containsTerm(std::shared_ptr<mcfile::nbt::Tag> const &tag, FilterKey const &key, FilterMode mode) {
+    return fCacheSelector.containsTerm(tag, key, mode);
+  }
+
+  bool containsTerm(std::shared_ptr<Node> const &node, FilterKey const &key, FilterMode mode) {
+    if (!node) {
+      return false;
+    }
+    if (auto r = node->region(); r) {
+      if (r->fValue.index() != 0) {
+        return false;
+      }
+      for (auto const &it : std::get<0>(r->fValue)) {
+        if (containsTerm(it, key, mode)) {
+          return true;
+        }
+      }
+      return false;
+    }
+    if (auto c = node->compound(); c) {
+      if (key.match(c->name())) {
+        return true;
+      }
+      return containsTerm(c->fTag, key, mode);
+    }
+    if (auto c = node->directoryContents(); c) {
+      for (auto const &it : c->fValue) {
+        if (containsTerm(it, key, mode)) {
+          return true;
+        }
+      }
+      return false;
+    }
+    if (auto file = node->fileUnopened(); file) {
+      return key.match(file->filename().u8string());
+    }
+    if (auto directory = node->directoryUnopened(); directory) {
+      return key.match(directory->filename().u8string());
+    }
+    return false;
   }
 
   void loadTextures(void *device) {
@@ -119,15 +154,11 @@ struct State {
     fSaveTask.reset();
   }
 
-  String filterTerm() const {
+  FilterKey filterKey() const {
     if (!fFilterBarOpened) {
-      return {};
+      return FilterKey({}, false);
     }
-    if (fFilterCaseSensitive) {
-      return fFilter;
-    } else {
-      return ToLower(fFilter);
-    }
+    return FilterKey(fFilter, fFilterCaseSensitive);
   }
 
   String winowTitle() const {

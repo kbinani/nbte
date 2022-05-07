@@ -3,39 +3,43 @@
 #include <optional>
 #include <string>
 #include <algorithm>
+#include <unordered_map>
+#include <memory>
+#include <minecraft-file.hpp>
 #include "texture.hpp"
 #include "texture-set.hpp"
 #include "string.hpp"
+#include "filter-cache.hpp"
 #include "imgui-ext.hpp"
 
 namespace nbte {
 
-static void RenderTextHighlighted(ImVec2 textPos, String const &text, String const &filter, bool caseSensitive) {
+static void RenderTextHighlighted(ImVec2 textPos, String const &text, FilterKey const &key) {
   ImGuiContext &g = *GImGui;
   ImGuiWindow *window = g.CurrentWindow;
   ImGuiStyle const &style = g.Style;
 
-  if (!filter.empty()) {
-    String search = caseSensitive ? filter : ToLower(filter);
+  if (!key.empty()) {
+    String target = key.fCaseSensitive ? text : ToLower(text);
     auto cursor = window->DC.CursorPos;
     auto color = im::GetColorU32(ImGuiCol_Button);
     size_t pivot = 0;
     while (true) {
-      size_t found = (caseSensitive ? text : ToLower(text)).find(search, pivot);
+      size_t found = target.find(key.fSearch, pivot);
       if (found == String::npos) {
         break;
       } else {
         auto leading = CalcTextSize(text.substr(0, found));
-        auto trailing = CalcTextSize(text.substr(0, found + search.size()));
+        auto trailing = CalcTextSize(text.substr(0, found + key.fSearch.size()));
         window->DrawList->AddRectFilled(ImVec2(textPos.x + leading.x, textPos.y + style.FramePadding.y), ImVec2(textPos.x + trailing.x, textPos.y + style.FramePadding.y + trailing.y), color, 2.0f);
-        pivot = found + search.size();
+        pivot = found + key.fSearch.size();
       }
     }
   }
   RenderText(textPos, text);
 }
 
-bool TreeNode(String const &label, ImGuiTreeNodeFlags flags, std::optional<Texture> icon, String const &filter, bool caseSensitive, TreeNodeOptions opt) {
+bool TreeNode(String const &label, ImGuiTreeNodeFlags flags, std::optional<Texture> icon, FilterKey const &key, TreeNodeOptions opt) {
   ImGuiContext &g = *GImGui;
   ImGuiWindow *window = g.CurrentWindow;
   ImGuiStyle const &style = g.Style;
@@ -62,9 +66,10 @@ bool TreeNode(String const &label, ImGuiTreeNodeFlags flags, std::optional<Textu
     }
   }
 
+  bool toggled = false;
   if (im::ItemAdd(bb, id)) {
     bool hovered, held;
-    bool toggled = im::ButtonBehavior(bb, id, &hovered, &held, true);
+    toggled = im::ButtonBehavior(bb, id, &hovered, &held, true);
     if (g.NavId == id && g.NavMoveDir == ImGuiDir_Left && opened) {
       toggled = true;
       im::NavMoveRequestCancel();
@@ -126,7 +131,7 @@ bool TreeNode(String const &label, ImGuiTreeNodeFlags flags, std::optional<Textu
       textPos = ImVec2(pos.x + labelSpacing + padding.x, pos.y + padding.y);
     }
 
-    RenderTextHighlighted(textPos, label, filter, caseSensitive);
+    RenderTextHighlighted(textPos, label, key);
   }
 
   im::ItemSize(bb, 0);
@@ -206,7 +211,7 @@ bool InputText(String const &label, String *text, ImGuiInputTextFlags flags) {
   return im::InputText((char const *)label.c_str(), (char *)text->c_str(), text->capacity() + 1, flags, InputTextCallback, text);
 }
 
-void TextHighlighted(String const &text, String const &filter, bool caseSensitive) {
+void TextHighlighted(String const &text, FilterKey const &key) {
   ImGuiContext &g = *GImGui;
   ImGuiWindow *window = g.CurrentWindow;
   ImGuiStyle const &style = im::GetStyle();
@@ -217,7 +222,7 @@ void TextHighlighted(String const &text, String const &filter, bool caseSensitiv
   ImRect bounds(cursor, ImVec2(cursor.x + size.x + style.FramePadding.x * 2, cursor.y + im::GetFrameHeight()));
 
   if (im::ItemAdd(bounds, id)) {
-    RenderTextHighlighted(ImVec2(cursor.x, cursor.y + style.FramePadding.y), text, filter, caseSensitive);
+    RenderTextHighlighted(ImVec2(cursor.x, cursor.y + style.FramePadding.y), text, key);
   }
   im::ItemSize(bounds.Max - bounds.Min, 0);
 }

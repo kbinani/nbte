@@ -8,17 +8,17 @@ static void VisitNbtCompound(State &s,
                              Compound &root,
                              mcfile::nbt::CompoundTag const &tag,
                              String const &path,
-                             String const &filter);
+                             FilterKey const &key);
 static void VisitNbt(State &s,
                      Compound &root,
                      String const &name,
                      std::shared_ptr<mcfile::nbt::Tag> const &tag,
                      String const &path,
-                     String const &filter);
+                     FilterKey const &key);
 static void Visit(State &s,
                   std::shared_ptr<Node> const &node,
                   String const &path,
-                  String const &filter);
+                  FilterKey const &key);
 
 static void RenderSavingModal(State &s) {
   OpenPopup(u8"Info");
@@ -224,8 +224,7 @@ static void InputScalar(T &v, Compound &root) {
 
 static void PushScalarInput(String const &name,
                             String const &path,
-                            String const &filter,
-                            bool filterCaseSensitive,
+                            FilterKey const &key,
                             std::optional<Texture> const &icon) {
   using namespace std;
   auto const &style = im::GetStyle();
@@ -238,7 +237,7 @@ static void PushScalarInput(String const &name,
     im::SetCursorPos(ImVec2(cursor.x + style.FramePadding.x, cursor.y));
   }
   PushID(path + u8"/" + name);
-  TextHighlighted(name, filter, filterCaseSensitive);
+  TextHighlighted(name, key);
   im::SameLine();
 }
 
@@ -253,38 +252,38 @@ static void VisitNbtScalar(State &s,
                            String const &name,
                            std::shared_ptr<mcfile::nbt::Tag> const &tag,
                            String const &path,
-                           String const &filter) {
+                           FilterKey const &key) {
   using namespace std;
   using namespace mcfile::nbt;
 
   switch (tag->type()) {
   case Tag::Type::Int:
     if (auto v = dynamic_pointer_cast<IntTag>(tag); v) {
-      PushScalarInput(name, path, filter, s.fFilterCaseSensitive, s.fTextures.fIconDocumentAttributeI);
+      PushScalarInput(name, path, key, s.fTextures.fIconDocumentAttributeI);
       InputScalar<int>(v->fValue, root);
     }
     break;
   case Tag::Type::Byte:
     if (auto v = dynamic_pointer_cast<ByteTag>(tag); v) {
-      PushScalarInput(name, path, filter, s.fFilterCaseSensitive, s.fTextures.fIconDocumentAttributeB);
+      PushScalarInput(name, path, key, s.fTextures.fIconDocumentAttributeB);
       InputScalar<uint8_t>(v->fValue, root);
     }
     break;
   case Tag::Type::Short:
     if (auto v = dynamic_pointer_cast<ShortTag>(tag); v) {
-      PushScalarInput(name, path, filter, s.fFilterCaseSensitive, s.fTextures.fIconDocumentAttributeS);
+      PushScalarInput(name, path, key, s.fTextures.fIconDocumentAttributeS);
       InputScalar<int16_t>(v->fValue, root);
     }
     break;
   case Tag::Type::Long:
     if (auto v = dynamic_pointer_cast<LongTag>(tag); v) {
-      PushScalarInput(name, path, filter, s.fFilterCaseSensitive, s.fTextures.fIconDocumentAttributeL);
+      PushScalarInput(name, path, key, s.fTextures.fIconDocumentAttributeL);
       InputScalar(v->fValue, root);
     }
     break;
   case Tag::Type::String:
     if (auto v = dynamic_pointer_cast<StringTag>(tag); v) {
-      PushScalarInput(name, path, filter, s.fFilterCaseSensitive, s.fTextures.fIconEditSmallCaps);
+      PushScalarInput(name, path, key, s.fTextures.fIconEditSmallCaps);
       String value = ReinterpretAsU8String(v->fValue);
       if (InputText(u8"", &value)) {
         v->fValue = ReinterpretAsStdString(value);
@@ -294,7 +293,7 @@ static void VisitNbtScalar(State &s,
     break;
   case mcfile::nbt::Tag::Type::Float:
     if (auto v = dynamic_pointer_cast<FloatTag>(tag); v) {
-      PushScalarInput(name, path, filter, s.fFilterCaseSensitive, s.fTextures.fIconDocumentAttributeF);
+      PushScalarInput(name, path, key, s.fTextures.fIconDocumentAttributeF);
       if (InputFloat(u8"", &v->fValue)) {
         root.fEdited = true;
       }
@@ -302,7 +301,7 @@ static void VisitNbtScalar(State &s,
     break;
   case mcfile::nbt::Tag::Type::Double:
     if (auto v = dynamic_pointer_cast<DoubleTag>(tag); v) {
-      PushScalarInput(name, path, filter, s.fFilterCaseSensitive, s.fTextures.fIconDocumentAttributeD);
+      PushScalarInput(name, path, key, s.fTextures.fIconDocumentAttributeD);
       if (InputDouble(u8"", &v->fValue)) {
         root.fEdited = true;
       }
@@ -320,14 +319,14 @@ static void VisitNbtNonScalar(State &s,
                               String const &name,
                               std::shared_ptr<mcfile::nbt::Tag> const &tag,
                               String const &path,
-                              String const &filterTerm) {
+                              FilterKey const &filterKey) {
   using namespace std;
   using namespace mcfile::nbt;
 
-  String filter = filterTerm;
-  bool matchedNode = !filter.empty() && (s.fFilterCaseSensitive ? name : ToLower(name)).find(filter) != String::npos;
+  FilterKey filter = filterKey;
+  bool matchedNode = !filter.empty() && filter.match(name);
   if (matchedNode) {
-    filter.clear();
+    filter.fSearch.clear();
   }
 
   optional<Texture> icon = nullopt;
@@ -335,7 +334,7 @@ static void VisitNbtNonScalar(State &s,
   switch (tag->type()) {
   case Tag::Type::Compound:
     if (!filter.empty()) {
-      if (!s.containsTerm(tag, filter, s.fFilterMode, s.fFilterCaseSensitive)) {
+      if (!s.containsTerm(tag, filter, s.fFilterMode)) {
         return;
       }
     }
@@ -346,7 +345,7 @@ static void VisitNbtNonScalar(State &s,
     break;
   case Tag::Type::List:
     if (!filter.empty()) {
-      if (!s.containsTerm(tag, filter, s.fFilterMode, s.fFilterCaseSensitive)) {
+      if (!s.containsTerm(tag, filter, s.fFilterMode)) {
         return;
       }
     }
@@ -395,7 +394,7 @@ static void VisitNbtNonScalar(State &s,
   if (matchedNode) {
     flags = flags | ImGuiTreeNodeFlags_Selected;
   }
-  if (TreeNode(label, flags, icon, s.filterTerm(), s.fFilterCaseSensitive, opt)) {
+  if (TreeNode(label, flags, icon, s.filterKey(), opt)) {
     im::Indent(kIndent);
 
     switch (tag->type()) {
@@ -417,7 +416,7 @@ static void VisitNbtNonScalar(State &s,
       if (auto v = dynamic_pointer_cast<ByteArrayTag>(tag); v) {
         for (size_t i = 0; i < v->fValue.size(); i++) {
           auto label = u8"#" + ToString(i);
-          PushScalarInput(label, nextPath, filter, s.fFilterCaseSensitive, s.fTextures.fIconDocumentAttributeB);
+          PushScalarInput(label, nextPath, filter, s.fTextures.fIconDocumentAttributeB);
           InputScalar<uint8_t>(v->fValue[i], root);
           PopScalarInput();
         }
@@ -427,7 +426,7 @@ static void VisitNbtNonScalar(State &s,
       if (auto v = dynamic_pointer_cast<IntArrayTag>(tag); v) {
         for (size_t i = 0; i < v->fValue.size(); i++) {
           auto label = u8"#" + ToString(i);
-          PushScalarInput(label, nextPath, filter, s.fFilterCaseSensitive, s.fTextures.fIconDocumentAttributeI);
+          PushScalarInput(label, nextPath, filter, s.fTextures.fIconDocumentAttributeI);
           InputScalar<int>(v->fValue[i], root);
           PopScalarInput();
         }
@@ -437,7 +436,7 @@ static void VisitNbtNonScalar(State &s,
       if (auto v = dynamic_pointer_cast<LongArrayTag>(tag); v) {
         for (size_t i = 0; i < v->fValue.size(); i++) {
           auto label = u8"#" + ToString(i);
-          PushScalarInput(label, nextPath, filter, s.fFilterCaseSensitive, s.fTextures.fIconDocumentAttributeL);
+          PushScalarInput(label, nextPath, filter, s.fTextures.fIconDocumentAttributeL);
           InputScalar<int64_t>(v->fValue[i], root);
           PopScalarInput();
         }
@@ -456,7 +455,7 @@ static void VisitNbt(State &s,
                      String const &name,
                      std::shared_ptr<mcfile::nbt::Tag> const &tag,
                      String const &path,
-                     String const &filter) {
+                     FilterKey const &filter) {
   using namespace mcfile::nbt;
 
   switch (tag->type()) {
@@ -477,7 +476,7 @@ static void VisitNbtCompound(State &s,
                              Compound &root,
                              mcfile::nbt::CompoundTag const &tag,
                              String const &path,
-                             String const &filter) {
+                             FilterKey const &filter) {
   using namespace std;
   using namespace mcfile::nbt;
 
@@ -488,11 +487,11 @@ static void VisitNbtCompound(State &s,
     }
     if (!filter.empty()) {
       if (s.fFilterMode == FilterMode::Key) {
-        if ((s.fFilterCaseSensitive ? name : ToLower(name)).find(filter) == String::npos && !s.containsTerm(it.second, filter, s.fFilterMode, s.fFilterCaseSensitive)) {
+        if (!filter.match(name) && !s.containsTerm(it.second, filter, s.fFilterMode)) {
           continue;
         }
       } else {
-        if (!s.containsTerm(it.second, filter, s.fFilterMode, s.fFilterCaseSensitive)) {
+        if (!s.containsTerm(it.second, filter, s.fFilterMode)) {
           continue;
         }
       }
@@ -504,21 +503,26 @@ static void VisitNbtCompound(State &s,
 static void Visit(State &s,
                   std::shared_ptr<Node> const &node,
                   String const &path,
-                  String const &filter) {
+                  FilterKey const &filter) {
   using namespace std;
 
   auto const &style = im::GetStyle();
   float frameHeight = im::GetFrameHeight();
 
+  if (!filter.empty() && !s.containsTerm(node, filter, s.fFilterMode)) {
+    return;
+  }
+
+  TreeNodeOptions opt;
+  if (!filter.empty()) {
+    opt.openIgnoringStorage = true;
+  }
+
   if (auto compound = node->compound(); compound) {
     PushID(path + u8"/" + compound->name());
     if (node->hasParent()) {
-      TreeNodeOptions opt;
-      if (!filter.empty() && s.containsTerm(compound->fTag, filter, s.fFilterMode, s.fFilterCaseSensitive)) {
-        opt.openIgnoringStorage = true;
-      }
       ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_NavLeftJumpsBackHere;
-      if (TreeNode(compound->name(), flags, s.fTextures.fIconBox, s.filterTerm(), s.fFilterCaseSensitive, opt)) {
+      if (TreeNode(compound->name(), flags, s.fTextures.fIconBox, s.filterKey(), opt)) {
         VisitNbtCompound(s, *compound, *compound->fTag, path, filter);
         im::TreePop();
       }
@@ -534,13 +538,12 @@ static void Visit(State &s,
     } else {
       label += u8" entries";
     }
-    TreeNodeOptions opt;
     if (contents->fValue.empty()) {
       opt.disable = true;
     }
     PushID(path + u8"/" + name);
     if (node->hasParent()) {
-      if (TreeNode(label, ImGuiTreeNodeFlags_NavLeftJumpsBackHere, s.fTextures.fIconFolder, s.filterTerm(), s.fFilterCaseSensitive, opt)) {
+      if (TreeNode(label, ImGuiTreeNodeFlags_NavLeftJumpsBackHere, s.fTextures.fIconFolder, s.filterKey(), opt)) {
         for (auto const &it : contents->fValue) {
           Visit(s, it, path + u8"/" + name, filter);
         }
@@ -558,7 +561,7 @@ static void Visit(State &s,
     PushID(path + u8"/" + name);
     if (node->hasParent()) {
       bool ready = region->wait();
-      if (TreeNode(name, ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_NavLeftJumpsBackHere, s.fTextures.fIconBlock, s.filterTerm(), s.fFilterCaseSensitive)) {
+      if (TreeNode(name, ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_NavLeftJumpsBackHere, s.fTextures.fIconBlock, s.filterKey(), opt)) {
         if (ready) {
           for (auto const &it : std::get<0>(region->fValue)) {
             Visit(s, it, path + u8"/" + name, filter);
@@ -586,12 +589,12 @@ static void Visit(State &s,
     String name = unopenedFile->filename().u8string();
     PushID(path + u8"/" + name);
     optional<Texture> icon = s.fTextures.fIconDocument;
-    TreeNodeOptions opt;
     opt.noArrow = true;
+    opt.openIgnoringStorage = false;
     if (auto pos = mcfile::je::Region::RegionXZFromFile(*unopenedFile); pos) {
       icon = s.fTextures.fIconBlock;
     }
-    if (TreeNode(name, 0, icon, s.filterTerm(), s.fFilterCaseSensitive, opt)) {
+    if (TreeNode(name, 0, icon, s.filterKey(), opt)) {
       node->load(*s.fPool);
       im::TreePop();
     }
@@ -600,14 +603,15 @@ static void Visit(State &s,
     String name = unopenedChunk->name();
     PushID(path + u8"/" + name);
     auto icon = s.fTextures.fIconBox;
-    if (TreeNode(name, 0, icon, s.filterTerm(), s.fFilterCaseSensitive)) {
+    if (TreeNode(name, 0, icon, s.filterKey())) {
       node->load(*s.fPool);
       im::TreePop();
     }
     im::PopID();
   } else if (auto unopenedDirectory = node->directoryUnopened(); unopenedDirectory) {
+      opt.openIgnoringStorage = false;
     PushID(path + u8"/" + unopenedDirectory->filename().u8string());
-    if (TreeNode(unopenedDirectory->filename().u8string(), ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_NavLeftJumpsBackHere, s.fTextures.fIconFolder, s.filterTerm(), s.fFilterCaseSensitive)) {
+    if (TreeNode(unopenedDirectory->filename().u8string(), ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_NavLeftJumpsBackHere, s.fTextures.fIconFolder, s.filterKey(), opt)) {
       node->load(*s.fPool);
       im::Indent(im::GetTreeNodeToLabelSpacing());
       TextUnformatted(u8"loading...");
@@ -636,7 +640,7 @@ static void RenderNode(State &s) {
   if (!s.fOpened) {
     return;
   }
-  Visit(s, s.fOpened, u8"", s.filterTerm());
+  Visit(s, s.fOpened, u8"", s.filterKey());
 }
 
 static void RenderFooter(State &s) {

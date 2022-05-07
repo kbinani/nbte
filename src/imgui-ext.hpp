@@ -12,7 +12,7 @@ struct TreeNodeOptions {
   bool noArrow = false;
 };
 
-bool TreeNode(String const &label, ImGuiTreeNodeFlags flags, std::optional<Texture> icon, String const &filter, bool caseSensitive, TreeNodeOptions options = {});
+bool TreeNode(String const &label, ImGuiTreeNodeFlags flags, std::optional<Texture> icon, FilterKey const &filter, TreeNodeOptions options = {});
 
 void InlineImage(Texture const &image);
 
@@ -24,7 +24,7 @@ ImGuiID GetID(String const &label);
 
 bool InputText(String const &label, String *text, ImGuiInputTextFlags flags = 0);
 
-void TextHighlighted(String const &text, String const &filter, bool caseSensitive);
+void TextHighlighted(String const &text, FilterKey const &key);
 
 inline ImVec2 CalcTextSize(String const &t) {
   return im::CalcTextSize((char const *)t.c_str());

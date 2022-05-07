@@ -7,11 +7,22 @@ enum class FilterMode {
   Value,
 };
 
-struct CacheKey {
-  CacheKey(String const &search, bool caseSensitive) : fSearch(caseSensitive ? search : ToLower(search)), fCaseSensitive(caseSensitive) {}
+struct FilterKey {
+  FilterKey(String const &search, bool caseSensitive) : fSearch(caseSensitive ? search : ToLower(search)), fCaseSensitive(caseSensitive) {}
 
-  bool operator==(CacheKey const &other) const {
+  bool operator==(FilterKey const &other) const {
     return fSearch == other.fSearch && fCaseSensitive == other.fCaseSensitive;
+  }
+
+  bool empty() const {
+    return fSearch.empty();
+  }
+
+  bool match(String const &target) const {
+    if (empty()) {
+      return true;
+    }
+    return (fCaseSensitive ? target : ToLower(target)).find(fSearch) != String::npos;
   }
 
   String fSearch;
@@ -20,24 +31,22 @@ struct CacheKey {
 
 template <FilterMode Mode>
 struct Cache {
-  bool containsSearchTerm(std::shared_ptr<mcfile::nbt::Tag> const &tag, String const &search, bool caseSensitive) {
-    intptr_t key = (intptr_t)tag.get();
-    if (auto found = fValue.find(key); found != fValue.end()) {
+  bool containsSearchTerm(std::shared_ptr<mcfile::nbt::Tag> const &tag, FilterKey const &key) {
+    intptr_t ptr = (intptr_t)tag.get();
+    if (auto found = fValue.find(ptr); found != fValue.end()) {
       return found->second;
     }
-    bool result = containsTerm(tag, search, caseSensitive);
-    fValue[key] = result;
+    bool result = containsTerm(tag, key);
+    fValue[ptr] = result;
     return result;
   }
 
 private:
-  bool containsTerm(std::shared_ptr<mcfile::nbt::Tag> const &tag,
-                    String const &filter,
-                    bool caseSensitive) {
+  bool containsTerm(std::shared_ptr<mcfile::nbt::Tag> const &tag, FilterKey const &key) {
     using namespace std;
     using namespace mcfile::nbt;
 
-    if (filter.empty()) {
+    if (key.empty()) {
       return true;
     }
 
@@ -56,12 +65,12 @@ private:
       if (auto v = dynamic_pointer_cast<CompoundTag>(tag); v) {
         for (auto const &it : *v) {
           if (Mode == FilterMode::Key) {
-            String key((char8_t const *)it.first.c_str());
-            if ((caseSensitive ? key : ToLower(key)).find(filter) != String::npos) {
+            String name = ReinterpretAsU8String(it.first);
+            if ((key.fCaseSensitive ? name : ToLower(name)).find(key.fSearch) != String::npos) {
               return true;
             }
           }
-          if (containsSearchTerm(it.second, filter, caseSensitive)) {
+          if (containsSearchTerm(it.second, key)) {
             return true;
           }
         }
@@ -70,7 +79,7 @@ private:
     case Tag::Type::List:
       if (auto v = dynamic_pointer_cast<ListTag>(tag); v) {
         for (auto const &it : *v) {
-          if (containsSearchTerm(it, filter, caseSensitive)) {
+          if (containsSearchTerm(it, key)) {
             return true;
           }
         }
@@ -81,8 +90,8 @@ private:
         return false;
       } else {
         if (auto v = dynamic_pointer_cast<StringTag>(tag); v) {
-          String value((char8_t const *)v->fValue.c_str());
-          return value.find(filter) != String::npos;
+          String value = ReinterpretAsU8String(v->fValue);
+          return (key.fCaseSensitive ? ToLower(value) : value).find(key.fSearch) != String::npos;
         }
       }
       return false;
@@ -99,24 +108,23 @@ private:
 
 template <FilterMode Mode, size_t Size>
 struct FilterLruCache {
-  using ValueType = std::pair<CacheKey, std::shared_ptr<Cache<Mode>>>;
+  using ValueType = std::pair<FilterKey, std::shared_ptr<Cache<Mode>>>;
 
-  bool containsSearchTerm(std::shared_ptr<mcfile::nbt::Tag> const &tag, String const &search, bool caseSensitive) {
+  bool containsSearchTerm(std::shared_ptr<mcfile::nbt::Tag> const &tag, FilterKey const &key) {
     using namespace std;
-    CacheKey key(search, caseSensitive);
     auto found = find_if(fCache.begin(), fCache.end(), [&key](auto const &item) { return item.first == key; });
     if (found != fCache.end()) {
       ValueType copy = *found;
       fCache.erase(found);
       fCache.push_back(copy);
-      return copy.second->containsSearchTerm(tag, key.fSearch, key.fCaseSensitive);
+      return copy.second->containsSearchTerm(tag, key);
     }
     auto cache = make_shared<Cache<Mode>>();
     if (fCache.size() + 1 > Size) {
       fCache.erase(fCache.begin());
     }
     fCache.push_back(make_pair(key, cache));
-    return cache->containsSearchTerm(tag, key.fSearch, key.fCaseSensitive);
+    return cache->containsSearchTerm(tag, key);
   }
 
   void invalidate() {
@@ -129,18 +137,15 @@ private:
 
 template <size_t Size>
 struct FilterCacheSelector {
-  bool containsTerm(std::shared_ptr<mcfile::nbt::Tag> const &tag,
-                    String const &filter,
-                    FilterMode mode,
-                    bool caseSensitive) {
-    if (filter.empty()) {
+  bool containsTerm(std::shared_ptr<mcfile::nbt::Tag> const &tag, FilterKey const &key, FilterMode mode) {
+    if (key.empty()) {
       return true;
     }
     switch (mode) {
     case FilterMode::Key:
-      return fKeyFilterCache.containsSearchTerm(tag, filter, caseSensitive);
+      return fKeyFilterCache.containsSearchTerm(tag, key);
     case FilterMode::Value:
-      return fValueFilterCache.containsSearchTerm(tag, filter, caseSensitive);
+      return fValueFilterCache.containsSearchTerm(tag, key);
     }
   }
 
