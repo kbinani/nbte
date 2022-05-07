@@ -289,28 +289,7 @@ static void PushScalarInput(String const &name,
     im::SetCursorPos(ImVec2(cursor.x + style.FramePadding.x, cursor.y));
   }
   PushID(path + u8"/" + name);
-  if (!filter.empty()) {
-    ImDrawList *list = im::GetWindowDrawList();
-    auto cursor = im::GetCursorScreenPos();
-    auto color = im::GetColorU32(ImGuiCol_Button);
-    size_t pos = 0;
-    while (true) {
-      size_t found = (filterCaseSensitive ? name : ToLower(name)).find(filter, pos);
-      if (found == String::npos) {
-        break;
-      } else {
-        auto leading = CalcTextSize(name.substr(0, found));
-        auto trailing = CalcTextSize(name.substr(0, found + filter.size()));
-        list->AddRectFilled(ImVec2(cursor.x + leading.x, cursor.y + style.FramePadding.y), ImVec2(cursor.x + trailing.x, cursor.y + style.FramePadding.y + trailing.y), color, 2.0f);
-        pos = found + filter.size();
-      }
-    }
-  }
-  {
-    auto cursor = im::GetCursorPos();
-    im::SetCursorPos(ImVec2(cursor.x, cursor.y + style.FramePadding.y));
-    TextUnformatted(name);
-  }
+  TextHighlighted(name, filter, filterCaseSensitive);
   im::SameLine();
 }
 
@@ -857,9 +836,9 @@ static void Render(State &s) {
     CaptureShortcutKey(s);
   }
 
-  //ImGui::ShowMetricsWindow();
+  //im::ShowMetricsWindow();
 
-  ImGui::Render();
+  im::Render();
 
   s.retrieveSaveTask();
 }

@@ -24,6 +24,8 @@ ImGuiID GetID(String const &label);
 
 bool InputText(String const &label, String *text, ImGuiInputTextFlags flags = 0);
 
+void TextHighlighted(String const &text, String const &filter, bool caseSensitive);
+
 inline ImVec2 CalcTextSize(String const &t) {
   return im::CalcTextSize((char const *)t.c_str());
 }
