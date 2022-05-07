@@ -5,6 +5,7 @@
 #include <algorithm>
 #include <unordered_map>
 #include <memory>
+#include <list>
 #include <minecraft-file.hpp>
 #include "texture.hpp"
 #include "texture-set.hpp"
