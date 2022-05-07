@@ -718,9 +718,12 @@ static void RenderFilterBar(State &s) {
       im::SetKeyboardFocusHere();
       s.fFilterBarGotFocus = true;
     }
-    InputText(u8"", &s.fFilter);
+    String str = s.fFilter;
+    bool changed = InputText(u8"", &str, ImGuiInputTextFlags_AutoSelectAll);
     if (im::IsItemDeactivated() && im::IsKeyPressed(im::GetKeyIndex(ImGuiKey_Escape))) {
       s.fFilterBarOpened = false;
+    } else if (changed) {
+      s.fFilter = str;
     }
     im::PopID();
 
