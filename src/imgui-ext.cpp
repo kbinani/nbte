@@ -39,7 +39,7 @@ static void RenderTextHighlighted(ImVec2 textPos, String const &text, FilterKey 
   RenderText(textPos, text);
 }
 
-bool TreeNode(String const &label, ImGuiTreeNodeFlags flags, std::optional<Texture> icon, FilterKey const &key, TreeNodeOptions opt) {
+bool TreeNode(String const &label, ImGuiTreeNodeFlags flags, TreeNodeOptions opt) {
   ImGuiContext &g = *GImGui;
   ImGuiWindow *window = g.CurrentWindow;
   ImGuiStyle const &style = g.Style;
@@ -121,17 +121,18 @@ bool TreeNode(String const &label, ImGuiTreeNodeFlags flags, std::optional<Textu
 
     ImVec2 textPos;
 
-    if (icon) {
-      ImVec2 iconSize(icon->fWidth, icon->fHeight);
+    if (opt.icon) {
+      ImVec2 iconSize(opt.icon->fWidth, opt.icon->fHeight);
       ImVec2 p(pos.x + labelSpacing, pos.y + frameHeight * 0.5f - iconSize.y * 0.5f);
-      window->DrawList->AddImage((ImTextureID)(intptr_t)icon->fTexture, p, p + iconSize);
+      window->DrawList->AddImage((ImTextureID)(intptr_t)opt.icon->fTexture, p, p + iconSize);
       window->DC.CursorPos = ImVec2(pos.x + iconSize.x + style.FramePadding.x, pos.y);
       textPos = ImVec2(pos.x + labelSpacing + iconSize.x + padding.x, pos.y + padding.y);
     } else {
       textPos = ImVec2(pos.x + labelSpacing + padding.x, pos.y + padding.y);
     }
 
-    RenderTextHighlighted(textPos, label, key);
+    static FilterKey const sEmpty({}, false);
+    RenderTextHighlighted(textPos, label, opt.filter ? *opt.filter : sEmpty);
   }
 
   im::ItemSize(bb, 0);

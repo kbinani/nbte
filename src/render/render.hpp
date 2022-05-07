@@ -390,11 +390,13 @@ static void VisitNbtNonScalar(State &s,
   if (size == 0) {
     opt.disable = true;
   }
+  opt.icon = icon;
+  opt.filter = s.filterKey();
   ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_NavLeftJumpsBackHere;
   if (matchedNode) {
     flags = flags | ImGuiTreeNodeFlags_Selected;
   }
-  if (TreeNode(label, flags, icon, s.filterKey(), opt)) {
+  if (TreeNode(label, flags, opt)) {
     im::Indent(kIndent);
 
     switch (tag->type()) {
@@ -503,26 +505,33 @@ static void VisitNbtCompound(State &s,
 static void Visit(State &s,
                   std::shared_ptr<Node> const &node,
                   String const &path,
-                  FilterKey const &filter) {
+                  FilterKey const &key) {
   using namespace std;
 
   auto const &style = im::GetStyle();
   float frameHeight = im::GetFrameHeight();
 
-  if (!filter.empty() && !s.containsTerm(node, filter, s.fFilterMode)) {
+  if (!key.empty() && !s.containsTerm(node, key, s.fFilterMode)) {
     return;
   }
+  FilterKey filter = key;
 
   TreeNodeOptions opt;
+  opt.filter = s.filterKey();
   if (!filter.empty()) {
     opt.openIgnoringStorage = true;
   }
 
   if (auto compound = node->compound(); compound) {
-    PushID(path + u8"/" + compound->name());
+    String name = compound->name();
+    PushID(path + u8"/" + name);
     if (node->hasParent()) {
       ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_NavLeftJumpsBackHere;
-      if (TreeNode(compound->name(), flags, s.fTextures.fIconBox, s.filterKey(), opt)) {
+      opt.icon = s.fTextures.fIconBox;
+      if (!filter.empty() && filter.match(name)) {
+        filter.fSearch.clear();
+      }
+      if (TreeNode(name, flags, opt)) {
         VisitNbtCompound(s, *compound, *compound->fTag, path, filter);
         im::TreePop();
       }
@@ -541,9 +550,13 @@ static void Visit(State &s,
     if (contents->fValue.empty()) {
       opt.disable = true;
     }
+    if (!filter.empty() && filter.match(name)) {
+      filter.fSearch.clear();
+    }
     PushID(path + u8"/" + name);
     if (node->hasParent()) {
-      if (TreeNode(label, ImGuiTreeNodeFlags_NavLeftJumpsBackHere, s.fTextures.fIconFolder, s.filterKey(), opt)) {
+      opt.icon = s.fTextures.fIconFolder;
+      if (TreeNode(label, ImGuiTreeNodeFlags_NavLeftJumpsBackHere, opt)) {
         for (auto const &it : contents->fValue) {
           Visit(s, it, path + u8"/" + name, filter);
         }
@@ -559,9 +572,13 @@ static void Visit(State &s,
     std::string rawName = mcfile::je::Region::GetDefaultRegionFileName(region->fX, region->fZ);
     String name = ReinterpretAsU8String(rawName);
     PushID(path + u8"/" + name);
+    if (!filter.empty() && filter.match(name)) {
+      filter.fSearch.clear();
+    }
     if (node->hasParent()) {
       bool ready = region->wait();
-      if (TreeNode(name, ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_NavLeftJumpsBackHere, s.fTextures.fIconBlock, s.filterKey(), opt)) {
+      opt.icon = s.fTextures.fIconBlock;
+      if (TreeNode(name, ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_NavLeftJumpsBackHere, opt)) {
         if (ready) {
           for (auto const &it : std::get<0>(region->fValue)) {
             Visit(s, it, path + u8"/" + name, filter);
@@ -594,7 +611,11 @@ static void Visit(State &s,
     if (auto pos = mcfile::je::Region::RegionXZFromFile(*unopenedFile); pos) {
       icon = s.fTextures.fIconBlock;
     }
-    if (TreeNode(name, 0, icon, s.filterKey(), opt)) {
+    opt.icon = icon;
+    if (!filter.empty() && filter.match(name)) {
+      filter.fSearch.clear();
+    }
+    if (TreeNode(name, 0, opt)) {
       node->load(*s.fPool);
       im::TreePop();
     }
@@ -602,16 +623,22 @@ static void Visit(State &s,
   } else if (auto unopenedChunk = node->unopenedChunk(); unopenedChunk) {
     String name = unopenedChunk->name();
     PushID(path + u8"/" + name);
-    auto icon = s.fTextures.fIconBox;
-    if (TreeNode(name, 0, icon, s.filterKey())) {
+    opt.icon = s.fTextures.fIconBox;
+    opt.openIgnoringStorage = false;
+    if (TreeNode(name, 0, opt)) {
       node->load(*s.fPool);
       im::TreePop();
     }
     im::PopID();
   } else if (auto unopenedDirectory = node->directoryUnopened(); unopenedDirectory) {
-      opt.openIgnoringStorage = false;
-    PushID(path + u8"/" + unopenedDirectory->filename().u8string());
-    if (TreeNode(unopenedDirectory->filename().u8string(), ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_NavLeftJumpsBackHere, s.fTextures.fIconFolder, s.filterKey(), opt)) {
+    opt.openIgnoringStorage = false;
+    opt.icon = s.fTextures.fIconFolder;
+    String name = unopenedDirectory->filename().u8string();
+    if (!filter.empty() && filter.match(name)) {
+      filter.fSearch.clear();
+    }
+    PushID(path + u8"/" + name);
+    if (TreeNode(name, ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_NavLeftJumpsBackHere, opt)) {
       node->load(*s.fPool);
       im::Indent(im::GetTreeNodeToLabelSpacing());
       TextUnformatted(u8"loading...");
@@ -621,9 +648,10 @@ static void Visit(State &s,
     im::PopID();
   } else if (auto unsupported = node->unsupportedFile(); unsupported) {
     im::Indent(im::GetTreeNodeToLabelSpacing());
-    PushID(path + u8"/" + unsupported->filename().u8string());
+    String name = unsupported->filename().u8string();
+    PushID(path + u8"/" + name);
     im::PushStyleColor(ImGuiCol_Text, style.Colors[ImGuiCol_TextDisabled]);
-    IconLabel(unsupported->filename().u8string(), s.fTextures.fIconDocumentExclamation);
+    IconLabel(name, s.fTextures.fIconDocumentExclamation);
     im::PopStyleColor();
     auto pos = im::GetItemRectMin();
     auto size = im::GetItemRectSize();

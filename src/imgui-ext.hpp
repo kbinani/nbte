@@ -10,9 +10,11 @@ struct TreeNodeOptions {
   bool openIgnoringStorage = false;
   bool disable = false;
   bool noArrow = false;
+  std::optional<Texture> icon = std::nullopt;
+  std::optional<FilterKey> filter = std::nullopt;
 };
 
-bool TreeNode(String const &label, ImGuiTreeNodeFlags flags, std::optional<Texture> icon, FilterKey const &filter, TreeNodeOptions options = {});
+bool TreeNode(String const &label, ImGuiTreeNodeFlags flags, TreeNodeOptions options = {});
 
 void InlineImage(Texture const &image);
 
