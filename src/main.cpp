@@ -27,6 +27,7 @@ extern "C" {
 #include <uuid4.h>
 }
 #include <variant>
+#include <list>
 
 #include "version.hpp"
 #include "string.hpp"
