@@ -778,6 +778,8 @@ static void CaptureShortcutKey(State &s) {
       s.fNavigateBarOpened = true;
 #endif
     }
+  } else if (im::IsKeyReleased(im::GetKeyIndex(ImGuiKey_F3))) {
+    s.fDebugOpened = !s.fDebugOpened;
   }
 }
 
@@ -821,7 +823,12 @@ static void Render(State &s) {
     CaptureShortcutKey(s);
   }
 
-  //im::ShowMetricsWindow();
+  if (s.fDebugOpened) {
+    float windowWidth = 512;
+    im::SetNextWindowPos(ImVec2(s.fDisplaySize.x - style.FramePadding.x - windowWidth, im::GetFrameHeightWithSpacing()), ImGuiCond_Appearing);
+    im::SetNextWindowSize(ImVec2(windowWidth, 0));
+    im::ShowMetricsWindow(&s.fDebugOpened);
+  }
 
   im::Render();
 

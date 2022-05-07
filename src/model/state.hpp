@@ -14,6 +14,7 @@ public:
   bool fMainMenuBarHelpSelected = false;
   bool fMainMenuBarHelpAboutOpened = false;
   bool fMainMenuBarHelpOpenSourceLicensesOpened = false;
+  bool fDebugOpened = false;
 
   bool fQuitRequested = false;
   bool fQuitAccepted = false;
