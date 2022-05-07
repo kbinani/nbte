@@ -585,18 +585,15 @@ static void Visit(State &s,
   } else if (auto unopenedFile = node->fileUnopened(); unopenedFile) {
     String name = unopenedFile->filename().u8string();
     PushID(path + u8"/" + name);
+    optional<Texture> icon = s.fTextures.fIconDocument;
+    TreeNodeOptions opt;
+    opt.noArrow = true;
     if (auto pos = mcfile::je::Region::RegionXZFromFile(*unopenedFile); pos) {
-      if (TreeNode(name, 0, s.fTextures.fIconBlock, s.filterTerm(), s.fFilterCaseSensitive)) {
-        node->load(*s.fPool);
-        im::TreePop();
-      }
-    } else {
-      TreeNodeOptions opt;
-      opt.noArrow = true;
-      if (TreeNode(name, 0, s.fTextures.fIconDocument, s.filterTerm(), s.fFilterCaseSensitive, opt)) {
-        node->load(*s.fPool);
-        im::TreePop();
-      }
+      icon = s.fTextures.fIconBlock;
+    }
+    if (TreeNode(name, 0, icon, s.filterTerm(), s.fFilterCaseSensitive, opt)) {
+      node->load(*s.fPool);
+      im::TreePop();
     }
     im::PopID();
   } else if (auto unopenedChunk = node->unopenedChunk(); unopenedChunk) {
