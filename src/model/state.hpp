@@ -28,7 +28,9 @@ struct State {
   bool fFilterCaseSensitive = false;
   bool fFilterBarGotFocus = false;
 
+#if NBTE_NAVBAR
   bool fNavigateBarOpened = false;
+#endif
 
   std::optional<Path> fMinecraftSaveDirectory;
 

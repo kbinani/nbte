@@ -68,9 +68,11 @@ static void RenderMainMenu(State &s) {
       if (MenuItem(u8"Filter", DecorateModCtrl(u8"F"), nullptr)) {
         s.fFilterBarOpened = !s.fFilterBarOpened;
       }
+#if NBTE_NAVBAR
       if (MenuItem(u8"Navigate", DecorateModCtrl(u8"N"), nullptr)) {
         s.fNavigateBarOpened = !s.fNavigateBarOpened;
       }
+#endif
       im::EndMenu();
     }
     if (BeginMenu(u8"Help", &s.fMainMenuBarHelpSelected)) {
@@ -792,8 +794,10 @@ static void CaptureShortcutKey(State &s) {
           s.open(*selected);
         }
       }
+#if NBTE_NAVBAR
     } else if (im::IsKeyDown(im::GetKeyIndex(ImGuiKey_N))) {
       s.fNavigateBarOpened = true;
+#endif
     }
   }
 }
@@ -819,7 +823,9 @@ static void Render(State &s) {
   RenderMainMenu(s);
   RenderErrorPopup(s);
   RenderFilterBar(s);
+#if NBTE_NAVBAR
   RenderNavigateBar(s);
+#endif
 
   BeginChild(u8"editor", ImVec2(0, 0), false, ImGuiWindowFlags_NavFlattened);
   RenderNode(s);
