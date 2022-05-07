@@ -126,7 +126,17 @@ This program is distributed in the hope that it will be useful, but WITHOUT ANY 
   }
 }
 
-void RenderQuitDialog(State &s) {
+static void PushDestructiveButtonStyles() {
+  im::PushStyleColor(ImGuiCol_Button, im::GetColorU32(ImVec4(255.0f / 255.0f, 172.0f / 255.0f, 168.0f / 255.0f, 1.0f)));
+  im::PushStyleColor(ImGuiCol_ButtonHovered, im::GetColorU32(ImVec4(255.0f / 255.0f, 59.0f / 255.0f, 48.0f / 255.0f, 1.0f)));
+  im::PushStyleColor(ImGuiCol_ButtonActive, im::GetColorU32(ImVec4(255.0f / 255.0f, 39.0f / 255.0f, 28.0f / 255.0f, 1.0f)));
+}
+
+static void PopDestructiveButtonStyles() {
+  im::PopStyleColor(3);
+}
+
+static void RenderQuitDialog(State &s) {
   if (!s.fQuitRequested) {
     return;
   }
@@ -154,13 +164,13 @@ void RenderQuitDialog(State &s) {
       im::CloseCurrentPopup();
     }
     im::SameLine(0, 50);
-    im::PushStyleColor(ImGuiCol_Button, im::GetColorU32(ImVec4(255.0f / 255.0f, 59.0f / 255.0f, 48.0f / 255.0f, 1.0f)));
+    PushDestructiveButtonStyles();
     if (Button(u8"No", ImVec2(64, 0))) {
       s.fQuitAccepted = true;
       s.fQuitRequested = false;
       im::CloseCurrentPopup();
     }
-    im::PopStyleColor();
+    PopDestructiveButtonStyles();
     im::SameLine(0, 50);
     if (Button(u8"Cancel", ImVec2(64, 0))) {
       s.fQuitRequested = false;
