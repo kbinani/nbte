@@ -15,25 +15,25 @@
 
 namespace nbte {
 
-static void RenderTextHighlighted(ImVec2 textPos, String const &text, FilterKey const &key) {
+static void RenderTextHighlighted(ImVec2 textPos, String const &text, FilterKey const *key) {
   ImGuiContext &g = *GImGui;
   ImGuiWindow *window = g.CurrentWindow;
   ImGuiStyle const &style = g.Style;
 
-  if (!key.empty()) {
-    String target = key.fCaseSensitive ? text : ToLower(text);
+  if (key) {
+    String target = key->fCaseSensitive ? text : ToLower(text);
     auto cursor = window->DC.CursorPos;
     auto color = im::GetColorU32(ImGuiCol_Button);
     size_t pivot = 0;
     while (true) {
-      size_t found = target.find(key.fSearch, pivot);
+      size_t found = target.find(key->fSearch, pivot);
       if (found == String::npos) {
         break;
       } else {
         auto leading = CalcTextSize(text.substr(0, found));
-        auto trailing = CalcTextSize(text.substr(0, found + key.fSearch.size()));
+        auto trailing = CalcTextSize(text.substr(0, found + key->fSearch.size()));
         window->DrawList->AddRectFilled(ImVec2(textPos.x + leading.x, textPos.y + style.FramePadding.y), ImVec2(textPos.x + trailing.x, textPos.y + style.FramePadding.y + trailing.y), color, 2.0f);
-        pivot = found + key.fSearch.size();
+        pivot = found + key->fSearch.size();
       }
     }
   }
@@ -132,8 +132,7 @@ bool TreeNode(String const &label, ImGuiTreeNodeFlags flags, TreeNodeOptions opt
       textPos = ImVec2(pos.x + labelSpacing + padding.x, pos.y + padding.y);
     }
 
-    static FilterKey const sEmpty({}, false);
-    RenderTextHighlighted(textPos, label, opt.filter ? *opt.filter : sEmpty);
+    RenderTextHighlighted(textPos, label, opt.filter);
   }
 
   im::ItemSize(bb, 0);
@@ -213,7 +212,7 @@ bool InputText(String const &label, String *text, ImGuiInputTextFlags flags) {
   return im::InputText((char const *)label.c_str(), (char *)text->c_str(), text->capacity() + 1, flags, InputTextCallback, text);
 }
 
-void TextHighlighted(String const &text, FilterKey const &key) {
+void TextHighlighted(String const &text, FilterKey const *key) {
   ImGuiContext &g = *GImGui;
   ImGuiWindow *window = g.CurrentWindow;
   ImGuiStyle const &style = im::GetStyle();

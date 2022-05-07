@@ -11,7 +11,7 @@ struct TreeNodeOptions {
   bool disable = false;
   bool noArrow = false;
   std::optional<Texture> icon = std::nullopt;
-  std::optional<FilterKey> filter = std::nullopt;
+  FilterKey const *filter = nullptr;
 };
 
 bool TreeNode(String const &label, ImGuiTreeNodeFlags flags, TreeNodeOptions options = {});
@@ -26,7 +26,7 @@ ImGuiID GetID(String const &label);
 
 bool InputText(String const &label, String *text, ImGuiInputTextFlags flags = 0);
 
-void TextHighlighted(String const &text, FilterKey const &key);
+void TextHighlighted(String const &text, FilterKey const *key);
 
 inline ImVec2 CalcTextSize(String const &t) {
   return im::CalcTextSize((char const *)t.c_str());

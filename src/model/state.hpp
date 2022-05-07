@@ -2,7 +2,11 @@
 
 namespace nbte {
 
-struct State {
+class State {
+  String fFilterRaw;
+  FilterKey fFilter;
+
+public:
   ImVec2 fDisplaySize;
   bool fMainMenuBarFileSelected = false;
   bool fMainMenuBarFileOpenSelected = false;
@@ -23,9 +27,7 @@ struct State {
   String fError;
 
   bool fFilterBarOpened = false;
-  String fFilter;
   FilterMode fFilterMode = FilterMode::Key;
-  bool fFilterCaseSensitive = false;
   bool fFilterBarGotFocus = false;
 
 #if NBTE_NAVBAR
@@ -40,16 +42,19 @@ struct State {
 
   FilterCacheSelector<64> fCacheSelector;
 
-  State() : fPool(new hwm::task_queue(std::thread::hardware_concurrency())), fSaveQueue(new hwm::task_queue(1)) {
+  State() : fFilter({}, false), fPool(new hwm::task_queue(std::thread::hardware_concurrency())), fSaveQueue(new hwm::task_queue(1)) {
   }
 
-  bool containsTerm(std::shared_ptr<mcfile::nbt::Tag> const &tag, FilterKey const &key, FilterMode mode) {
+  bool containsTerm(std::shared_ptr<mcfile::nbt::Tag> const &tag, FilterKey const *key, FilterMode mode) {
     return fCacheSelector.containsTerm(tag, key, mode);
   }
 
-  bool containsTerm(std::shared_ptr<Node> const &node, FilterKey const &key, FilterMode mode) {
+  bool containsTerm(std::shared_ptr<Node> const &node, FilterKey const *key, FilterMode mode) {
     if (!node) {
       return false;
+    }
+    if (!key) {
+      return true;
     }
     if (auto r = node->region(); r) {
       if (r->fValue.index() != 0) {
@@ -63,7 +68,7 @@ struct State {
       return false;
     }
     if (auto c = node->compound(); c) {
-      if (key.match(c->name())) {
+      if (key->match(c->name())) {
         return true;
       }
       return containsTerm(c->fTag, key, mode);
@@ -77,10 +82,10 @@ struct State {
       return false;
     }
     if (auto file = node->fileUnopened(); file) {
-      return key.match(file->filename().u8string());
+      return key->match(file->filename().u8string());
     }
     if (auto directory = node->directoryUnopened(); directory) {
-      return key.match(directory->filename().u8string());
+      return key->match(directory->filename().u8string());
     }
     return false;
   }
@@ -154,11 +159,28 @@ struct State {
     fSaveTask.reset();
   }
 
-  FilterKey filterKey() const {
+  FilterKey const *filterKey() const {
     if (!fFilterBarOpened) {
-      return FilterKey({}, false);
+      return nullptr;
     }
-    return FilterKey(fFilter, fFilterCaseSensitive);
+    if (fFilterRaw.empty()) {
+      return nullptr;
+    }
+    return &fFilter;
+  }
+
+  void updateFilter(String const &filterRaw, bool caseSensitive) {
+    fFilterRaw = filterRaw;
+    fFilter.fSearch = caseSensitive ? filterRaw : ToLower(filterRaw);
+    fFilter.fCaseSensitive = caseSensitive;
+  }
+
+  String const &filterRaw() const {
+    return fFilterRaw;
+  }
+
+  bool filterCaseSensitive() const {
+    return fFilter.fCaseSensitive;
   }
 
   String winowTitle() const {

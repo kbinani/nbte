@@ -8,17 +8,17 @@ static void VisitNbtCompound(State &s,
                              Compound &root,
                              mcfile::nbt::CompoundTag const &tag,
                              String const &path,
-                             FilterKey const &key);
+                             FilterKey const *key);
 static void VisitNbt(State &s,
                      Compound &root,
                      String const &name,
                      std::shared_ptr<mcfile::nbt::Tag> const &tag,
                      String const &path,
-                     FilterKey const &key);
+                     FilterKey const *key);
 static void Visit(State &s,
                   std::shared_ptr<Node> const &node,
                   String const &path,
-                  FilterKey const &key);
+                  FilterKey const *key);
 
 static void RenderSavingModal(State &s) {
   OpenPopup(u8"Info");
@@ -224,7 +224,7 @@ static void InputScalar(T &v, Compound &root) {
 
 static void PushScalarInput(String const &name,
                             String const &path,
-                            FilterKey const &key,
+                            FilterKey const *key,
                             std::optional<Texture> const &icon) {
   using namespace std;
   auto const &style = im::GetStyle();
@@ -252,7 +252,7 @@ static void VisitNbtScalar(State &s,
                            String const &name,
                            std::shared_ptr<mcfile::nbt::Tag> const &tag,
                            String const &path,
-                           FilterKey const &key) {
+                           FilterKey const *key) {
   using namespace std;
   using namespace mcfile::nbt;
 
@@ -319,21 +319,21 @@ static void VisitNbtNonScalar(State &s,
                               String const &name,
                               std::shared_ptr<mcfile::nbt::Tag> const &tag,
                               String const &path,
-                              FilterKey const &filterKey) {
+                              FilterKey const *filterKey) {
   using namespace std;
   using namespace mcfile::nbt;
 
-  FilterKey filter = filterKey;
-  bool matchedNode = !filter.empty() && filter.match(name);
+  FilterKey const *filter = filterKey;
+  bool matchedNode = filter && filter->match(name);
   if (matchedNode) {
-    filter.fSearch.clear();
+    filter = nullptr;
   }
 
   optional<Texture> icon = nullopt;
   int size = 0;
   switch (tag->type()) {
   case Tag::Type::Compound:
-    if (!filter.empty()) {
+    if (filter) {
       if (!s.containsTerm(tag, filter, s.fFilterMode)) {
         return;
       }
@@ -344,7 +344,7 @@ static void VisitNbtNonScalar(State &s,
     icon = s.fTextures.fIconBox;
     break;
   case Tag::Type::List:
-    if (!filter.empty()) {
+    if (filter) {
       if (!s.containsTerm(tag, filter, s.fFilterMode)) {
         return;
       }
@@ -384,7 +384,7 @@ static void VisitNbtNonScalar(State &s,
   PushID(nextPath);
 
   TreeNodeOptions opt;
-  if (!filter.empty()) {
+  if (filter) {
     opt.openIgnoringStorage = true;
   }
   if (size == 0) {
@@ -457,7 +457,7 @@ static void VisitNbt(State &s,
                      String const &name,
                      std::shared_ptr<mcfile::nbt::Tag> const &tag,
                      String const &path,
-                     FilterKey const &filter) {
+                     FilterKey const *filter) {
   using namespace mcfile::nbt;
 
   switch (tag->type()) {
@@ -478,7 +478,7 @@ static void VisitNbtCompound(State &s,
                              Compound &root,
                              mcfile::nbt::CompoundTag const &tag,
                              String const &path,
-                             FilterKey const &filter) {
+                             FilterKey const *filter) {
   using namespace std;
   using namespace mcfile::nbt;
 
@@ -487,9 +487,9 @@ static void VisitNbtCompound(State &s,
     if (!it.second) {
       continue;
     }
-    if (!filter.empty()) {
+    if (filter) {
       if (s.fFilterMode == FilterMode::Key) {
-        if (!filter.match(name) && !s.containsTerm(it.second, filter, s.fFilterMode)) {
+        if (!filter->match(name) && !s.containsTerm(it.second, filter, s.fFilterMode)) {
           continue;
         }
       } else {
@@ -505,20 +505,20 @@ static void VisitNbtCompound(State &s,
 static void Visit(State &s,
                   std::shared_ptr<Node> const &node,
                   String const &path,
-                  FilterKey const &key) {
+                  FilterKey const *key) {
   using namespace std;
 
   auto const &style = im::GetStyle();
   float frameHeight = im::GetFrameHeight();
 
-  if (!key.empty() && !s.containsTerm(node, key, s.fFilterMode)) {
+  if (key && !s.containsTerm(node, key, s.fFilterMode)) {
     return;
   }
-  FilterKey filter = key;
+  FilterKey const *filter = key;
 
   TreeNodeOptions opt;
   opt.filter = s.filterKey();
-  if (!filter.empty()) {
+  if (filter) {
     opt.openIgnoringStorage = true;
   }
 
@@ -528,8 +528,8 @@ static void Visit(State &s,
     if (node->hasParent()) {
       ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_NavLeftJumpsBackHere;
       opt.icon = s.fTextures.fIconBox;
-      if (!filter.empty() && filter.match(name)) {
-        filter.fSearch.clear();
+      if (filter && filter->match(name)) {
+        filter = nullptr;
       }
       if (TreeNode(name, flags, opt)) {
         VisitNbtCompound(s, *compound, *compound->fTag, path, filter);
@@ -550,8 +550,8 @@ static void Visit(State &s,
     if (contents->fValue.empty()) {
       opt.disable = true;
     }
-    if (!filter.empty() && filter.match(name)) {
-      filter.fSearch.clear();
+    if (filter && filter->match(name)) {
+      filter = nullptr;
     }
     PushID(path + u8"/" + name);
     if (node->hasParent()) {
@@ -572,8 +572,8 @@ static void Visit(State &s,
     std::string rawName = mcfile::je::Region::GetDefaultRegionFileName(region->fX, region->fZ);
     String name = ReinterpretAsU8String(rawName);
     PushID(path + u8"/" + name);
-    if (!filter.empty() && filter.match(name)) {
-      filter.fSearch.clear();
+    if (filter && filter->match(name)) {
+      filter = nullptr;
     }
     if (node->hasParent()) {
       bool ready = region->wait();
@@ -612,8 +612,8 @@ static void Visit(State &s,
       icon = s.fTextures.fIconBlock;
     }
     opt.icon = icon;
-    if (!filter.empty() && filter.match(name)) {
-      filter.fSearch.clear();
+    if (filter && filter->match(name)) {
+      filter = nullptr;
     }
     if (TreeNode(name, 0, opt)) {
       node->load(*s.fPool);
@@ -634,8 +634,8 @@ static void Visit(State &s,
     opt.openIgnoringStorage = false;
     opt.icon = s.fTextures.fIconFolder;
     String name = unopenedDirectory->filename().u8string();
-    if (!filter.empty() && filter.match(name)) {
-      filter.fSearch.clear();
+    if (filter && filter->match(name)) {
+      filter = nullptr;
     }
     PushID(path + u8"/" + name);
     if (TreeNode(name, ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_NavLeftJumpsBackHere, opt)) {
@@ -704,10 +704,10 @@ static void RenderFilterBar(State &s) {
 
     im::SameLine();
     PushID(u8"filter_panel#button_case_sensitive");
-    im::PushStyleColor(ImGuiCol_Text, s.fFilterCaseSensitive ? style.Colors[ImGuiCol_ButtonActive] : style.Colors[ImGuiCol_TextDisabled]);
-    im::PushStyleColor(ImGuiCol_Button, s.fFilterCaseSensitive ? style.Colors[ImGuiCol_Button] : style.Colors[ImGuiCol_ChildBg]);
+    im::PushStyleColor(ImGuiCol_Text, s.filterCaseSensitive() ? style.Colors[ImGuiCol_ButtonActive] : style.Colors[ImGuiCol_TextDisabled]);
+    im::PushStyleColor(ImGuiCol_Button, s.filterCaseSensitive() ? style.Colors[ImGuiCol_Button] : style.Colors[ImGuiCol_ChildBg]);
     if (Button(u8"Aa")) {
-      s.fFilterCaseSensitive = !s.fFilterCaseSensitive;
+      s.updateFilter(s.filterRaw(), !s.filterCaseSensitive());
     }
     im::PopStyleColor(2);
     im::PopID();
@@ -718,12 +718,12 @@ static void RenderFilterBar(State &s) {
       im::SetKeyboardFocusHere();
       s.fFilterBarGotFocus = true;
     }
-    String str = s.fFilter;
+    String str = s.filterRaw();
     bool changed = InputText(u8"", &str, ImGuiInputTextFlags_AutoSelectAll);
     if (im::IsItemDeactivated() && im::IsKeyPressed(im::GetKeyIndex(ImGuiKey_Escape))) {
       s.fFilterBarOpened = false;
     } else if (changed) {
-      s.fFilter = str;
+      s.updateFilter(str, s.filterCaseSensitive());
     }
     im::PopID();
 
@@ -784,7 +784,7 @@ static void CaptureShortcutKey(State &s) {
 static void Render(State &s) {
   ImGuiStyle const &style = im::GetStyle();
   ImVec4 bg = style.Colors[ImGuiCol_WindowBg];
-  if (s.fFilterBarOpened && !s.fFilter.empty()) {
+  if (s.fFilterBarOpened && s.filterKey() != nullptr) {
     float v = 220.0f / 255.0f;
     bg = ImVec4(v, v, v, 1.0f);
   }
