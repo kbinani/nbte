@@ -18,14 +18,6 @@ struct CacheKey {
   bool fCaseSensitive;
 };
 
-struct CacheKeyHasher {
-  size_t operator()(CacheKey const &key) const {
-    size_t seed = std::hash<std::u8string>{}(key.fSearch);
-    seed ^= std::hash<bool>{}(key.fCaseSensitive) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
-    return seed;
-  }
-};
-
 template <FilterMode Mode>
 struct Cache {
   bool containsSearchTerm(std::shared_ptr<mcfile::nbt::Tag> const &tag, String const &search, bool caseSensitive) {
