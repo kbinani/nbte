@@ -30,11 +30,11 @@ elseif (WIN32)
     /wd26812 # Suppress "Prefer 'enum class' over 'enum'" warnings
   )
   add_compile_options(
-    /Ot
-    /Oi
-    /Zi
-    $<IF:$<CONFIG:Debug>,/MTd,/MT>
+    /Ot # Favor Fast Code
+    /Oi # Generate Intrinsic Functions
+    /Zi # Debug Information Format: PDB file that contains all the symbolic debugging information
     $<IF:$<CONFIG:Debug>,,/GL> # Enable: Whole program optimization
+    $<IF:$<CONFIG:Debug>,/MTd,/MT>
   )
   add_link_options(
     /DEBUG
