@@ -127,56 +127,6 @@ bool TreeNode(String const &label, ImGuiTreeNodeFlags flags, std::optional<Textu
   return opened;
 }
 
-bool IconButton(String const &label, std::optional<Texture> icon) {
-  ImGuiWindow *window = im::GetCurrentWindow();
-  if (window->SkipItems) {
-    return false;
-  }
-
-  ImVec2 const pos = window->DC.CursorPos;
-  ImGuiStyle const &style = im::GetStyle();
-  float const frameHeight = im::GetFrameHeight();
-  ImVec2 const frameSize(frameHeight, frameHeight);
-  ImVec2 const padding = style.FramePadding;
-  ImVec2 const availableSize = im::GetContentRegionAvail();
-  ImGuiID const id = GetID(label);
-
-  ImVec2 textSize = CalcTextSize(label);
-  ImRect bounds;
-  if (icon) {
-    bounds = ImRect(pos, pos + ImVec2(icon->fWidth + style.FramePadding.x + textSize.x + style.FramePadding.x, frameHeight));
-  } else {
-    bounds = ImRect(pos, pos + ImVec2(style.FramePadding.x + textSize.x + style.FramePadding.x, frameHeight));
-  }
-
-  bool hovered = false;
-  bool held = false;
-  bool pressed = im::ButtonBehavior(bounds, id, &hovered, &held);
-
-  if (hovered || held) {
-    ImGuiCol col = ImGuiCol_Header;
-    if (held && hovered) {
-      col = ImGuiCol_HeaderActive;
-    } else if (hovered) {
-      col = ImGuiCol_HeaderHovered;
-    }
-    ImU32 background = im::GetColorU32(col);
-    window->DrawList->AddRectFilled(bounds.Min, bounds.Max, background);
-  }
-
-  if (icon) {
-    ImVec2 iconSize(icon->fWidth, icon->fHeight);
-    ImVec2 p(pos.x, pos.y + frameHeight * 0.5f - iconSize.y * 0.5f);
-    window->DrawList->AddImage((ImTextureID)(intptr_t)icon->fTexture, p, p + iconSize);
-    window->DC.CursorPos = ImVec2(pos.x + iconSize.x + style.FramePadding.x, pos.y);
-  }
-  RenderText(window->DC.CursorPos + ImVec2(0, padding.y), label);
-
-  im::ItemSize(bounds.GetSize());
-  im::ItemAdd(bounds, id);
-  return pressed;
-}
-
 void InlineImage(Texture const &image) {
   ImGuiWindow *window = im::GetCurrentWindow();
   if (window->SkipItems) {

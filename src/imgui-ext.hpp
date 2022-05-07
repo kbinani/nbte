@@ -14,8 +14,6 @@ struct TreeNodeOptions {
 
 bool TreeNode(String const &label, ImGuiTreeNodeFlags flags, std::optional<Texture> icon, String const &filter, bool caseSensitive, TreeNodeOptions options = {});
 
-bool IconButton(String const &label, std::optional<Texture> icon);
-
 void InlineImage(Texture const &image);
 
 void IconLabel(String const &label, std::optional<Texture> icon);
