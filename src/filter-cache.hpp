@@ -145,10 +145,14 @@ struct FilterLruCache {
     using namespace std;
     auto found = find_if(fCache.begin(), fCache.end(), [key](auto const &item) { return item.first == key; });
     if (found != fCache.end()) {
-      ValueType copy = *found;
-      fCache.erase(found);
-      fCache.push_back(copy);
-      return copy.second->containsSearchTerm(tag, key);
+      auto ret = found->second->containsSearchTerm(tag, key);
+      auto index = std::distance(fCache.begin(), found);
+      if (index + 1 != fCache.size()) {
+        ValueType copy = *found;
+        fCache.erase(found);
+        fCache.push_back(copy);
+      }
+      return ret;
     }
     auto cache = make_shared<Cache<Mode>>();
     if (fCache.size() + 1 > Size) {

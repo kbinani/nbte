@@ -41,7 +41,7 @@ public:
   std::unique_ptr<hwm::task_queue> fSaveQueue;
   TextureSet fTextures;
 
-  FilterCacheSelector<64> fCacheSelector;
+  FilterCacheSelector<2> fCacheSelector;
 
   State() : fFilter({}, false), fPool(new hwm::task_queue(std::thread::hardware_concurrency())), fSaveQueue(new hwm::task_queue(1)) {
   }
