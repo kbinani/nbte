@@ -53,7 +53,7 @@ static void glfw_error_callback(int error, const char *description) {
   fprintf(stderr, "Glfw Error %d: %s\n", error, description);
 }
 
-int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR pCmdLine, int nCmdShow) {
+int WINAPI wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _In_ LPWSTR lpCmdLine, _In_ int nShowCmd) {
   namespace fs = std::filesystem;
 
   // Setup window
@@ -63,9 +63,9 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR pCmdLine
   }
 
   fs::path file;
-  if (lstrlenW(pCmdLine) > 0) {
+  if (lstrlenW(lpCmdLine) > 0) {
     int argc = 0;
-    LPWSTR *argv = CommandLineToArgvW(pCmdLine, &argc);
+    LPWSTR *argv = CommandLineToArgvW(lpCmdLine, &argc);
     if (!argv) {
       return 1;
     }
