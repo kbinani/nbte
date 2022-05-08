@@ -137,7 +137,7 @@ OTHER DEALINGS IN THE FONT SOFTWARE.)");
 
     TextUnformatted(u8"");
     im::Separator();
-    TextWrapped(String(u8"nativefiledialog: https://github.com/mlabbe/nativefiledialog\n\n") + u8R"(${NBTE_LEGAL_NATIVEFILEDIALOG})");
+    TextWrapped(String(u8"nativefiledialog-extended: https://github.com/btzy/nativefiledialog-extended\n\n") + u8R"(${NBTE_LEGAL_NATIVEFILEDIALOG})");
 
     TextUnformatted(u8"");
     im::Separator();
