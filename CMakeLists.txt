@@ -55,7 +55,7 @@ configure_file(src/version.hpp.in ${CMAKE_CURRENT_SOURCE_DIR}/src/version.hpp)
 
 file(READ deps/libminecraft-file/LICENSE NBTE_LEGAL_LIBMINECRAFT_FILE)
 string(STRIP "${NBTE_LEGAL_LIBMINECRAFT_FILE}" NBTE_LEGAL_LIBMINECRAFT_FILE)
-file(READ deps/nativefiledialog/LICENSE NBTE_LEGAL_NATIVEFILEDIALOG)
+file(READ deps/nativefiledialog-extended/LICENSE NBTE_LEGAL_NATIVEFILEDIALOG)
 string(STRIP "${NBTE_LEGAL_NATIVEFILEDIALOG}" NBTE_LEGAL_NATIVEFILEDIALOG)
 file(READ deps/stb/LICENSE NBTE_LEGAL_STB)
 string(STRIP "${NBTE_LEGAL_STB}" NBTE_LEGAL_STB)
@@ -96,6 +96,7 @@ list(APPEND nbte_files
   src/texture.hpp
   src/texture-set.hpp
   src/filter-cache.hpp
+  src/filter-cache.cpp
   resource/resource.rc.in
   resource/UDEVGothic35_Regular.ttf
   resource/nbte32.png
