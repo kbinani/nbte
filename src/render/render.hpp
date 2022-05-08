@@ -784,6 +784,8 @@ static void CaptureShortcutKey(State &s) {
 }
 
 static void Render(State &s) {
+  s.incrementFrameCount();
+
   ImGuiStyle const &style = im::GetStyle();
   ImVec4 bg = style.Colors[ImGuiCol_WindowBg];
   if (s.fFilterBarOpened && s.filterKey() != nullptr) {

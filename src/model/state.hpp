@@ -4,6 +4,7 @@ namespace nbte {
 
 class State {
   String fFilterRaw;
+  bool fFilterCaseSensitive = false;
   FilterKey fFilter;
 
 public:
@@ -42,6 +43,8 @@ public:
   TextureSet fTextures;
 
   FilterCacheSelector<2> fCacheSelector;
+
+  size_t fFrameCount = 0;
 
   State() : fFilter({}, false), fPool(new hwm::task_queue(std::thread::hardware_concurrency())), fSaveQueue(new hwm::task_queue(1)) {
   }
@@ -127,7 +130,7 @@ public:
     if (!fFilterBarOpened) {
       return nullptr;
     }
-    if (fFilterRaw.empty()) {
+    if (fFilter.fSearch.empty()) {
       return nullptr;
     }
     return &fFilter;
@@ -135,8 +138,7 @@ public:
 
   void updateFilter(String const &filterRaw, bool caseSensitive) {
     fFilterRaw = filterRaw;
-    fFilter.fSearch = caseSensitive ? filterRaw : ToLower(filterRaw);
-    fFilter.fCaseSensitive = caseSensitive;
+    fFilterCaseSensitive = caseSensitive;
   }
 
   String const &filterRaw() const {
@@ -171,6 +173,18 @@ public:
       return false;
     }
     return fOpened->dirtyFiles(&buffer);
+  }
+
+  void incrementFrameCount() {
+    if (fFrameCount == std::numeric_limits<size_t>::max()) {
+      fFrameCount = 0;
+    } else {
+      fFrameCount++;
+    }
+    if (fFrameCount % 6 == 0) {
+      fFilter.fSearch = fFilterCaseSensitive ? fFilterRaw : ToLower(fFilterRaw);
+      fFilter.fCaseSensitive = fFilterCaseSensitive;
+    }
   }
 };
 
