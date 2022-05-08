@@ -576,7 +576,7 @@ static void Visit(State &s,
       filter = nullptr;
     }
     if (node->hasParent()) {
-      bool ready = region->wait();
+      bool ready = region->wait(s);
       opt.icon = s.fTextures.fIconBlock;
       if (TreeNode(name, ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_NavLeftJumpsBackHere, opt)) {
         if (ready) {
@@ -591,7 +591,7 @@ static void Visit(State &s,
         im::TreePop();
       }
     } else {
-      if (region->wait()) {
+      if (region->wait(s)) {
         for (auto const &it : std::get<0>(region->fValue)) {
           Visit(s, it, path + u8"/" + name, filter);
         }

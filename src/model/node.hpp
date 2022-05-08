@@ -3,12 +3,13 @@
 namespace nbte {
 
 class Node;
+class State;
 
 class Region {
 public:
-  Region(hwm::task_queue &queue, int x, int z, Path const &path, std::shared_ptr<Node> const &parent);
+  Region(hwm::task_queue &queue, int x, int z, Path const &path, std::shared_ptr<Node> const &owner);
 
-  bool wait();
+  bool wait(State &s);
   String save(TemporaryDirectory &temp);
   bool isDirty() const;
 
@@ -18,6 +19,7 @@ public:
   int fX;
   int fZ;
   std::variant<ValueType, std::shared_ptr<std::future<std::optional<ValueType>>>> fValue;
+  std::weak_ptr<Node> fOwner;
 };
 
 class UnopenedChunk {

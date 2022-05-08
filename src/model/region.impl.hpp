@@ -87,11 +87,11 @@ static std::optional<Region::ValueType> ReadRegion(int rx, int rz, Path path, st
   return ret;
 }
 
-Region::Region(hwm::task_queue &queue, int x, int z, Path const &file, std::shared_ptr<Node> const &parent) : fFile(file), fX(x), fZ(z) {
-  fValue = std::make_shared<std::future<std::optional<ValueType>>>(queue.enqueue(ReadRegion, x, z, file, parent));
+Region::Region(hwm::task_queue &queue, int x, int z, Path const &file, std::shared_ptr<Node> const &owner) : fFile(file), fX(x), fZ(z), fOwner(owner) {
+  fValue = std::make_shared<std::future<std::optional<ValueType>>>(queue.enqueue(ReadRegion, x, z, file, owner));
 }
 
-bool Region::wait() {
+bool Region::wait(State &s) {
   using namespace std;
   if (fValue.index() == 0) {
     return true;
@@ -100,6 +100,9 @@ bool Region::wait() {
   auto state = future->wait_for(chrono::seconds(0));
   if (state != future_status::ready) {
     return false;
+  }
+  if (auto owner = fOwner.lock(); owner) {
+    s.revokeFilterCache(owner);
   }
   if (auto v = future->get(); v) {
     fValue = *v;

@@ -29,6 +29,10 @@ struct Cache {
     return result;
   }
 
+  void revoke(std::shared_ptr<Node> const &node) {
+    fValue.erase((intptr_t)node.get());
+  }
+
 private:
   bool containsTerm(std::shared_ptr<mcfile::nbt::Tag> const &tag, FilterKey const &key) {
     using namespace std;
@@ -158,6 +162,12 @@ struct FilterLruCache {
     fCache.clear();
   }
 
+  void revoke(std::shared_ptr<Node> const &node) {
+    for (auto &it : fCache) {
+      it.second->revoke(node);
+    }
+  }
+
 private:
   std::list<ValueType> fCache;
 };
@@ -179,6 +189,11 @@ struct FilterCacheSelector {
   void invalidate() {
     fKeyFilterCache.invalidate();
     fValueFilterCache.invalidate();
+  }
+
+  void revokeCache(std::shared_ptr<Node> const &node) {
+    fKeyFilterCache.revoke(node);
+    fValueFilterCache.revoke(node);
   }
 
 private:

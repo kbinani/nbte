@@ -147,6 +147,10 @@ public:
     return fFilter.fCaseSensitive;
   }
 
+  void revokeFilterCache(std::shared_ptr<Node> const &node) {
+    fCacheSelector.revokeCache(node);
+  }
+
   String winowTitle() const {
     String title = u8"nbte";
     if (!fOpened) {
