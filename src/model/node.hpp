@@ -22,23 +22,6 @@ public:
   std::weak_ptr<Node> fOwner;
 };
 
-class UnopenedChunk {
-public:
-  UnopenedChunk(Path file, uint64_t offset, uint64_t size, int cx, int cz, int localX, int localZ) : fFile(file), fOffset(offset), fSize(size), fChunkX(cx), fChunkZ(cz), fLocalChunkX(localX), fLocalChunkZ(localZ) {}
-
-  String name() const {
-    return u8"Chunk " + ToString(fChunkX) + u8" " + ToString(fChunkZ) + u8" [" + ToString(fLocalChunkX) + u8" " + ToString(fLocalChunkZ) + u8" in region]";
-  }
-
-  Path fFile;
-  uint64_t fOffset;
-  uint64_t fSize;
-  int fChunkX;
-  int fChunkZ;
-  int fLocalChunkX;
-  int fLocalChunkZ;
-};
-
 class DirectoryContents {
 public:
   DirectoryContents(Path const &dir, std::shared_ptr<Node> parent);
@@ -84,7 +67,6 @@ public:
     TypeDirectoryUnopened,
     TypeUnsupportedFile,
     TypeRegion,
-    TypeUnopenedChunk,
     TypeCompound,
   };
   using Value = std::variant<DirectoryContents, // DirectoryContents
@@ -92,7 +74,6 @@ public:
                              Path,              // DirectoryUnopened
                              Path,              // UnsupportedFile
                              Region,            // Region
-                             UnopenedChunk,
                              Compound // Compound
                              >;
 
@@ -110,7 +91,6 @@ public:
   Path const *unsupportedFile() const;
   Region *region();
   Region const *region() const;
-  UnopenedChunk const *unopenedChunk() const;
 
   String description() const;
   bool hasParent() const;

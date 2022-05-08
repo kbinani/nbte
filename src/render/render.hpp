@@ -620,16 +620,6 @@ static void Visit(State &s,
       im::TreePop();
     }
     im::PopID();
-  } else if (auto unopenedChunk = node->unopenedChunk(); unopenedChunk) {
-    String name = unopenedChunk->name();
-    PushID(path + u8"/" + name);
-    opt.icon = s.fTextures.fIconBox;
-    opt.openIgnoringStorage = false;
-    if (TreeNode(name, 0, opt)) {
-      node->load(*s.fPool);
-      im::TreePop();
-    }
-    im::PopID();
   } else if (auto unopenedDirectory = node->directoryUnopened(); unopenedDirectory) {
     opt.openIgnoringStorage = false;
     opt.icon = s.fTextures.fIconFolder;
