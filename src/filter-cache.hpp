@@ -9,12 +9,22 @@ enum class FilterMode {
 
 template <FilterMode Mode>
 struct Cache {
-  bool containsSearchTerm(std::shared_ptr<mcfile::nbt::Tag> const &tag, FilterKey const &key) {
-    intptr_t ptr = (intptr_t)tag.get();
+  bool containsSearchTerm(std::variant<std::shared_ptr<mcfile::nbt::Tag>, std::shared_ptr<Node>> const &tag, FilterKey const &key) {
+    intptr_t ptr;
+    if (tag.index() == 0) {
+      ptr = (intptr_t)std::get<0>(tag).get();
+    } else {
+      ptr = (intptr_t)std::get<1>(tag).get();
+    }
     if (auto found = fValue.find(ptr); found != fValue.end()) {
       return found->second;
     }
-    bool result = containsTerm(tag, key);
+    bool result;
+    if (tag.index() == 0) {
+      result = containsTerm(std::get<0>(tag), key);
+    } else {
+      result = containsTerm(std::get<1>(tag), key);
+    }
     fValue[ptr] = result;
     return result;
   }
@@ -78,6 +88,47 @@ private:
     return false;
   }
 
+  bool containsTerm(std::shared_ptr<Node> const &node, FilterKey const &key) {
+    if (!node) {
+      return false;
+    }
+    if (key.fSearch.empty()) {
+      return true;
+    }
+    if (auto r = node->region(); r) {
+      if (r->fValue.index() != 0) {
+        return false;
+      }
+      for (auto const &it : std::get<0>(r->fValue)) {
+        if (containsTerm(it, key)) {
+          return true;
+        }
+      }
+      return false;
+    }
+    if (auto c = node->compound(); c) {
+      if (key.match(c->name())) {
+        return true;
+      }
+      return containsTerm(c->fTag, key);
+    }
+    if (auto c = node->directoryContents(); c) {
+      for (auto const &it : c->fValue) {
+        if (containsTerm(it, key)) {
+          return true;
+        }
+      }
+      return false;
+    }
+    if (auto file = node->fileUnopened(); file) {
+      return key.match(file->filename().u8string());
+    }
+    if (auto directory = node->directoryUnopened(); directory) {
+      return key.match(directory->filename().u8string());
+    }
+    return false;
+  }
+
 private:
   std::unordered_map<intptr_t, bool> fValue;
 };
@@ -86,7 +137,7 @@ template <FilterMode Mode, size_t Size>
 struct FilterLruCache {
   using ValueType = std::pair<FilterKey, std::shared_ptr<Cache<Mode>>>;
 
-  bool containsSearchTerm(std::shared_ptr<mcfile::nbt::Tag> const &tag, FilterKey const &key) {
+  bool containsSearchTerm(std::variant<std::shared_ptr<mcfile::nbt::Tag>, std::shared_ptr<Node>> const &tag, FilterKey const &key) {
     using namespace std;
     auto found = find_if(fCache.begin(), fCache.end(), [key](auto const &item) { return item.first == key; });
     if (found != fCache.end()) {
@@ -113,7 +164,7 @@ private:
 
 template <size_t Size>
 struct FilterCacheSelector {
-  bool containsTerm(std::shared_ptr<mcfile::nbt::Tag> const &tag, FilterKey const *key, FilterMode mode) {
+  bool containsTerm(std::variant<std::shared_ptr<mcfile::nbt::Tag>, std::shared_ptr<Node>> const &tag, FilterKey const *key, FilterMode mode) {
     if (!key) {
       return true;
     }

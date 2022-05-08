@@ -51,44 +51,7 @@ public:
   }
 
   bool containsTerm(std::shared_ptr<Node> const &node, FilterKey const *key, FilterMode mode) {
-    if (!node) {
-      return false;
-    }
-    if (!key) {
-      return true;
-    }
-    if (auto r = node->region(); r) {
-      if (r->fValue.index() != 0) {
-        return false;
-      }
-      for (auto const &it : std::get<0>(r->fValue)) {
-        if (containsTerm(it, key, mode)) {
-          return true;
-        }
-      }
-      return false;
-    }
-    if (auto c = node->compound(); c) {
-      if (key->match(c->name())) {
-        return true;
-      }
-      return containsTerm(c->fTag, key, mode);
-    }
-    if (auto c = node->directoryContents(); c) {
-      for (auto const &it : c->fValue) {
-        if (containsTerm(it, key, mode)) {
-          return true;
-        }
-      }
-      return false;
-    }
-    if (auto file = node->fileUnopened(); file) {
-      return key->match(file->filename().u8string());
-    }
-    if (auto directory = node->directoryUnopened(); directory) {
-      return key->match(directory->filename().u8string());
-    }
-    return false;
+    return fCacheSelector.containsTerm(node, key, mode);
   }
 
   void loadTextures(void *device) {
