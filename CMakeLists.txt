@@ -44,6 +44,7 @@ endif()
 
 add_subdirectory(deps/glfw EXCLUDE_FROM_ALL)
 add_subdirectory(deps/libminecraft-file EXCLUDE_FROM_ALL)
+add_subdirectory(deps/nativefiledialog-extended EXCLUDE_FROM_ALL)
 
 if (NOT nbte_busgnag_ready AND APPLE)
   execute_process(COMMAND xcodebuild -project Bugsnag.xcodeproj -target BugsnagStatic -sdk macosx -arch "\$(ARCHS_STANDARD)" WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/deps/bugsnag-cocoa)
@@ -103,7 +104,6 @@ list(APPEND nbte_files
   deps/imgui/imgui_tables.cpp
   deps/imgui/imgui_widgets.cpp
   deps/imgui/misc/cpp/imgui_stdlib.cpp
-  deps/nativefiledialog/src/nfd_common.c
   deps/stb/stb_image.h
   deps/uuid4/src/uuid4.h
   deps/uuid4/src/uuid4.c)
@@ -114,16 +114,14 @@ if (APPLE)
     resource/assets.xcassets
     resource/MainMenu.xib
     deps/imgui/backends/imgui_impl_metal.mm
-    deps/imgui/backends/imgui_impl_osx.mm
-    deps/nativefiledialog/src/nfd_cocoa.m)
+    deps/imgui/backends/imgui_impl_osx.mm)
 elseif (WIN32)
   list(APPEND nbte_files
     src/main.cpp
     src/imgui-ext.cpp
     deps/imgui/backends/imgui_impl_glfw.cpp
     deps/imgui/backends/imgui_impl_opengl3.cpp
-    resource/resource.rc
-    deps/nativefiledialog/src/nfd_win.cpp)
+    resource/resource.rc)
 endif()
 list(APPEND nbte_icon_files
   resource/document_attribute_b.png
@@ -177,7 +175,6 @@ list(APPEND nbte_include_directories
   deps/imgui/backends
   deps/imgui/misc/cpp
   deps/glfw/include
-  deps/nativefiledialog/src/include
   deps/stb
   deps/hwm.task
   deps/uuid4/src)
@@ -186,7 +183,9 @@ if (APPLE)
 endif()
 target_include_directories(nbte PRIVATE ${nbte_include_directories})
 
-list(APPEND nbte_link_libraries mcfile)
+list(APPEND nbte_link_libraries
+  mcfile
+  nfd)
 if (APPLE)
   list(APPEND nbte_link_libraries
     "-framework MetalKit"

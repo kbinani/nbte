@@ -281,6 +281,7 @@ extern "C" {
 - (instancetype)init {
   if (self = [super init]) {
     uuid4_init();
+    NFD_Init();
 
     AppViewController *appViewController = [[AppViewController alloc] initWithNibName:nil bundle:nil];
     self.window = [[NSWindow alloc] initWithContentRect:NSZeroRect
@@ -310,6 +311,10 @@ extern "C" {
     return NO;
   }
   return [self.appViewController openFile:filename];
+}
+
+- (void)applicationWillTerminate:(NSNotification *)notification {
+  NFD_Quit();
 }
 
 @end

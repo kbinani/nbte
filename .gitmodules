@@ -4,9 +4,6 @@
 [submodule "deps/glfw"]
 	path = deps/glfw
 	url = https://github.com/glfw/glfw.git
-[submodule "deps/nativefiledialog"]
-	path = deps/nativefiledialog
-	url = https://github.com/kbinani/nativefiledialog.git
 [submodule "deps/libminecraft-file"]
 	path = deps/libminecraft-file
 	url = https://github.com/kbinani/libminecraft-file.git
@@ -22,3 +19,6 @@
 [submodule "deps/bugsnag-cocoa"]
 	path = deps/bugsnag-cocoa
 	url = https://github.com/bugsnag/bugsnag-cocoa.git
+[submodule "deps/nativefiledialog-extended"]
+	path = deps/nativefiledialog-extended
+	url = https://github.com/btzy/nativefiledialog-extended.git

@@ -9,10 +9,10 @@ static std::optional<std::filesystem::path> OpenFileDialog() {
   namespace fs = std::filesystem;
 
   nfdchar_t *outPath = nullptr;
-  if (NFD_OpenDialog(nullptr, nullptr, &outPath) == NFD_OKAY) {
+  if (NFD_OpenDialog(&outPath, nullptr, 0, nullptr) == NFD_OKAY) {
     String selected;
     selected.assign((char8_t const *)outPath);
-    free(outPath);
+    NFD_FreePath(outPath);
     return fs::path(selected);
   } else {
     return nullopt;
@@ -24,10 +24,10 @@ static std::optional<std::filesystem::path> OpenDirectoryDialog() {
   namespace fs = std::filesystem;
 
   nfdchar_t *outPath = nullptr;
-  if (NFD_PickFolder(nullptr, &outPath) == NFD_OKAY) {
+  if (NFD_PickFolder(&outPath, nullptr) == NFD_OKAY) {
     String selected;
     selected.assign((char8_t const *)outPath);
-    free(outPath);
+    NFD_FreePath(outPath);
     return fs::path(selected);
   } else {
     return nullopt;
