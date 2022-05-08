@@ -3,14 +3,9 @@
 #include <optional>
 #include <string>
 #include <algorithm>
-#include <unordered_map>
-#include <memory>
-#include <list>
-#include <minecraft-file.hpp>
 #include "texture.hpp"
-#include "texture-set.hpp"
 #include "string.hpp"
-#include "filter-cache.hpp"
+#include "filter-key.hpp"
 #include "imgui-ext.hpp"
 
 namespace nbte {

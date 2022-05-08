@@ -96,7 +96,7 @@ list(APPEND nbte_files
   src/texture.hpp
   src/texture-set.hpp
   src/filter-cache.hpp
-  src/filter-cache.cpp
+  src/filter-key.hpp
   resource/resource.rc.in
   resource/UDEVGothic35_Regular.ttf
   resource/nbte32.png
