@@ -222,7 +222,8 @@ list(APPEND nbte_juce_files
   juce/TreeComponent.hpp
   juce/LabelComponent.hpp
   juce/Style.hpp
-  juce/TextureSet.hpp)
+  juce/TextureSet.hpp
+  juce/LookAndFeel.hpp)
 
 target_sources(nbte-juce
   PRIVATE
@@ -241,7 +242,8 @@ target_compile_definitions(nbte-juce
 
 juce_add_binary_data(app-data
   SOURCES
-    resource/document.png)
+    resource/document.png
+    resource/UDEVGothic35_Regular.ttf)
 
 target_link_libraries(nbte-juce
   PRIVATE

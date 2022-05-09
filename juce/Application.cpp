@@ -5,6 +5,7 @@
 #include "TextureSet.hpp"
 #include "LabelComponent.hpp"
 #include "MainWindow.hpp"
+#include "LookAndFeel.hpp"
 
 namespace nbte {
 
@@ -25,6 +26,8 @@ public:
   }
 
   void initialise(const juce::String &commandLine) override {
+    fLaf.reset(new LookAndFeel());
+    juce::LookAndFeel::setDefaultLookAndFeel(fLaf.get());
     fMainWindow.reset(new MainWindow(getApplicationName()));
   }
 
@@ -37,6 +40,7 @@ public:
   }
 
 private:
+  std::unique_ptr<LookAndFeel> fLaf;
   std::unique_ptr<MainWindow> fMainWindow;
 };
 
