@@ -74,7 +74,7 @@ public:
                              Path,              // DirectoryUnopened
                              Path,              // UnsupportedFile
                              Region,            // Region
-                             Compound // Compound
+                             Compound           // Compound
                              >;
 
   Node(Value &&value, std::shared_ptr<Node> parent);

@@ -9,12 +9,12 @@ set(nbte_product_bundle_identifier com.github.kbinani.nbte)
 set(nbte_macos_deployment_target "10.15")
 set(nbte_apple_development_team_id "XM695N4A7T")
 
-set_directory_properties(PROPERTIES VS_STARTUP_PROJECT nbte)
+set_directory_properties(PROPERTIES VS_STARTUP_PROJECT nbte-juce)
 
 execute_process(COMMAND git rev-list --all --count OUTPUT_VARIABLE nbte_build_number)
 string(STRIP "${nbte_build_number}" nbte_build_number)
 
-include(FetchContent)
+add_subdirectory(deps/JUCE)
 
 if (APPLE)
   set(CMAKE_OSX_ARCHITECTURES "arm64;x86_64")
@@ -206,3 +206,47 @@ add_executable(binary_to_compressed_c deps/imgui/misc/fonts/binary_to_compressed
 include_external_msproject(package ${CMAKE_CURRENT_SOURCE_DIR}/package/package.wapproj
   TYPE C7167F0D-BC9F-4E6E-AFE1-012C56B48DB5
   GUID 03182ADD-54AB-4518-B6A3-CFD896BCD9A4)
+
+
+# JUCE
+
+juce_add_gui_app(nbte-juce
+  ICON_BIG "package/Images/Square150x150Logo.scale-200.png"
+  ICON_SMALL "package/Images/StoreLogo.png"
+  PRODUCT_NAME "nbte")
+
+list(APPEND nbte_juce_files
+  juce/Application.cpp
+  juce/MainWindow.hpp)
+
+target_sources(nbte-juce
+  PRIVATE
+  ${nbte_juce_files}
+)
+
+target_compile_definitions(nbte-juce
+  PRIVATE
+    JUCE_WEB_BROWSER=0
+    JUCE_USE_CURL=0
+    JUCE_APPLICATION_NAME_STRING="$<TARGET_PROPERTY:nbte-juce,JUCE_PRODUCT_NAME>"
+    JUCE_APPLICATION_VERSION_STRING="$<TARGET_PROPERTY:nbte-juce,JUCE_VERSION>"
+    JUCE_DISPLAY_SPLASH_SCREEN=0
+    NOMINMAX
+    WIN32_LEAN_AND_MEAN)
+
+# juce_add_binary_data(app-data
+#   SOURCES
+#     resource/icon-large.png
+#     resource/japanese.lang)
+
+target_link_libraries(nbte-juce
+  PRIVATE
+    mcfile
+    # app-data
+    juce::juce_gui_extra
+  PUBLIC
+    juce::juce_recommended_config_flags
+    juce::juce_recommended_lto_flags
+    juce::juce_recommended_warning_flags)
+
+source_group(TREE ${CMAKE_CURRENT_LIST_DIR} FILES ${nbte_juce_files})
