@@ -217,7 +217,12 @@ juce_add_gui_app(nbte-juce
 
 list(APPEND nbte_juce_files
   juce/Application.cpp
-  juce/MainWindow.hpp)
+  juce/MainWindow.hpp
+  juce/StackComponent.hpp
+  juce/TreeComponent.hpp
+  juce/LabelComponent.hpp
+  juce/Style.hpp
+  juce/TextureSet.hpp)
 
 target_sources(nbte-juce
   PRIVATE
@@ -234,15 +239,14 @@ target_compile_definitions(nbte-juce
     NOMINMAX
     WIN32_LEAN_AND_MEAN)
 
-# juce_add_binary_data(app-data
-#   SOURCES
-#     resource/icon-large.png
-#     resource/japanese.lang)
+juce_add_binary_data(app-data
+  SOURCES
+    resource/document.png)
 
 target_link_libraries(nbte-juce
   PRIVATE
     mcfile
-    # app-data
+    app-data
     juce::juce_gui_extra
   PUBLIC
     juce::juce_recommended_config_flags

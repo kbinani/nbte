@@ -1,3 +1,9 @@
+#include <juce_gui_extra/juce_gui_extra.h>
+
+#include "Style.hpp"
+#include "StackComponent.hpp"
+#include "TextureSet.hpp"
+#include "LabelComponent.hpp"
 #include "MainWindow.hpp"
 
 namespace nbte {

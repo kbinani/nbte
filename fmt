@@ -1,3 +1,4 @@
 #!/bin/bash
 
 find src -name '*.cpp' -o -name '*.hpp' -o -name '*.mm' | xargs -n 1 -P `nproc` clang-format -i
+find juce -name '*.cpp' -o -name '*.hpp' -o -name '*.mm' | xargs -n 1 -P `nproc` clang-format -i
