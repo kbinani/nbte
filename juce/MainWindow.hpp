@@ -26,8 +26,9 @@ public:
 
   void resized() override {
     if (fViewport) {
-      fViewport->setBounds(0, 0, getWidth(), getHeight());
-      fStackComponent->updateHeight(getWidth());
+      int width = getWidth() - 2 * kWindowPadding;
+      fViewport->setBounds(kWindowPadding, kWindowPadding, width, getHeight() - 2 * kWindowPadding);
+      fStackComponent->updateHeight(width);
     }
   }
 
