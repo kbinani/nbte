@@ -8,6 +8,12 @@ class StackComponent : public juce::Component {
 public:
   StackComponent() {}
 
+  void addChildOwned(juce::Component *child, bool visible = true) {
+    child->setVisible(visible);
+    addChildComponent(child);
+    fOwnedChildren.push_back(std::unique_ptr<juce::Component>(child));
+  }
+
   void updateHeight(int width) {
     int y = 0;
     for (int i = 0; i < getNumChildComponents(); i++) {
@@ -27,6 +33,8 @@ public:
   }
 
 private:
+  std::vector<std::unique_ptr<juce::Component>> fOwnedChildren;
+
   JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(StackComponent)
 };
 

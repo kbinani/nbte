@@ -9,8 +9,8 @@ public:
     setUsingNativeTitleBar(true);
     fViewport.reset(new juce::Viewport());
     fStackComponent.reset(new StackComponent());
-    fLabelComponent.reset(new LabelComponent("Sample", TextureSet::Get().fIconDocument));
-    fStackComponent->addAndMakeVisible(fLabelComponent.get());
+    fStackComponent->addChildOwned(new LabelComponent("Label", TextureSet::Get().fIconDocument, false));
+    fStackComponent->addChildOwned(new LabelComponent("Label Disabled", TextureSet::Get().fIconDocumentExclamation, true));
     fViewport->setViewedComponent(fStackComponent.get(), false);
     setContentNonOwned(fViewport.get(), false);
 
@@ -38,7 +38,6 @@ public:
 private:
   std::unique_ptr<juce::Viewport> fViewport;
   std::unique_ptr<StackComponent> fStackComponent;
-  std::unique_ptr<LabelComponent> fLabelComponent;
 
   JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(MainWindow)
 };

@@ -242,7 +242,20 @@ target_compile_definitions(nbte-juce
 
 juce_add_binary_data(app-data
   SOURCES
+    resource/document_attribute_b.png
+    resource/document_attribute_d.png
+    resource/document_attribute_f.png
+    resource/document_attribute_i.png
+    resource/document_attribute_l.png
+    resource/document_attribute_s.png
+    resource/edit_small_caps.png
+    resource/box.png
+    resource/block.png
+    resource/edit_list.png
+    resource/folder.png
     resource/document.png
+    resource/document_exclamation.png
+    resource/edit_code.png
     resource/UDEVGothic35_Regular.ttf)
 
 target_link_libraries(nbte-juce
