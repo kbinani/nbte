@@ -4,6 +4,8 @@
 #include "StackComponent.hpp"
 #include "TextureSet.hpp"
 #include "LabelComponent.hpp"
+#include "SquareButtonComponent.hpp"
+#include "IntegralInputComponent.hpp"
 #include "MainWindow.hpp"
 #include "LookAndFeel.hpp"
 

@@ -5,12 +5,12 @@ namespace nbte {
 class LabelComponent : public juce::Component {
 public:
   LabelComponent(juce::String const &text, juce::Image const &icon, bool disabled) : fText(text), fIcon(icon), fDisabled(disabled) {
-    setSize(kFrameHeight, kFrameHeight);
+    setSize(kFrameHeightWithSpacing, kFrameHeightWithSpacing);
   }
 
   void paint(juce::Graphics &g) override {
     g.saveState();
-    g.drawImage(fIcon, juce::Rectangle<float>(kPaddingX, kFrameHeight * 0.5f - fIcon.getHeight() * 0.5f, fIcon.getWidth(), fIcon.getHeight()));
+    g.drawImage(fIcon, juce::Rectangle<float>(kPaddingX, kFrameHeightWithSpacing * 0.5f - fIcon.getHeight() * 0.5f, fIcon.getWidth(), fIcon.getHeight()));
 
     g.setFont(15.0f);
     if (fDisabled) {
@@ -27,6 +27,8 @@ private:
   juce::String fText;
   juce::Image fIcon;
   bool fDisabled;
+
+  JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(LabelComponent)
 };
 
 } // namespace nbte
