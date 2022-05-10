@@ -11,11 +11,6 @@ public:
     }
   }
 
-  void fillTextEditorBackground(juce::Graphics &g, int width, int height, juce::TextEditor &) override {
-    g.setColour(juce::Colours::white);
-    g.fillRect(0, 0, width, height);
-  }
-
   void drawTextEditorOutline(juce::Graphics &, int width, int height, juce::TextEditor &) override {}
 };
 

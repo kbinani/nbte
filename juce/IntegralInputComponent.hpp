@@ -11,7 +11,10 @@ public:
     addAndMakeVisible(&fPlusButton);
     addAndMakeVisible(&fMinusButton);
     addAndMakeVisible(&fEditor);
-
+    fEditor.setColour(juce::TextEditor::backgroundColourId, juce::Colours::white);
+    fEditor.setColour(juce::TextEditor::textColourId, juce::Colours::black);
+    fEditor.setColour(juce::TextEditor::highlightColourId, juce::Colour::fromFloatRGBA(0.26f, 0.59f, 0.98f, 0.35f));
+    fEditor.setColour(juce::TextEditor::highlightedTextColourId, juce::Colours::black);
     setSize(kFrameHeightWithSpacing, kFrameHeightWithSpacing);
   }
 
