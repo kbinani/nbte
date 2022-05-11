@@ -7,6 +7,8 @@ public:
   explicit MainWindow(juce::String name)
       : juce::DocumentWindow(name, juce::Colour::fromFloatRGBA(0.94f, 0.94f, 0.94f, 1.00f), juce::DocumentWindow::closeButton | juce::DocumentWindow::maximiseButton | juce::DocumentWindow::minimiseButton) {
     setUsingNativeTitleBar(true);
+    setDraggable(false);
+
     fViewport.reset(new juce::Viewport());
     TextureSet const &icons = TextureSet::Get();
     fStackComponent.reset(new StackComponent());
