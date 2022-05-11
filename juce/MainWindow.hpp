@@ -23,7 +23,7 @@ public:
     tree->addChildOwned(new FloatNumberComponent<double>(icons.fIconDocumentAttributeD, "BorderCenterX", 0));
     tree->addChildOwned(new LabelComponent("Label", icons.fIconDocument));
     auto childTree = new TreeComponent(icons.fIconBlock, "r.0.0.mca");
-    childTree->addChildOwned(new LabelComponent("Chunk 0 0", icons.fIconBox));
+    childTree->addChildOwned(new TreeComponent(icons.fIconBox, "Chunk 0 0"))->setHideArrow(true);
     tree->addChildOwned(childTree);
     fStackComponent->addChildOwned(tree);
     fViewport->setViewedComponent(fStackComponent.get(), false);

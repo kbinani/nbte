@@ -18,11 +18,20 @@ public:
     setOpen(true, true);
   }
 
-  juce::Component *addChildOwned(juce::Component *child, bool visible = true) {
+  template <class T, class = std::enable_if<std::is_base_of_v<juce::Component, T>>>
+  T *addChildOwned(T *child, bool visible = true) {
     child->setVisible(visible);
     addChildComponent(child);
     fOwnedChildren.emplace_back(child);
     return child;
+  }
+
+  void setHideArrow(bool hide) {
+    if (fHideArrow == hide) {
+      return;
+    }
+    fHideArrow = hide;
+    repaint();
   }
 
   void updateHeight(int width) override {
@@ -61,8 +70,10 @@ public:
       g.fillRect(buttonBounds());
     }
 
-    g.setColour(juce::Colours::black);
-    g.fillPath(fTriangle);
+    if (!fHideArrow) {
+      g.setColour(juce::Colours::black);
+      g.fillPath(fTriangle);
+    }
 
     g.drawImage(fIcon, juce::Rectangle<float>(kTreeNodeToLabelSpacing, kFrameHeightWithSpacing * 0.5f - fIcon.getHeight() * 0.5f, fIcon.getWidth(), fIcon.getHeight()));
 
@@ -150,6 +161,9 @@ private:
     if (open == fOpen && !force) {
       return;
     }
+    if (fHideArrow && !force) {
+      return;
+    }
 
     fOpen = open;
     float arrowScale = 0.7f;
@@ -180,6 +194,7 @@ private:
   bool fOpen = true;
   juce::Path fTriangle;
   int fState = kIdle;
+  bool fHideArrow = false;
 };
 
 } // namespace nbte
