@@ -5,7 +5,8 @@
 #include "TextureSet.hpp"
 #include "LabelComponent.hpp"
 #include "SquareButtonComponent.hpp"
-#include "IntegralInputComponent.hpp"
+#include "IntegralNumberComponent.hpp"
+#include "FloatNumberComponent.hpp"
 #include "MainWindow.hpp"
 #include "LookAndFeel.hpp"
 
