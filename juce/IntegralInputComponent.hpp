@@ -16,7 +16,8 @@ public:
     fEditor.setColour(juce::TextEditor::highlightColourId, juce::Colour::fromFloatRGBA(0.26f, 0.59f, 0.98f, 0.35f));
     fEditor.setColour(juce::TextEditor::highlightedTextColourId, juce::Colours::black);
     fEditor.setText(juce::String(value));
-    fEditor.onTextChange = [this]() { onTextChange(); };
+    fEditor.onTextChange = [this]() { onEditorTextChange(); };
+    fEditor.onFocusLost = [this]() { onEditorLostFocus(); };
     fPlusButton.onClick = [this]() { onPlusButtonClick(); };
     fMinusButton.onClick = [this]() { onMinusButtonClick(); };
     setSize(kFrameHeightWithSpacing, kFrameHeightWithSpacing);
@@ -61,7 +62,7 @@ private:
     }
   }
 
-  void onTextChange() {
+  void onEditorTextChange() {
     juce::String text = fEditor.getText();
     try {
       if constexpr (std::is_signed_v<T>) {
@@ -75,6 +76,10 @@ private:
       }
     } catch (...) {
     }
+  }
+
+  void onEditorLostFocus() {
+    fEditor.setText(juce::String(fValue));
   }
 
   void onPlusButtonClick() {
