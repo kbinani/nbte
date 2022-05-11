@@ -2,11 +2,16 @@
 
 namespace nbte {
 
-class SquareButtonComponent : public juce::Component {
+class SquareButtonComponent : public juce::Component, juce::Timer {
   enum State {
     Idle,
     Hovered,
     Active,
+  };
+
+  enum {
+    kKeyRepeatDelay = 275,
+    kKeyRepeatRate = 50,
   };
 
 public:
@@ -41,12 +46,31 @@ public:
   void mouseDown(juce::MouseEvent const &e) override {
     fState = Active;
     repaint();
+    stopTimer();
+    startTimer(kKeyRepeatDelay);
   }
 
   void mouseUp(juce::MouseEvent const &e) override {
     fState = Idle;
     repaint();
+    stopTimer();
+    if (onClick) {
+      onClick();
+    }
   }
+
+  void timerCallback() override {
+    if (getTimerInterval() != kKeyRepeatRate) {
+      stopTimer();
+      startTimer(kKeyRepeatRate);
+    }
+    if (onClick) {
+      onClick();
+    }
+  }
+
+public:
+  std::function<void()> onClick;
 
 private:
   juce::String fLabel;

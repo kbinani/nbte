@@ -15,6 +15,10 @@ public:
     fEditor.setColour(juce::TextEditor::textColourId, juce::Colours::black);
     fEditor.setColour(juce::TextEditor::highlightColourId, juce::Colour::fromFloatRGBA(0.26f, 0.59f, 0.98f, 0.35f));
     fEditor.setColour(juce::TextEditor::highlightedTextColourId, juce::Colours::black);
+    fEditor.setText(juce::String(value));
+    fEditor.onTextChange = [this]() { onTextChange(); };
+    fPlusButton.onClick = [this]() { onPlusButtonClick(); };
+    fMinusButton.onClick = [this]() { onMinusButtonClick(); };
     setSize(kFrameHeightWithSpacing, kFrameHeightWithSpacing);
   }
 
@@ -38,6 +42,53 @@ public:
     int x = kPaddingX + fIcon.getWidth() + kPaddingX;
     g.drawFittedText(fLabel, x, 0, fLabelWidth, getHeight(), juce::Justification::left, 1);
     g.restoreState();
+  }
+
+  std::function<void(T newValue, T oldValue)> onChange;
+
+private:
+  void setValue(T v, bool updateEditor = true) {
+    if (v == fValue) {
+      return;
+    }
+    T old = v;
+    fValue = v;
+    if (onChange) {
+      onChange(v, old);
+    }
+    if (updateEditor) {
+      fEditor.setText(juce::String(fValue));
+    }
+  }
+
+  void onTextChange() {
+    juce::String text = fEditor.getText();
+    try {
+      if constexpr (std::is_signed_v<T>) {
+        int64_t v = std::stoll(text.toRawUTF8());
+        T next = (T)std::min(std::max(v, (int64_t)std::numeric_limits<T>::lowest()), (int64_t)std::numeric_limits<T>::max());
+        setValue(next, false);
+      } else {
+        uint64_t v = std::stoul(text.toRawUTF8());
+        T next = (T)std::min(std::max(v, (uint64_t)std::numeric_limits<T>::lowest()), (uint64_t)std::numeric_limits<T>::max());
+        setValue(next, false);
+      }
+    } catch (...) {
+    }
+  }
+
+  void onPlusButtonClick() {
+    if (fValue == std::numeric_limits<T>::max()) {
+      return;
+    }
+    setValue(fValue + 1);
+  }
+
+  void onMinusButtonClick() {
+    if (fValue == std::numeric_limits<T>::lowest()) {
+      return;
+    }
+    setValue(fValue - 1);
   }
 
 private:
