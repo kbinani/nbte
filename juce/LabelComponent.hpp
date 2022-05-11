@@ -4,7 +4,7 @@ namespace nbte {
 
 class LabelComponent : public juce::Component {
 public:
-  LabelComponent(juce::String const &text, juce::Image const &icon) : fText(text), fIcon(icon) {
+  LabelComponent(juce::Image const &icon, juce::String const &text) : fIcon(icon), fText(text) {
     setSize(kFrameHeightWithSpacing, kFrameHeightWithSpacing);
   }
 

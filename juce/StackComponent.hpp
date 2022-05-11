@@ -8,7 +8,8 @@ class StackComponent : public juce::Component, public HeightUpdatable {
 public:
   StackComponent() {}
 
-  juce::Component *addChildOwned(juce::Component *child, bool visible = true) {
+  template <class T, class = std::enable_if<std::is_base_of_v<juce::Component, T>>>
+  T *addChildOwned(T *child, bool visible = true) {
     child->setVisible(visible);
     addChildComponent(child);
     fOwnedChildren.emplace_back(child);

@@ -12,8 +12,8 @@ public:
     fViewport.reset(new juce::Viewport());
     TextureSet const &icons = TextureSet::Get();
     fStackComponent.reset(new StackComponent());
-    fStackComponent->addChildOwned(new LabelComponent("Label", icons.fIconDocument));
-    fStackComponent->addChildOwned(new LabelComponent("Label Disabled", icons.fIconDocumentExclamation))->setEnabled(false);
+    fStackComponent->addChildOwned(new LabelComponent(icons.fIconDocument, "Label"));
+    fStackComponent->addChildOwned(new LabelComponent(icons.fIconDocumentExclamation, "Label Disabled"))->setEnabled(false);
     fStackComponent->addChildOwned(new IntegralNumberComponent<uint8_t>(icons.fIconDocumentAttributeB, "Byte", 0));
     fStackComponent->addChildOwned(new IntegralNumberComponent<int32_t>(icons.fIconDocumentAttributeI, "Int32", 0));
     fStackComponent->addChildOwned(new FloatNumberComponent<float>(icons.fIconDocumentAttributeF, "Float", 0));
@@ -21,7 +21,7 @@ public:
     fStackComponent->addChildOwned(new StringComponent(icons.fIconEditSmallCaps, "String", ""));
     auto tree = new TreeComponent(icons.fIconBox, "Data");
     tree->addChildOwned(new FloatNumberComponent<double>(icons.fIconDocumentAttributeD, "BorderCenterX", 0));
-    tree->addChildOwned(new LabelComponent("Label", icons.fIconDocument));
+    tree->addChildOwned(new LabelComponent(icons.fIconDocument, "Label"));
     auto childTree = new TreeComponent(icons.fIconBlock, "r.0.0.mca");
     childTree->addChildOwned(new TreeComponent(icons.fIconBox, "Chunk 0 0"))->setHideArrow(true);
     tree->addChildOwned(childTree);
