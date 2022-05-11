@@ -227,7 +227,8 @@ list(APPEND nbte_juce_files
   juce/IntegralNumberComponent.hpp
   juce/SquareButtonComponent.hpp
   juce/FloatNumberComponent.hpp
-  juce/StringComponent.hpp)
+  juce/StringComponent.hpp
+  juce/HeightUpdatable.hpp)
 
 target_sources(nbte-juce
   PRIVATE

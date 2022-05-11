@@ -4,22 +4,25 @@
 
 namespace nbte {
 
-class StackComponent : public juce::Component {
+class StackComponent : public juce::Component, public HeightUpdatable {
 public:
   StackComponent() {}
 
-  void addChildOwned(juce::Component *child, bool visible = true) {
+  juce::Component *addChildOwned(juce::Component *child, bool visible = true) {
     child->setVisible(visible);
     addChildComponent(child);
-    fOwnedChildren.push_back(std::unique_ptr<juce::Component>(child));
+    fOwnedChildren.emplace_back(child);
+    return child;
   }
 
-  void updateHeight(int width) {
+  void updateHeight(int width) override {
     int y = 0;
-    for (int i = 0; i < getNumChildComponents(); i++) {
-      auto child = getChildComponent(i);
+    for (auto &child : fOwnedChildren) {
       if (!child->isVisible()) {
         continue;
+      }
+      if (auto hu = dynamic_cast<HeightUpdatable *>(child.get()); hu) {
+        hu->updateHeight(width);
       }
       int height = child->getHeight();
       child->setBounds(0, y, width, height);
@@ -28,7 +31,7 @@ public:
     setSize(width, y);
   }
 
-  void childrenChanged() override {
+  void childBoundsChanged(juce::Component *) override {
     updateHeight(getWidth());
   }
 

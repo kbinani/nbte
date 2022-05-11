@@ -27,20 +27,20 @@ public:
     int width = getWidth();
     int buttonSize = kFrameHeight;
     int buttonX = width - kItemInnerSpacing - buttonSize;
-    fPlusButton.setBounds(buttonX, kPaddingY, kFrameHeight, kFrameHeight);
+    fPlusButton.setBounds(buttonX, kFramePaddingY, kFrameHeight, kFrameHeight);
     buttonX = buttonX - kItemInnerSpacing - buttonSize;
-    fMinusButton.setBounds(buttonX, kPaddingY, kFrameHeight, kFrameHeight);
-    int editorX = kPaddingX + fIcon.getWidth() + kPaddingX + fLabelWidth + kPaddingX + kPaddingX;
-    fEditor.setBounds(editorX, kPaddingY, juce::jmax(0, buttonX - editorX - kItemInnerSpacing), kFrameHeight);
+    fMinusButton.setBounds(buttonX, kFramePaddingY, kFrameHeight, kFrameHeight);
+    int editorX = kTreeNodeToLabelSpacing + fIcon.getWidth() + kFramePaddingX + fLabelWidth + kFramePaddingX + kFramePaddingX;
+    fEditor.setBounds(editorX, kFramePaddingY, juce::jmax(0, buttonX - editorX - kItemInnerSpacing), kFrameHeight);
   }
 
   void paint(juce::Graphics &g) override {
     g.saveState();
-    g.drawImage(fIcon, juce::Rectangle<float>(kPaddingX, kFrameHeightWithSpacing * 0.5f - fIcon.getHeight() * 0.5f, fIcon.getWidth(), fIcon.getHeight()));
+    g.drawImage(fIcon, juce::Rectangle<float>(kTreeNodeToLabelSpacing, kFrameHeightWithSpacing * 0.5f - fIcon.getHeight() * 0.5f, fIcon.getWidth(), fIcon.getHeight()));
 
     g.setFont(15.0f);
     g.setColour(juce::Colours::black);
-    int x = kPaddingX + fIcon.getWidth() + kPaddingX;
+    int x = kTreeNodeToLabelSpacing + fIcon.getWidth() + kFramePaddingX;
     g.drawFittedText(fLabel, x, 0, fLabelWidth, getHeight(), juce::Justification::left, 1);
     g.restoreState();
   }

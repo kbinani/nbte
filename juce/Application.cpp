@@ -1,6 +1,7 @@
 #include <juce_gui_extra/juce_gui_extra.h>
 
 #include "Style.hpp"
+#include "HeightUpdatable.hpp"
 #include "StackComponent.hpp"
 #include "TextureSet.hpp"
 #include "LabelComponent.hpp"
@@ -8,6 +9,7 @@
 #include "IntegralNumberComponent.hpp"
 #include "FloatNumberComponent.hpp"
 #include "StringComponent.hpp"
+#include "TreeComponent.hpp"
 #include "MainWindow.hpp"
 #include "LookAndFeel.hpp"
 

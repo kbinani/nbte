@@ -21,17 +21,17 @@ public:
 
   void resized() override {
     int width = getWidth();
-    int editorX = kPaddingX + fIcon.getWidth() + kPaddingX + fLabelWidth + kPaddingX + kPaddingX;
-    fEditor.setBounds(editorX, kPaddingY, juce::jmax(0, width - editorX - kItemInnerSpacing), kFrameHeight);
+    int editorX = kTreeNodeToLabelSpacing + fIcon.getWidth() + kFramePaddingX + fLabelWidth + kFramePaddingX + kFramePaddingX;
+    fEditor.setBounds(editorX, kFramePaddingY, juce::jmax(0, width - editorX - kItemInnerSpacing), kFrameHeight);
   }
 
   void paint(juce::Graphics &g) override {
     g.saveState();
-    g.drawImage(fIcon, juce::Rectangle<float>(kPaddingX, kFrameHeightWithSpacing * 0.5f - fIcon.getHeight() * 0.5f, fIcon.getWidth(), fIcon.getHeight()));
+    g.drawImage(fIcon, juce::Rectangle<float>(kTreeNodeToLabelSpacing, kFrameHeightWithSpacing * 0.5f - fIcon.getHeight() * 0.5f, fIcon.getWidth(), fIcon.getHeight()));
 
-    g.setFont(15.0f);
+    g.setFont(kFontSize);
     g.setColour(juce::Colours::black);
-    int x = kPaddingX + fIcon.getWidth() + kPaddingX;
+    int x = kTreeNodeToLabelSpacing + fIcon.getWidth() + kFramePaddingX;
     g.drawFittedText(fLabel, x, 0, fLabelWidth, getHeight(), juce::Justification::left, 1);
     g.restoreState();
   }

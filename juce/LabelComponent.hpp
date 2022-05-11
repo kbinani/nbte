@@ -4,21 +4,21 @@ namespace nbte {
 
 class LabelComponent : public juce::Component {
 public:
-  LabelComponent(juce::String const &text, juce::Image const &icon, bool disabled) : fText(text), fIcon(icon), fDisabled(disabled) {
+  LabelComponent(juce::String const &text, juce::Image const &icon) : fText(text), fIcon(icon) {
     setSize(kFrameHeightWithSpacing, kFrameHeightWithSpacing);
   }
 
   void paint(juce::Graphics &g) override {
     g.saveState();
-    g.drawImage(fIcon, juce::Rectangle<float>(kPaddingX, kFrameHeightWithSpacing * 0.5f - fIcon.getHeight() * 0.5f, fIcon.getWidth(), fIcon.getHeight()));
+    g.drawImage(fIcon, juce::Rectangle<float>(kTreeNodeToLabelSpacing, kFrameHeightWithSpacing * 0.5f - fIcon.getHeight() * 0.5f, fIcon.getWidth(), fIcon.getHeight()));
 
     g.setFont(15.0f);
-    if (fDisabled) {
-      g.setColour(juce::Colour::fromFloatRGBA(0.60f, 0.60f, 0.60f, 1.00f));
-    } else {
+    if (isEnabled()) {
       g.setColour(juce::Colours::black);
+    } else {
+      g.setColour(juce::Colour::fromFloatRGBA(0.60f, 0.60f, 0.60f, 1.00f));
     }
-    int x = kPaddingX + fIcon.getWidth() + kPaddingX;
+    int x = kTreeNodeToLabelSpacing + fIcon.getWidth() + kFramePaddingX;
     g.drawFittedText(fText, x, 0, getWidth() - x, getHeight(), juce::Justification::left, 1);
     g.restoreState();
   }
@@ -26,7 +26,6 @@ public:
 private:
   juce::String fText;
   juce::Image fIcon;
-  bool fDisabled;
 
   JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(LabelComponent)
 };
