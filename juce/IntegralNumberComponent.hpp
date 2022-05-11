@@ -3,9 +3,9 @@
 namespace nbte {
 
 template <std::integral T>
-class IntegralInputComponent : public juce::Component {
+class IntegralNumberComponent : public juce::Component {
 public:
-  IntegralInputComponent(juce::Image const &icon, juce::String const &label, T value) : fIcon(icon), fLabel(label), fValue(value), fPlusButton("+"), fMinusButton("-") {
+  IntegralNumberComponent(juce::Image const &icon, juce::String const &label, T value) : fIcon(icon), fLabel(label), fValue(value), fPlusButton("+"), fMinusButton("-") {
     juce::Font font(kFontSize);
     fLabelWidth = font.getStringWidthFloat(label);
     addAndMakeVisible(&fPlusButton);
@@ -105,7 +105,7 @@ private:
   SquareButtonComponent fPlusButton;
   SquareButtonComponent fMinusButton;
 
-  JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(IntegralInputComponent)
+  JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(IntegralNumberComponent)
 };
 
 } // namespace nbte

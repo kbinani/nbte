@@ -14,7 +14,8 @@ public:
     fStackComponent.reset(new StackComponent());
     fStackComponent->addChildOwned(new LabelComponent("Label", icons.fIconDocument, false));
     fStackComponent->addChildOwned(new LabelComponent("Label Disabled", icons.fIconDocumentExclamation, true));
-    fStackComponent->addChildOwned(new IntegralInputComponent<int32_t>(icons.fIconDocumentAttributeI, "Int32", 0));
+    fStackComponent->addChildOwned(new IntegralNumberComponent<uint8_t>(icons.fIconDocumentAttributeI, "Uint8", 0));
+    fStackComponent->addChildOwned(new IntegralNumberComponent<int32_t>(icons.fIconDocumentAttributeI, "Int32", 0));
     fViewport->setViewedComponent(fStackComponent.get(), false);
     setContentNonOwned(fViewport.get(), false);
 
