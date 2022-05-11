@@ -18,6 +18,7 @@ public:
     fStackComponent->addChildOwned(new IntegralNumberComponent<int32_t>(icons.fIconDocumentAttributeI, "Int32", 0));
     fStackComponent->addChildOwned(new FloatNumberComponent<float>(icons.fIconDocumentAttributeF, "Float", 0));
     fStackComponent->addChildOwned(new FloatNumberComponent<double>(icons.fIconDocumentAttributeD, "Double", 0));
+    fStackComponent->addChildOwned(new StringComponent(icons.fIconEditSmallCaps, "String", ""));
     fViewport->setViewedComponent(fStackComponent.get(), false);
     setContentNonOwned(fViewport.get(), false);
 

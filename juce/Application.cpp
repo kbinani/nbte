@@ -7,6 +7,7 @@
 #include "SquareButtonComponent.hpp"
 #include "IntegralNumberComponent.hpp"
 #include "FloatNumberComponent.hpp"
+#include "StringComponent.hpp"
 #include "MainWindow.hpp"
 #include "LookAndFeel.hpp"
 
