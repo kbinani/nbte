@@ -85,11 +85,19 @@ public:
 
   void mouseEnter(juce::MouseEvent const &e) override {
     juce::Component::mouseEnter(e);
+    auto button = buttonBounds();
+    if (button.contains(e.position)) {
+      fState = kHovered;
+    } else {
+      fState = kIdle;
+    }
+    repaint();
   }
 
   void mouseExit(juce::MouseEvent const &e) override {
     juce::Component::mouseExit(e);
     fState = kIdle;
+    repaint();
   }
 
   void mouseMove(juce::MouseEvent const &e) override {
