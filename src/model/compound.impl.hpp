@@ -35,7 +35,7 @@ String Compound::save(Path const &file) {
   case Compound::Format::RawBigEndian: {
     auto stream = make_shared<FileOutputStream>(file);
     OutputStreamWriter writer(stream, endian);
-    if (!fTag->writeAsRoot(writer)) {
+    if (!CompoundTag::Write(*fTag, writer)) {
       return u8"IO Error";
     }
     break;
@@ -56,7 +56,7 @@ String Compound::save(Path const &file) {
   case Compound::Format::GzippedBigEndian: {
     auto stream = make_shared<GzFileOutputStream>(file);
     OutputStreamWriter writer(stream, endian);
-    if (!fTag->writeAsRoot(writer)) {
+    if (!CompoundTag::Write(*fTag, writer)) {
       return u8"IO Error";
     }
     break;
