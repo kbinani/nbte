@@ -11,6 +11,7 @@ public:
   ImVec2 fDisplaySize;
   bool fMainMenuBarFileSelected = false;
   bool fMainMenuBarFileOpenSelected = false;
+  bool fMainMenuBarViewSelected = false;
   bool fMainMenuBarFindSelected = false;
   bool fMainMenuBarHelpSelected = false;
   bool fMainMenuBarHelpAboutOpened = false;
@@ -87,6 +88,17 @@ public:
       return;
     }
     fError = u8"Can't open directory";
+  }
+
+  void reload() {
+    if (!fOpened) {
+      return;
+    }
+    if (std::filesystem::is_directory(fOpenedPath)) {
+      openDirectory(fOpenedPath);
+    } else if (std::filesystem::is_regular_file(fOpenedPath)) {
+      open(fOpenedPath);
+    }
   }
 
   bool canSave() const {

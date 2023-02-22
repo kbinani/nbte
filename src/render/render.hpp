@@ -64,6 +64,12 @@ static void RenderMainMenu(State &s) {
       }
       im::EndMenu();
     }
+    if (BeginMenu(u8"View", &s.fMainMenuBarViewSelected)) {
+      if (MenuItem(u8"Reload", u8"F5", nullptr, s.fOpened != nullptr)) {
+        s.reload();
+      }
+      im::EndMenu();
+    }
     if (BeginMenu(u8"Find", &s.fMainMenuBarFindSelected)) {
       if (MenuItem(u8"Filter", DecorateModCtrl(u8"F"), nullptr)) {
         s.fFilterBarOpened = !s.fFilterBarOpened;
@@ -770,6 +776,10 @@ static void CaptureShortcutKey(State &s) {
     }
   } else if (im::IsKeyReleased(im::GetKeyIndex(ImGuiKey_F3))) {
     s.fDebugOpened = !s.fDebugOpened;
+  } else if (im::IsKeyReleased(im::GetKeyIndex(ImGuiKey_F5))) {
+    if (s.fOpened) {
+      s.reload();
+    }
   }
 }
 
