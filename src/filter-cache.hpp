@@ -104,6 +104,9 @@ private:
         return false;
       }
       for (auto const &it : std::get<0>(r->fValue)) {
+        if (!it) {
+          continue;
+        }
         if (containsTerm(it, key)) {
           return true;
         }

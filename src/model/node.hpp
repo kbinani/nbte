@@ -15,6 +15,10 @@ public:
 
   using ValueType = std::vector<std::shared_ptr<Node>>;
 
+  static size_t Index(int localChunkX, int localChunkZ) {
+    return localChunkZ * 32 + localChunkX;
+  }
+
   Path fFile;
   int fX;
   int fZ;

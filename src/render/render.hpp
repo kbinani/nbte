@@ -508,6 +508,38 @@ static void VisitNbtCompound(State &s,
   }
 }
 
+static void RenderRegion(State &s, String const &path, String const &name, nbte::Region &region, FilterKey const *filter) {
+  bool ready = region.wait(s);
+  if (ready) {
+    auto const &values = std::get<0>(region.fValue);
+    for (int z = 0; z < 32; z++) {
+      bool hitZ = s.fChunkLocatorResponse && s.fChunkLocatorResponse->first == region.fFile && s.fChunkLocatorResponse->second.fZ == region.fZ * 32 + z;
+      for (int x = 0; x < 32; x++) {
+        auto const &value = values[Region::Index(x, z)];
+        if (!value) {
+          continue;
+        }
+        auto hitX = hitZ && s.fChunkLocatorResponse->second.fX == region.fX * 32 + x;
+        if (hitX && hitZ) {
+          im::SetNextItemOpen(true);
+        }
+        Visit(s, value, path + u8"/" + name, filter);
+        if (hitX && hitZ) {
+          im::SetItemDefaultFocus();
+        }
+      }
+      if (hitZ) {
+        im::SetScrollHereY(1.0f);
+        s.fChunkLocatorResponse = std::nullopt;
+      }
+    }
+  } else {
+    im::Indent(im::GetTreeNodeToLabelSpacing());
+    TextUnformatted(u8"loading...");
+    im::Unindent(im::GetTreeNodeToLabelSpacing());
+  }
+}
+
 static void Visit(State &s,
                   std::shared_ptr<Node> const &node,
                   String const &path,
@@ -585,48 +617,35 @@ static void Visit(State &s,
       bool ready = region->wait(s);
       opt.icon = s.fTextures.fIconBlock;
       opt.button = u8"Grid";
+      if (s.fChunkLocatorResponse && s.fChunkLocatorResponse->first == region->fFile) {
+        im::SetNextItemOpen(true);
+      }
       auto tree = TreeNode(name, ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_NavLeftJumpsBackHere, opt);
       if (tree.opened) {
-        if (ready) {
-          for (auto const &it : std::get<0>(region->fValue)) {
-            Visit(s, it, path + u8"/" + name, filter);
-          }
-        } else {
-          im::Indent(im::GetTreeNodeToLabelSpacing());
-          TextUnformatted(u8"loading...");
-          im::Unindent(im::GetTreeNodeToLabelSpacing());
-        }
+        RenderRegion(s, path, name, *region, filter);
         im::TreePop();
       }
-      if (ready && tree.buttonActivated) {
-        s.fChunkLocatorOpened = mcfile::Pos2i(region->fX, region->fZ);
+      if (tree.buttonActivated) {
+        s.fChunkLocatorRequest = std::make_pair(region->fFile, mcfile::Pos2i(region->fX, region->fZ));
       }
     } else {
-      if (region->wait(s)) {
-        auto origin = im::GetCursorPos();
-        auto regionAvail = im::GetContentRegionAvail();
-        if (auto icon = s.fTextures.fIconBlock; icon) {
-          InlineImage(*icon);
-        }
-
-        im::SetCursorPosX(im::GetCursorPosX() + style.FramePadding.x);
-        TextUnformatted(name);
-
-        auto textSize = CalcTextSize(u8"Grid");
-        im::SameLine();
-        im::SetCursorPosX(origin.x + regionAvail.x - textSize.x - 2 * style.FramePadding.x);
-        if (Button(u8"Grid", ImVec2(textSize.x + style.FramePadding.x * 2, frameHeight))) {
-          s.fChunkLocatorOpened = mcfile::Pos2i(region->fX, region->fZ);
-        }
-
-        for (auto const &it : std::get<0>(region->fValue)) {
-          Visit(s, it, path + u8"/" + name, filter);
-        }
-      } else {
-        im::Indent(im::GetTreeNodeToLabelSpacing());
-        TextUnformatted(u8"loading...");
-        im::Unindent(im::GetTreeNodeToLabelSpacing());
+      auto origin = im::GetCursorPos();
+      auto regionAvail = im::GetContentRegionAvail();
+      if (auto icon = s.fTextures.fIconBlock; icon) {
+        InlineImage(*icon);
       }
+
+      im::SetCursorPosX(im::GetCursorPosX() + style.FramePadding.x);
+      TextUnformatted(name);
+
+      auto textSize = CalcTextSize(u8"Grid");
+      im::SameLine();
+      im::SetCursorPosX(origin.x + regionAvail.x - textSize.x - 2 * style.FramePadding.x);
+      if (Button(u8"Grid", ImVec2(textSize.x + style.FramePadding.x * 2, frameHeight))) {
+        s.fChunkLocatorRequest = std::make_pair(region->fFile, mcfile::Pos2i(region->fX, region->fZ));
+      }
+
+      RenderRegion(s, path, name, *region, filter);
     }
     im::PopID();
   } else if (auto unopenedFile = node->fileUnopened(); unopenedFile) {
@@ -805,8 +824,8 @@ static void CaptureShortcutKey(State &s) {
 }
 
 static void RenderChunkLocator(State &s) {
-  auto region = s.fChunkLocatorOpened;
-  if (!region) {
+  auto request = s.fChunkLocatorRequest;
+  if (!request) {
     return;
   }
   float const frameHeight = im::GetFrameHeight();
@@ -817,13 +836,14 @@ static void RenderChunkLocator(State &s) {
     auto origin = im::GetCursorPos();
     for (int z = 0; z < 32; z++) {
       for (int x = 0; x < 32; x++) {
-        int cx = region->fX * 32 + x;
-        int cz = region->fZ * 32 + z;
+        int cx = request->second.fX * 32 + x;
+        int cz = request->second.fZ * 32 + z;
         im::SetCursorPos(ImVec2(origin.x + x * frameHeight, origin.y + z * frameHeight));
         auto id = std::string("chunk_locator_") + std::to_string(cx) + "_" + std::to_string(cz);
         im::PushID(id.c_str());
         if (im::Button("", ImVec2(frameHeight, frameHeight))) {
-          s.fChunkLocatorOpened = std::nullopt;
+          s.fChunkLocatorRequest = std::nullopt;
+          s.fChunkLocatorResponse = std::make_pair(request->first, mcfile::Pos2i(cx, cz));
         }
         im::PopID();
         if (im::IsItemHovered()) {
@@ -835,7 +855,7 @@ static void RenderChunkLocator(State &s) {
     }
     im::EndPopup();
   } else {
-    s.fChunkLocatorOpened = std::nullopt;
+    s.fChunkLocatorRequest = std::nullopt;
   }
 }
 

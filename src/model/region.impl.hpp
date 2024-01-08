@@ -6,6 +6,7 @@ static std::optional<Region::ValueType> ReadRegion(int rx, int rz, Path path, st
   using namespace std;
 
   Region::ValueType ret;
+  ret.resize(1024);
 
   constexpr uint64_t kSectorSize = 4096;
 
@@ -56,7 +57,7 @@ static std::optional<Region::ValueType> ReadRegion(int rx, int rz, Path path, st
       UnopenedChunk uc(path, sectorOffset * kSectorSize, chunkSize, rx * 32 + x, rz * 32 + z, x, z);
       auto node = shared_ptr<Node>(new Node(Node::Value(in_place_index<Node::TypeUnopenedChunk>, uc), parent));
 #else
-      //NOTE: Code for debug: Loading all chunks immediately
+      // NOTE: Code for debug: Loading all chunks immediately
       if (!sr.seek(sectorOffset * kSectorSize + sizeof(uint32_t))) {
         return nullopt;
       }
@@ -80,7 +81,7 @@ static std::optional<Region::ValueType> ReadRegion(int rx, int rz, Path path, st
       String name(u8"Chunk " + ToString(cx) + u8" " + ToString(cz) + u8" [" + ToString(x) + u8" " + ToString(z) + u8" in region]");
       auto node = shared_ptr<Node>(new Node(Node::Value(in_place_index<Node::TypeCompound>, Compound(name, cx, cz, tag, Compound::Format::DeflatedBigEndian)), parent));
 #endif
-      ret.push_back(node);
+      ret[Region::Index(x, z)].swap(node);
     }
   }
 
@@ -107,7 +108,7 @@ bool Region::wait(State &s) {
   if (auto v = future->get(); v) {
     fValue = *v;
   } else {
-    fValue = ValueType();
+    fValue = ValueType(1024);
   }
   future.reset();
   return true;
@@ -143,6 +144,9 @@ String Region::save(TemporaryDirectory &tempRoot) {
   }
   bool ok = mcfile::je::Region::SquashChunksAsMca(*out, [this, &r, region](int x, int z, mcfile::stream::OutputStream &output, bool &stop) {
     for (auto const &it : r) {
+      if (!it) {
+        continue;
+      }
       auto c = it->compound();
       if (!c) {
         continue;
@@ -183,7 +187,13 @@ bool Region::isDirty() const {
   }
   auto const &r = get<0>(fValue);
   for (auto const &it : r) {
+    if (!it) {
+      continue;
+    }
     if (auto c = it->compound(); c) {
+      if (!c) {
+        continue;
+      }
       if (c->fEdited) {
         return true;
       }

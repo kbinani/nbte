@@ -160,6 +160,9 @@ void Node::clearDirty() {
   } else if (auto r = region(); r) {
     if (r->fValue.index() == 0) {
       for (auto const &it : std::get<0>(r->fValue)) {
+        if (!it) {
+          continue;
+        }
         it->clearDirty();
       }
     }
