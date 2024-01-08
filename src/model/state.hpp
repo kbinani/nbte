@@ -20,6 +20,7 @@ public:
 
   std::optional<std::pair<std::shared_ptr<Node>, mcfile::Pos2i>> fChunkLocatorRequest;
   std::optional<std::pair<std::shared_ptr<Node>, mcfile::Pos2i>> fChunkLocatorResponse;
+  std::optional<std::pair<std::shared_ptr<Node>, double>> fChunkFadeTimeout;
 
   bool fQuitRequested = false;
   bool fQuitAccepted = false;

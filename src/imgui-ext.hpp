@@ -13,6 +13,7 @@ struct TreeNodeOptions {
   std::optional<Texture> icon = std::nullopt;
   FilterKey const *filter = nullptr;
   std::optional<String> button;
+  std::optional<ImU32> headerBackground;
 };
 
 struct TreeNodeResult {

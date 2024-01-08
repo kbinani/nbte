@@ -95,7 +95,7 @@ TreeNodeResult TreeNode(String const &label, ImGuiTreeNodeFlags flags, TreeNodeO
 
     float const labelSpacing = im::GetTreeNodeToLabelSpacing();
 
-    if (hovered || held) {
+    if (hovered || held || opt.headerBackground) {
       ImGuiCol col = ImGuiCol_Header;
       if (held && hovered) {
         col = ImGuiCol_HeaderActive;
@@ -103,6 +103,9 @@ TreeNodeResult TreeNode(String const &label, ImGuiTreeNodeFlags flags, TreeNodeO
         col = ImGuiCol_HeaderHovered;
       }
       ImU32 bgColor = im::GetColorU32(col);
+      if (opt.headerBackground) {
+        bgColor = *opt.headerBackground;
+      }
       ImVec2 topLeft = bb.Min;
       ImVec2 bottomRight = bb.Max;
       if (opt.noArrow) {

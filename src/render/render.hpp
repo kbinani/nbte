@@ -513,15 +513,17 @@ static void RenderRegion(State &s, String const &path, String const &name, std::
   if (ready) {
     auto const &values = std::get<0>(region.fValue);
     for (int z = 0; z < 32; z++) {
-      bool hitZ = s.fChunkLocatorResponse && s.fChunkLocatorResponse->first == node && s.fChunkLocatorResponse->second.fZ == region.fZ * 32 + z;
+      auto response = s.fChunkLocatorResponse;
+      bool hitZ = response && response->first == node && response->second.fZ == region.fZ * 32 + z;
       for (int x = 0; x < 32; x++) {
         auto const &value = values[Region::Index(x, z)];
         if (!value) {
           continue;
         }
-        auto hitX = hitZ && s.fChunkLocatorResponse->second.fX == region.fX * 32 + x;
+        auto hitX = hitZ && response->second.fX == region.fX * 32 + x;
         if (hitX && hitZ) {
           im::SetNextItemOpen(true);
+          s.fChunkFadeTimeout = std::make_pair(value, im::GetTime() + 3);
         }
         Visit(s, value, path + u8"/" + name, filter);
         if (hitX && hitZ) {
@@ -568,6 +570,16 @@ static void Visit(State &s,
       opt.icon = s.fTextures.fIconBox;
       if (filter && filter->match(name)) {
         filter = nullptr;
+      }
+      if (auto timeout = s.fChunkFadeTimeout; timeout && timeout->first == node) {
+        auto remaining = timeout->second - im::GetTime();
+        if (remaining < 0) {
+          s.fChunkFadeTimeout = nullopt;
+        } else if (remaining < 0.3) {
+          opt.headerBackground = im::GetColorU32(ImGuiCol_HeaderActive, (float)(remaining / 0.3));
+        } else {
+          opt.headerBackground = im::GetColorU32(ImGuiCol_HeaderActive);
+        }
       }
       if (TreeNode(name, flags, opt).opened) {
         VisitNbtCompound(s, *compound, *compound->fTag, path, filter);
