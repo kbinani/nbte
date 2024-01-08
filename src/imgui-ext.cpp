@@ -35,7 +35,7 @@ static void RenderTextHighlighted(ImVec2 textPos, String const &text, FilterKey 
   RenderText(textPos, text);
 }
 
-bool TreeNode(String const &label, ImGuiTreeNodeFlags flags, TreeNodeOptions opt) {
+TreeNodeResult TreeNode(String const &label, ImGuiTreeNodeFlags flags, TreeNodeOptions opt) {
   ImGuiContext &g = *GImGui;
   ImGuiWindow *window = g.CurrentWindow;
   ImGuiStyle const &style = g.Style;
@@ -44,19 +44,28 @@ bool TreeNode(String const &label, ImGuiTreeNodeFlags flags, TreeNodeOptions opt
   ImVec2 pos = window->DC.CursorPos;
   float frameHeight = im::GetFrameHeight();
   ImVec2 padding = style.FramePadding;
+  ImVec2 regionAvail = im::GetContentRegionAvail();
 
-  ImRect bb(pos, ImVec2(pos.x + im::GetContentRegionAvail().x, pos.y + frameHeight));
+  float buttonWidthWithPadding = 0;
+  if (opt.button) {
+    auto textSize = CalcTextSize(*opt.button);
+    buttonWidthWithPadding = textSize.x + 3 * padding.x;
+  }
+  ImRect bb(pos, ImVec2(pos.x + regionAvail.x - buttonWidthWithPadding, pos.y + frameHeight));
 
-  bool opened = true;
+  TreeNodeResult r;
+  r.opened = true;
+  r.buttonActivated = false;
+
   if (opt.disable) {
-    opened = false;
+    r.opened = false;
   } else if (opt.openIgnoringStorage) {
-    opened = true;
+    r.opened = true;
   } else {
-    opened = im::TreeNodeBehaviorIsOpen(id, flags);
+    r.opened = im::TreeNodeBehaviorIsOpen(id, flags);
   }
 
-  if (opened && !g.NavIdIsAlive && !(flags & ImGuiTreeNodeFlags_NoTreePushOnOpen)) {
+  if (r.opened && !g.NavIdIsAlive && !(flags & ImGuiTreeNodeFlags_NoTreePushOnOpen)) {
     if (flags & ImGuiTreeNodeFlags_NavLeftJumpsBackHere) {
       window->DC.TreeJumpToParentOnPopMask |= (1 << window->DC.TreeDepth);
     }
@@ -66,11 +75,11 @@ bool TreeNode(String const &label, ImGuiTreeNodeFlags flags, TreeNodeOptions opt
   if (im::ItemAdd(bb, id)) {
     bool hovered, held;
     toggled = im::ButtonBehavior(bb, id, &hovered, &held, true);
-    if (g.NavId == id && g.NavMoveDir == ImGuiDir_Left && opened) {
+    if (g.NavId == id && g.NavMoveDir == ImGuiDir_Left && r.opened) {
       toggled = true;
       im::NavMoveRequestCancel();
     }
-    if (g.NavId == id && g.NavMoveDir == ImGuiDir_Right && !opened) {
+    if (g.NavId == id && g.NavMoveDir == ImGuiDir_Right && !r.opened) {
       toggled = true;
       im::NavMoveRequestCancel();
     }
@@ -80,8 +89,8 @@ bool TreeNode(String const &label, ImGuiTreeNodeFlags flags, TreeNodeOptions opt
       held = false;
     }
     if (toggled && !opt.openIgnoringStorage) {
-      opened = !opened;
-      window->DC.StateStorage->SetInt(id, opened ? 1 : 0);
+      r.opened = !r.opened;
+      window->DC.StateStorage->SetInt(id, r.opened ? 1 : 0);
     }
 
     float const labelSpacing = im::GetTreeNodeToLabelSpacing();
@@ -112,7 +121,7 @@ bool TreeNode(String const &label, ImGuiTreeNodeFlags flags, TreeNodeOptions opt
       ImVec2 defaultSize(frameHeight - 2 * padding.x, frameHeight - 2 * padding.y);
       float const arrowScale = 0.7f;
       ImVec2 arrowOffset = padding + defaultSize * (0.5f - 0.5f * arrowScale);
-      im::RenderArrow(window->DrawList, pos + arrowOffset, arrowColor, opened ? ImGuiDir_Down : ImGuiDir_Right, arrowScale);
+      im::RenderArrow(window->DrawList, pos + arrowOffset, arrowColor, r.opened ? ImGuiDir_Down : ImGuiDir_Right, arrowScale);
     }
 
     ImVec2 textPos;
@@ -128,15 +137,21 @@ bool TreeNode(String const &label, ImGuiTreeNodeFlags flags, TreeNodeOptions opt
     }
 
     RenderTextHighlighted(textPos, label, opt.filter);
+
+    if (opt.button) {
+      window->DC.CursorPos = ImVec2(pos.x + regionAvail.x - buttonWidthWithPadding + padding.x, pos.y);
+      r.buttonActivated = Button(*opt.button, ImVec2(buttonWidthWithPadding - padding.x, frameHeight));
+      im::SameLine();
+    }
   }
 
   im::ItemSize(bb, 0);
 
-  if (opened) {
+  if (r.opened) {
     TreePush(label);
   }
 
-  return opened;
+  return r;
 }
 
 void InlineImage(Texture const &image) {

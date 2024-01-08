@@ -402,7 +402,7 @@ static void VisitNbtNonScalar(State &s,
   if (matchedNode) {
     flags = flags | ImGuiTreeNodeFlags_Selected;
   }
-  if (TreeNode(label, flags, opt)) {
+  if (TreeNode(label, flags, opt).opened) {
     im::Indent(kIndent);
 
     switch (tag->type()) {
@@ -537,7 +537,7 @@ static void Visit(State &s,
       if (filter && filter->match(name)) {
         filter = nullptr;
       }
-      if (TreeNode(name, flags, opt)) {
+      if (TreeNode(name, flags, opt).opened) {
         VisitNbtCompound(s, *compound, *compound->fTag, path, filter);
         im::TreePop();
       }
@@ -562,7 +562,7 @@ static void Visit(State &s,
     PushID(path + u8"/" + name);
     if (node->hasParent()) {
       opt.icon = s.fTextures.fIconFolder;
-      if (TreeNode(label, ImGuiTreeNodeFlags_NavLeftJumpsBackHere, opt)) {
+      if (TreeNode(label, ImGuiTreeNodeFlags_NavLeftJumpsBackHere, opt).opened) {
         for (auto const &it : contents->fValue) {
           Visit(s, it, path + u8"/" + name, filter);
         }
@@ -584,7 +584,9 @@ static void Visit(State &s,
     if (node->hasParent()) {
       bool ready = region->wait(s);
       opt.icon = s.fTextures.fIconBlock;
-      if (TreeNode(name, ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_NavLeftJumpsBackHere, opt)) {
+      opt.button = u8"Grid";
+      auto tree = TreeNode(name, ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_NavLeftJumpsBackHere, opt);
+      if (tree.opened) {
         if (ready) {
           for (auto const &it : std::get<0>(region->fValue)) {
             Visit(s, it, path + u8"/" + name, filter);
@@ -596,8 +598,27 @@ static void Visit(State &s,
         }
         im::TreePop();
       }
+      if (ready && tree.buttonActivated) {
+        s.fChunkLocatorOpened = mcfile::Pos2i(region->fX, region->fZ);
+      }
     } else {
       if (region->wait(s)) {
+        auto origin = im::GetCursorPos();
+        auto regionAvail = im::GetContentRegionAvail();
+        if (auto icon = s.fTextures.fIconBlock; icon) {
+          InlineImage(*icon);
+        }
+
+        im::SetCursorPosX(im::GetCursorPosX() + style.FramePadding.x);
+        TextUnformatted(name);
+
+        auto textSize = CalcTextSize(u8"Grid");
+        im::SameLine();
+        im::SetCursorPosX(origin.x + regionAvail.x - textSize.x - 2 * style.FramePadding.x);
+        if (Button(u8"Grid", ImVec2(textSize.x + style.FramePadding.x * 2, frameHeight))) {
+          s.fChunkLocatorOpened = mcfile::Pos2i(region->fX, region->fZ);
+        }
+
         for (auto const &it : std::get<0>(region->fValue)) {
           Visit(s, it, path + u8"/" + name, filter);
         }
@@ -621,7 +642,7 @@ static void Visit(State &s,
     if (filter && filter->match(name)) {
       filter = nullptr;
     }
-    if (TreeNode(name, 0, opt)) {
+    if (TreeNode(name, 0, opt).opened) {
       node->load(*s.fPool);
       im::TreePop();
     }
@@ -634,7 +655,7 @@ static void Visit(State &s,
       filter = nullptr;
     }
     PushID(path + u8"/" + name);
-    if (TreeNode(name, ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_NavLeftJumpsBackHere, opt)) {
+    if (TreeNode(name, ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_NavLeftJumpsBackHere, opt).opened) {
       node->load(*s.fPool);
       im::Indent(im::GetTreeNodeToLabelSpacing());
       TextUnformatted(u8"loading...");
@@ -783,6 +804,41 @@ static void CaptureShortcutKey(State &s) {
   }
 }
 
+static void RenderChunkLocator(State &s) {
+  auto region = s.fChunkLocatorOpened;
+  if (!region) {
+    return;
+  }
+  float const frameHeight = im::GetFrameHeight();
+
+  im::OpenPopup("Locate chunk to open");
+  bool open = true;
+  if (im::BeginPopupModal("Locate chunk to open", &open)) {
+    auto origin = im::GetCursorPos();
+    for (int z = 0; z < 32; z++) {
+      for (int x = 0; x < 32; x++) {
+        int cx = region->fX * 32 + x;
+        int cz = region->fZ * 32 + z;
+        im::SetCursorPos(ImVec2(origin.x + x * frameHeight, origin.y + z * frameHeight));
+        auto id = std::string("chunk_locator_") + std::to_string(cx) + "_" + std::to_string(cz);
+        im::PushID(id.c_str());
+        if (im::Button("", ImVec2(frameHeight, frameHeight))) {
+          s.fChunkLocatorOpened = std::nullopt;
+        }
+        im::PopID();
+        if (im::IsItemHovered()) {
+          im::SetTooltip("Chunk %d %d [%d %d in region]", cx, cz, x, z);
+        }
+        im::SameLine();
+      }
+      im::NewLine();
+    }
+    im::EndPopup();
+  } else {
+    s.fChunkLocatorOpened = std::nullopt;
+  }
+}
+
 static void Render(State &s) {
   s.incrementFrameCount();
 
@@ -820,6 +876,7 @@ static void Render(State &s) {
   im::End();
 
   RenderFooter(s);
+  RenderChunkLocator(s);
 
   if (!s.fSaveTask) {
     CaptureShortcutKey(s);

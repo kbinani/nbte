@@ -17,6 +17,7 @@ public:
   bool fMainMenuBarHelpAboutOpened = false;
   bool fMainMenuBarHelpOpenSourceLicensesOpened = false;
   bool fDebugOpened = false;
+  std::optional<mcfile::Pos2i> fChunkLocatorOpened;
 
   bool fQuitRequested = false;
   bool fQuitAccepted = false;

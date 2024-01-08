@@ -12,9 +12,15 @@ struct TreeNodeOptions {
   bool noArrow = false;
   std::optional<Texture> icon = std::nullopt;
   FilterKey const *filter = nullptr;
+  std::optional<String> button;
 };
 
-bool TreeNode(String const &label, ImGuiTreeNodeFlags flags, TreeNodeOptions options = {});
+struct TreeNodeResult {
+  bool opened;
+  bool buttonActivated;
+};
+
+TreeNodeResult TreeNode(String const &label, ImGuiTreeNodeFlags flags, TreeNodeOptions options = {});
 
 void InlineImage(Texture const &image);
 
