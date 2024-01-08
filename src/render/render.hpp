@@ -290,9 +290,9 @@ static void VisitNbtScalar(State &s,
   case Tag::Type::String:
     if (auto v = dynamic_pointer_cast<StringTag>(tag); v) {
       PushScalarInput(name, path, key, s.fTextures.fIconEditSmallCaps);
-      String value = ReinterpretAsU8String(v->fValue);
+      String value = v->fValue;
       if (InputText(u8"", &value)) {
-        v->fValue = ReinterpretAsStdString(value);
+        v->fValue = value;
         root.fEdited = true;
       }
     }
@@ -489,7 +489,7 @@ static void VisitNbtCompound(State &s,
   using namespace mcfile::nbt;
 
   for (auto &it : tag) {
-    String name = ReinterpretAsU8String(it.first);
+    String name = it.first;
     if (!it.second) {
       continue;
     }

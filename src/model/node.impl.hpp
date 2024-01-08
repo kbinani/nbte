@@ -31,16 +31,16 @@ static std::shared_ptr<mcfile::nbt::CompoundTag> ReadCompound(Path const &path, 
 
   static std::set<mcfile::Endian> const sEndians = {mcfile::Endian::Big, mcfile::Endian::Little};
 
-  if (auto tag = mcfile::nbt::CompoundTag::Read(path, mcfile::Endian::Little); tag) {
+  if (auto tag = mcfile::nbt::CompoundTag::ReadFromFile(path, mcfile::Endian::Little); tag) {
     *format = Compound::Format::RawLittleEndian;
     return tag;
-  } else if (auto tag = mcfile::nbt::CompoundTag::Read(path, mcfile::Endian::Big); tag) {
+  } else if (auto tag = mcfile::nbt::CompoundTag::ReadFromFile(path, mcfile::Endian::Big); tag) {
     *format = Compound::Format::RawBigEndian;
     return tag;
-  } else if (auto tag = mcfile::nbt::CompoundTag::ReadCompressed(path, mcfile::Endian::Little); tag) {
+  } else if (auto tag = mcfile::nbt::CompoundTag::ReadCompressedFromFile(path, mcfile::Endian::Little); tag) {
     *format = Compound::Format::DeflatedLittleEndian;
     return tag;
-  } else if (auto tag = mcfile::nbt::CompoundTag::ReadCompressed(path, mcfile::Endian::Big); tag) {
+  } else if (auto tag = mcfile::nbt::CompoundTag::ReadCompressedFromFile(path, mcfile::Endian::Big); tag) {
     *format = Compound::Format::DeflatedBigEndian;
     return tag;
   }

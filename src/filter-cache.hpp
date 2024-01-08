@@ -55,7 +55,7 @@ private:
       if (auto v = dynamic_pointer_cast<CompoundTag>(tag); v) {
         for (auto const &it : *v) {
           if (Mode == FilterMode::Key) {
-            String name = ReinterpretAsU8String(it.first);
+            String name = it.first;
             if ((key.fCaseSensitive ? name : ToLower(name)).find(key.fSearch) != String::npos) {
               return true;
             }
@@ -80,7 +80,7 @@ private:
         return false;
       } else {
         if (auto v = dynamic_pointer_cast<StringTag>(tag); v) {
-          String value = ReinterpretAsU8String(v->fValue);
+          String value = v->fValue;
           return (key.fCaseSensitive ? ToLower(value) : value).find(key.fSearch) != String::npos;
         }
       }
