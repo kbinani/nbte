@@ -508,12 +508,12 @@ static void VisitNbtCompound(State &s,
   }
 }
 
-static void RenderRegion(State &s, String const &path, String const &name, nbte::Region &region, FilterKey const *filter) {
+static void RenderRegion(State &s, String const &path, String const &name, std::shared_ptr<Node> const &node, nbte::Region &region, FilterKey const *filter) {
   bool ready = region.wait(s);
   if (ready) {
     auto const &values = std::get<0>(region.fValue);
     for (int z = 0; z < 32; z++) {
-      bool hitZ = s.fChunkLocatorResponse && s.fChunkLocatorResponse->first == region.fFile && s.fChunkLocatorResponse->second.fZ == region.fZ * 32 + z;
+      bool hitZ = s.fChunkLocatorResponse && s.fChunkLocatorResponse->first == node && s.fChunkLocatorResponse->second.fZ == region.fZ * 32 + z;
       for (int x = 0; x < 32; x++) {
         auto const &value = values[Region::Index(x, z)];
         if (!value) {
@@ -617,16 +617,16 @@ static void Visit(State &s,
       bool ready = region->wait(s);
       opt.icon = s.fTextures.fIconBlock;
       opt.button = u8"Grid";
-      if (s.fChunkLocatorResponse && s.fChunkLocatorResponse->first == region->fFile) {
+      if (s.fChunkLocatorResponse && s.fChunkLocatorResponse->first == node) {
         im::SetNextItemOpen(true);
       }
       auto tree = TreeNode(name, ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_NavLeftJumpsBackHere, opt);
       if (tree.opened) {
-        RenderRegion(s, path, name, *region, filter);
+        RenderRegion(s, path, name, node, *region, filter);
         im::TreePop();
       }
       if (tree.buttonActivated) {
-        s.fChunkLocatorRequest = std::make_pair(region->fFile, mcfile::Pos2i(region->fX, region->fZ));
+        s.fChunkLocatorRequest = std::make_pair(node, mcfile::Pos2i(region->fX, region->fZ));
       }
     } else {
       auto origin = im::GetCursorPos();
@@ -642,10 +642,10 @@ static void Visit(State &s,
       im::SameLine();
       im::SetCursorPosX(origin.x + regionAvail.x - textSize.x - 2 * style.FramePadding.x);
       if (Button(u8"Grid", ImVec2(textSize.x + style.FramePadding.x * 2, frameHeight))) {
-        s.fChunkLocatorRequest = std::make_pair(region->fFile, mcfile::Pos2i(region->fX, region->fZ));
+        s.fChunkLocatorRequest = std::make_pair(node, mcfile::Pos2i(region->fX, region->fZ));
       }
 
-      RenderRegion(s, path, name, *region, filter);
+      RenderRegion(s, path, name, node, *region, filter);
     }
     im::PopID();
   } else if (auto unopenedFile = node->fileUnopened(); unopenedFile) {
@@ -828,12 +828,18 @@ static void RenderChunkLocator(State &s) {
   if (!request) {
     return;
   }
+  auto region = request->first->region();
+  if (!region) {
+    return;
+  }
   float const frameHeight = im::GetFrameHeight();
 
   im::OpenPopup("Locate chunk to open");
   bool open = true;
   if (im::BeginPopupModal("Locate chunk to open", &open)) {
     auto origin = im::GetCursorPos();
+    auto ready = region->wait(s);
+
     for (int z = 0; z < 32; z++) {
       for (int x = 0; x < 32; x++) {
         int cx = request->second.fX * 32 + x;
@@ -841,10 +847,18 @@ static void RenderChunkLocator(State &s) {
         im::SetCursorPos(ImVec2(origin.x + x * frameHeight, origin.y + z * frameHeight));
         auto id = std::string("chunk_locator_") + std::to_string(cx) + "_" + std::to_string(cz);
         im::PushID(id.c_str());
+        bool disable = true;
+        if (ready) {
+          if (std::get<0>(region->fValue)[Region::Index(x, z)]) {
+            disable = false;
+          }
+        }
+        im::BeginDisabled(disable);
         if (im::Button("", ImVec2(frameHeight, frameHeight))) {
           s.fChunkLocatorRequest = std::nullopt;
           s.fChunkLocatorResponse = std::make_pair(request->first, mcfile::Pos2i(cx, cz));
         }
+        im::EndDisabled();
         im::PopID();
         if (im::IsItemHovered()) {
           im::SetTooltip("Chunk %d %d [%d %d in region]", cx, cz, x, z);

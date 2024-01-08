@@ -18,8 +18,8 @@ public:
   bool fMainMenuBarHelpOpenSourceLicensesOpened = false;
   bool fDebugOpened = false;
 
-  std::optional<std::pair<Path, mcfile::Pos2i>> fChunkLocatorRequest;
-  std::optional<std::pair<Path, mcfile::Pos2i>> fChunkLocatorResponse;
+  std::optional<std::pair<std::shared_ptr<Node>, mcfile::Pos2i>> fChunkLocatorRequest;
+  std::optional<std::pair<std::shared_ptr<Node>, mcfile::Pos2i>> fChunkLocatorResponse;
 
   bool fQuitRequested = false;
   bool fQuitAccepted = false;
